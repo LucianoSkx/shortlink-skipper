@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.9.4 — 2026-08-22
+
+### Added
+- `@exclude` header rules for sensitive sites (email, banks, payment) as an extra execution-surface guard on top of `EXCLUDE_HOSTS`
+
+### Changed
+- `adlinkfly` and `adlinkfly-captcha` rules now gated by `looksLikeShortlink()` instead of `() => true` (avoids firing waitFor on every page)
+- `handleAcortalink` message listener now ignores events whose `origin` is not the page's own origin
+- Unified loot-link / lootlabs XOR decoding into a single `xorDecode(encoded, keyLength = 5)` helper (replaces duplicated `decodeLootlabsPayload` and `decryptData`)
+
+## 1.9.3 — 2026-08-22
+
+### Changed
+- `extractDestFromParams` path-segment filter no longer discards base64url segments (segments with `-`/`_` are now kept)
+- `boost-ink` rule gated by host instead of `() => true`
+
+## 1.9.2 — 2026-08-22
+
+### Added
+- `lootlink-local` rule: in-page loot-link bypass (reimplemented from GreasyFork #483207, MIT) for links exposing the `window.p` global
+
 ## 1.2.0 — 2026-08-22
 
 ### Added

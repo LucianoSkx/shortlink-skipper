@@ -1,10 +1,26 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.4
+// @version      1.9.5
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
+// @exclude      *://*.google.com/*
+// @exclude      *://mail.google.com/*
+// @exclude      *://*.gmail.com/*
+// @exclude      *://*.microsoft.com/*
+// @exclude      *://*.outlook.com/*
+// @exclude      *://*.live.com/*
+// @exclude      *://*.hotmail.com/*
+// @exclude      *://*.yahoo.com/*
+// @exclude      *://*.icloud.com/*
+// @exclude      *://*.paypal.com/*
+// @exclude      *://*.itau.com.br/*
+// @exclude      *://*.bb.com.br/*
+// @exclude      *://*.bradesco.com.br/*
+// @exclude      *://*.caixa.gov.br/*
+// @exclude      *://*.nubank.com.br/*
+// @exclude      *://*.santander.com.br/*
 // @run-at       document-start
 // @grant        unsafeWindow
 // @grant        GM_getValue
@@ -628,13 +644,13 @@
     return match ? goto(match[1]) : false;
   }
 
-  function decodeLootlabsPayload(encoded) {
+  function xorDecode(encoded, keyLength = 5) {
     try {
       let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
       while (b64.length % 4) b64 += '=';
       const raw = atob(b64);
-      const key = raw.slice(0, 5);
-      const data = raw.slice(5);
+      const key = raw.slice(0, keyLength);
+      const data = raw.slice(keyLength);
       let out = '';
       for (let i = 0; i < data.length; i++) {
         out += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
@@ -656,7 +672,7 @@
       ws.addEventListener('message', (event) => {
         if (lootlabsResolved) return;
         if (typeof event.data !== 'string' || !event.data.startsWith('r:')) return;
-        const decoded = decodeLootlabsPayload(event.data.slice(2));
+        const decoded = xorDecode(event.data.slice(2));
         if (decoded && /^https?:\/\//i.test(decoded.trim())) {
           lootlabsResolved = true;
           log('lootlabs payload intercepted');
@@ -860,6 +876,7 @@
     PAGE.addEventListener(
       'message',
       (event) => {
+        if (event.origin !== location.origin) return;
         if (typeof event.data === 'string' && event.data.includes('__done__') && event.data.length < 9) {
           Object.defineProperty(event, 'source', { value: '' });
         }
@@ -1113,14 +1130,6 @@
         return res;
       };
     }
-    function decryptData(encoded, keyLength = 5) {
-      const b64 = atob(encoded);
-      const key = b64.substring(0, keyLength);
-      const enc = b64.substring(keyLength);
-      let out = '';
-      for (let i = 0; i < enc.length; i++) out += String.fromCharCode(enc.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-      return out;
-    }
     function doBypass() {
       try {
         const urid = sessionData[0].urid;
@@ -1137,7 +1146,7 @@
         ws.onmessage = (ev) => {
           if (resolved) return;
           if (typeof ev.data === 'string' && ev.data.startsWith('r:')) {
-            const data = decryptData(ev.data.split(':')[1]);
+            const data = xorDecode(ev.data.split(':')[1]);
             if (/^https?:\/\//i.test(data)) { resolved = true; log('LootLink: local destination obtained'); goto(data); }
           }
         };
@@ -1171,8 +1180,8 @@
       run: handleExternalService,
     },
     { name: 'url-destination', when: () => looksLikeShortlink(), run: async () => goto(extractDestFromParams()) },
-    { name: 'adlinkfly', when: () => true, run: handleAdLinkFly },
-    { name: 'adlinkfly-captcha', when: () => true, run: handleInvisibleCaptcha },
+    { name: 'adlinkfly', when: () => looksLikeShortlink(), run: handleAdLinkFly },
+    { name: 'adlinkfly-captcha', when: () => looksLikeShortlink(), run: handleInvisibleCaptcha },
     { name: 'go-link-form', when: () => looksLikeShortlink(), run: handleGoLinkForm },
     { name: 'wpsafelink', when: () => looksLikeShortlink(), run: handleWpSafeLink },
     { name: 'math-captcha', when: () => looksLikeShortlink(), run: async () => {
