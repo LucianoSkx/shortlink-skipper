@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.2
+// @version      1.9.3
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -271,7 +271,7 @@
     }
     const segments = location.pathname.split('/').filter(Boolean);
     for (const seg of segments.reverse()) {
-      if (seg.length < 8 || /[._-]/.test(seg)) continue;
+      if (seg.length < 8) continue;
       const decoded = decodeMaybe(seg);
       if (/^https?:\/\//i.test(decoded)) return decoded;
     }
@@ -365,19 +365,24 @@
   async function handleExternalService() {
     if (!BYPASS_SERVICE_URL.test(location.href)) return false;
     log('hard site detected, trying direct bypass APIs');
-    const data = await gmGetJson(
-      'https://trw.lat/api/bypass?apikey=TRW_FREE-GAY-15a92945-9b04-4c75-8337-f2a6007281e9&url=' +
-        encodeURIComponent(location.href),
-    );
-    if (
-      data?.success &&
-      typeof data.result === 'string' &&
-      /^https?:\/\//i.test(data.result)
-    ) {
-      log('direct destination from bypass API');
-      return goto(data.result);
+    const apiKey = GM_getValue('trwApiKey', '');
+    if (apiKey) {
+      const data = await gmGetJson(
+        'https://trw.lat/api/bypass?apikey=' + encodeURIComponent(apiKey) + '&url=' +
+          encodeURIComponent(location.href),
+      );
+      if (
+        data?.success &&
+        typeof data.result === 'string' &&
+        /^https?:\/\//i.test(data.result)
+      ) {
+        log('direct destination from bypass API');
+        return goto(data.result);
+      }
+      log('API unavailable, delegating to bypass.tools');
+    } else {
+      log('no trw.lat API key set, delegating to bypass.tools');
     }
-    log('API unavailable, delegating to bypass.tools');
     return goto(`https://bypass.tools/bypass?url=${encodeURIComponent(location.href)}`);
   }
 
@@ -1162,7 +1167,7 @@
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
     { name: 'setc-form', when: () => true, run: handleSetcForm },
-    { name: 'boost-ink', when: () => true, run: handleBoostInk },
+    { name: 'boost-ink', when: () => /(^|\.)boost\.ink$/.test(location.host), run: handleBoostInk },
     { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
     {
@@ -1201,6 +1206,11 @@
         location.reload();
       },
     );
+    GM_registerMenuCommand('Configure trw.lat API key', () => {
+      const current = GM_getValue('trwApiKey', '');
+      const input = prompt('trw.lat API key (leave empty to disable the direct API):', current);
+      if (input !== null) GM_setValue('trwApiKey', input.trim());
+    });
   }
 
   async function main() {
