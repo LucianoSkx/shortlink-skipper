@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.7
+// @version      1.9.8
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -308,7 +308,7 @@
     for (const seg of segments.reverse()) {
       if (seg.length < 8) continue;
       const decoded = decodeMaybe(seg);
-      if (/^https?:\/\//i.test(decoded)) return decoded;
+      if (isPlausibleUrl(decoded)) return decoded;
     }
     return null;
   }

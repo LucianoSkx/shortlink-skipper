@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.8 — 2026-08-22
+
+### Fixed
+- `extractDestFromParams`: o trecho de path segments (`/goto/<b64>`) agora usa `isPlausibleUrl()` em vez do cheque antigo `/^https?:\/\//`, igualando query params e hash (reduz falso positivo de destino)
+
 ## 1.9.7 — 2026-08-22
 
 ### Added
