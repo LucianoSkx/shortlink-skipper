@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.0
+// @version      1.9.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -60,7 +60,7 @@
   const REKONISE_HOST = /(^|\.)rekonise\.com$/;
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
-  const LOOTLINK_HOST = /(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)$/;
+  const LOOTLINK_HOST = /(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com|links\.lootlabs\.gg)$/;
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.com$/;
@@ -1145,6 +1145,7 @@
     { name: 'close-interstitial', when: () => CLOSE_INTERSTITIAL_HOST.test(location.host), run: handleCloseInterstitial },
     { name: 'rekonise', when: () => REKONISE_HOST.test(location.host), run: handleRekonise },
     { name: 'mboost', when: () => MBOOST_HOST.test(location.host), run: handleMboost },
+    { name: 'lootlink-local', when: () => LOOTLINK_HOST.test(location.host), run: handleLootLinkLocal },
     { name: 'lootlabs', when: () => LOOTLABS_HOST.test(location.host), run: handleLootlabs },
     { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
     { name: 'bcvc', when: () => BCVC_HOST.test(location.host), run: handleBcVc },
@@ -1157,7 +1158,6 @@
     { name: 'boost-ink', when: () => true, run: handleBoostInk },
     { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
-    { name: 'lootlink-local', when: () => LOOTLINK_HOST.test(location.host), run: handleLootLinkLocal },
     {
       name: 'external-service',
       when: () => BYPASS_SERVICE_URL.test(location.href),
