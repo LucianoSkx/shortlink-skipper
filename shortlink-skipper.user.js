@@ -2,7 +2,7 @@
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
 // @version      0.4.0
-// @description  Pula encurtadores de links automaticamente: acelera countdowns, clica botões finais, extrai destino da URL, bloqueia popups e avisos anti-adblock.
+// @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
 // @run-at       document-start
@@ -121,7 +121,7 @@
       timeout,
     ).then((el) => {
       if (el) {
-        log('clicando em', el.tagName, el.className || '');
+        log('clicking', el.tagName, el.className || '');
         fireClick(el);
       }
       return Boolean(el);
@@ -177,14 +177,14 @@
       history = JSON.parse(sessionStorage.getItem(KEY) || '[]');
     } catch {}
     if (history.slice(-3).filter((u) => u === url).length >= 2) {
-      log('loop de redirecionamento detectado, abortando:', url);
+      log('redirect loop detected, aborting:', url);
       return false;
     }
     history.push(url);
     try {
       sessionStorage.setItem(KEY, JSON.stringify(history.slice(-8)));
     } catch {}
-    log('indo para', url);
+    log('going to', url);
     location.href = url;
     return true;
   }
@@ -252,7 +252,7 @@
   async function handleGoLinkForm() {
     const form = await waitFor(GO_LINK_FORM, 4000);
     if (!form) return false;
-    log('formulario go-link encontrado');
+    log('go-link form found');
     const submitBtn = await waitFor(() => {
       const btn = form.querySelector('.get-link, button[type="submit"], button.btn-primary, input[type="submit"]') ||
         (BUTTON_TEXTS.test(form.innerText || '') ? form.querySelector('button, input[type="submit"]') : null);
@@ -263,7 +263,7 @@
       return true;
     }
     if (visible(form)) {
-      log('submetendo formulario diretamente');
+      log('submitting form directly');
       form.submit();
       return true;
     }
@@ -279,7 +279,7 @@
   async function handleWpSafeLink() {
     const marker = document.querySelector('#wpsafegenerate, .wpsafelink-landing, #wpsafe-generate, .wpsafelink-button');
     if (!marker) return false;
-    log('template WPSafeLink detectado');
+    log('WPSafeLink template detected');
     const stepBtn = await waitFor(() => {
       const b = document.querySelector('.wpsafelink-button');
       return b && visible(b) && !/please wait/i.test(b.innerText || '') ? b : null;
@@ -296,7 +296,7 @@
     }
     const link = await waitFor('#wpsafegenerate > #wpsafe-link > a[href], #wpsafe-link a[href]', 20000);
     if (link?.href) {
-      log('destino WPSafeLink:', link.href);
+      log('WPSafeLink destination:', link.href);
       return goto(link.href);
     }
     return Boolean(stepBtn);
@@ -321,10 +321,10 @@
 
   async function handleManualCaptcha() {
     if (!captchaPresent()) return false;
-    log('captcha presente, aguardando resolucao manual...');
+    log('captcha present, waiting for manual solve...');
     const solved = await waitFor(captchaSolved, 180000, 1000);
     if (!solved) return false;
-    log('captcha resolvido pelo usuario, submetendo');
+    log('captcha solved by user, submitting');
     await sleep(800);
     const btn =
       findByText(/^(continue|verify|confirm|proceed|submit|get link)$/i) ||
@@ -364,13 +364,13 @@
       return el?.value ? el : null;
     }, 2500);
     if (!field) return false;
-    log('template AdLinkFly detectado');
+    log('AdLinkFly template detected');
     const form = field.closest('form') || field.parentElement;
     for (let attempt = 0; attempt < 3; attempt++) {
       await sleep(5000);
       const json = await postForm('/links/go', hiddenFields(form));
       if (json?.url) {
-        log('AdLinkFly: destino obtido');
+        log('AdLinkFly: destination obtained');
         return goto(json.url);
       }
     }
@@ -380,7 +380,7 @@
   async function handleInvisibleCaptcha() {
     const btn = await waitFor('#invisibleCaptchaShortlink', 2500);
     if (!btn) return false;
-    log('captcha invisivel AdLinkFly detectado');
+    log('AdLinkFly invisible captcha detected');
     return clickWhen(() => (!btn.disabled ? btn : null), 60000);
   }
 
@@ -412,7 +412,7 @@
     const formId = location.pathname.startsWith('/go') ? '#form-go' : '#form-captcha';
     const form = await waitFor(formId, 8000);
     if (!form) return false;
-    log('ouo.io detectado, submetendo em loop:', formId);
+    log('ouo.io detected, submitting in a loop:', formId);
     return submitFormLoop(form);
   }
 
@@ -432,7 +432,7 @@
       const json = await postForm('/links/go2', { alias, csrf, tkn: tk.th });
       return json?.url ? goto(json.url) : false;
     } catch (error) {
-      log('aylink-family: erro:', error.message);
+      log('aylink-family error:', error.message);
       return false;
     }
   }
@@ -476,7 +476,7 @@
     if (!link) return false;
     const href = link.getAttribute('href');
     const dest = href.split('dest=')[1];
-    log('botao skip com dest encontrado');
+    log('skip button with dest found');
     return dest ? goto(decodeURIComponent(dest)) : goto(href);
   }
 
@@ -494,13 +494,13 @@
 
   async function handleBypassService() {
     if (!BYPASS_SERVICE_URL.test(location.href)) return false;
-    log('site dificil, delegando ao servico publico adbypass.org');
+    log('hard site detected, delegating to public service adbypass.org');
     return goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`);
   }
 
   async function handleAcortalink() {
     if (!ACORTALINK_HOST.test(location.host)) return false;
-    log('acortalink.me detectado');
+    log('acortalink.me detected');
     PAGE.open = (url) => (location.assign(url), PAGE);
     PAGE.addEventListener(
       'message',
@@ -525,7 +525,7 @@
 
   async function handleBstlar() {
     if (!BSTLAR_HOST.test(location.host)) return false;
-    log('bstlar.com detectado, interceptando XHR de tasks');
+    log('bstlar.com detected, intercepting tasks XHR');
     const originalOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (...args) {
       this.addEventListener('load', async () => {
@@ -569,7 +569,7 @@
     input.value = String(result);
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
-    log(`captcha matematico resolvido: ${a} ${opRaw} ${b} = ${result}`);
+    log(`math captcha solved: ${a} ${opRaw} ${b} = ${result}`);
     return true;
   }
 
@@ -587,13 +587,13 @@
   function enableBoost() {
     if (!boostEnabled) {
       boostEnabled = true;
-      log('timers acelerados');
+      log('timers boosted');
     }
   }
 
   function blockPopups() {
     PAGE.open = function blockedOpen(url) {
-      log('popup bloqueado:', url || 'about:blank');
+      log('popup blocked:', url || 'about:blank');
       return null;
     };
     document.addEventListener(
@@ -602,7 +602,7 @@
         const anchor = event.target.closest?.('a[target="_blank"]');
         if (anchor && looksLikeShortlink()) {
           event.preventDefault();
-          log('popup por clique bloqueado:', anchor.href);
+          log('click popup blocked:', anchor.href);
         }
       },
       true,
@@ -622,7 +622,7 @@
         document.addEventListener(type, (event) => event.stopImmediatePropagation(), true);
       }
     } catch (error) {
-      log('falha ao restaurar foco:', error.message);
+      log('failed to restore focus:', error.message);
     }
   }
 
@@ -665,7 +665,7 @@
           return text.length > 0 && text.length < 600 && ADBLOCK_BANNER.test(text);
         });
         for (const banner of banners) {
-          log('banner anti-adblock removido');
+          log('anti-adblock banner removed');
           banner.remove();
         }
       }, 500);
@@ -684,23 +684,23 @@
     { name: 'bstlar', when: () => BSTLAR_HOST.test(location.host), run: handleBstlar },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
     {
-      name: 'servico-externo',
+      name: 'external-service',
       when: () => BYPASS_SERVICE_URL.test(location.href),
       run: async () =>
         goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`),
     },
-    { name: 'destino-na-url', when: () => looksLikeShortlink(), run: async () => goto(extractDestFromParams()) },
+    { name: 'url-destination', when: () => looksLikeShortlink(), run: async () => goto(extractDestFromParams()) },
     { name: 'adlinkfly', when: () => true, run: handleAdLinkFly },
     { name: 'adlinkfly-captcha', when: () => true, run: handleInvisibleCaptcha },
     { name: 'go-link-form', when: () => looksLikeShortlink(), run: handleGoLinkForm },
     { name: 'wpsafelink', when: () => looksLikeShortlink(), run: handleWpSafeLink },
     { name: 'captcha-manual', when: () => looksLikeShortlink(), run: handleManualCaptcha },
-    { name: 'captcha-matematica', when: () => looksLikeShortlink(), run: async () => {
+    { name: 'math-captcha', when: () => looksLikeShortlink(), run: async () => {
         await waitFor(() => document.querySelector('input[name*="captcha" i], input[id*="captcha" i]'), 10000);
         return solveMathCaptcha();
       } },
-    { name: 'botao-final', when: () => looksLikeShortlink(), run: handleButtons },
-    { name: 'unico-link-externo', when: () => looksLikeShortlink(), run: async () => {
+    { name: 'final-button', when: () => looksLikeShortlink(), run: handleButtons },
+    { name: 'single-external-link', when: () => looksLikeShortlink(), run: async () => {
         await sleep(4000);
         const dest = findExternalExit();
         if (dest) return goto(dest);
@@ -710,7 +710,7 @@
 
   function registerMenu() {
     GM_registerMenuCommand(
-      disabled() ? 'Ativar neste site' : 'Desativar neste site',
+      disabled() ? 'Enable on this site' : 'Disable on this site',
       () => {
         const off = GM_getValue('disabled_hosts', {});
         if (off[location.host]) delete off[location.host];
@@ -748,15 +748,15 @@
       try {
         shouldRun = rule.when();
       } catch (error) {
-        log(`regra ${rule.name}: erro no when:`, error.message);
+        log(`rule ${rule.name}: when error:`, error.message);
       }
       if (!shouldRun) continue;
       try {
         const acted = await rule.run();
-        log(`regra ${rule.name}: ${acted ? 'agiu' : 'sem ação'}`);
+        log(`rule ${rule.name}: ${acted ? 'acted' : 'no action'}`);
         if (acted) return;
       } catch (error) {
-        log(`regra ${rule.name}: erro no run:`, error.message);
+        log(`rule ${rule.name}: run error:`, error.message);
       }
     }
   }
