@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.5
+// @version      1.9.6
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -35,6 +35,7 @@
   'use strict';
 
   const PAGE = unsafeWindow;
+  let VERBOSE = GM_getValue('verbose', true);
 
   const EXCLUDE_HOSTS = [
     /(^|\.)google\./,
@@ -88,12 +89,16 @@
   const INFRA_HOST =
     /googleapis|gstatic|jsdelivr|unpkg|cdnjs|cloudflare|fontawesome|jquery|bootstrapcdn|w3\.org|schema\.org|gravatar|recaptcha|hcaptcha|youtube|youtu\.be|vimeo|dailymotion|twitch|spotify|soundcloud|doubleclick|googlesyndication|googletagmanager|google-analytics|adservice|adsystem|amazon-adsystem|facebook|fbcdn|instagram|cdninstagram|twitter|x\.com|twimg|tiktok|pinterest|reddit|telegram|t\.me|discord|whatsapp|github|gitlab|codepen|stackexchange|wikipedia/i;
 
+  const SOCIAL_HOST =
+    /(^|\.)(twitter\.com|x\.com|facebook\.com|fb\.me|instagram\.com|tiktok\.com|youtube\.com|youtu\.be|discord\.gg|discord\.com|t\.me|telegram\.me|linkedin\.com|reddit\.com|pinterest\.com|bsky\.app)$/;
+
   function disabled() {
     const off = GM_getValue('disabled_hosts', {});
     return Boolean(off[location.host]);
   }
 
   function log(...args) {
+    if (!VERBOSE) return;
     console.log(`%c[ShortlinkSkipper]`, 'color:#7c4dff;font-weight:bold', new Date().toLocaleTimeString(), ...args);
   }
 
@@ -106,6 +111,10 @@
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  // Reads a global variable from the page context. SECURITY: `name` MUST be a
+  // fixed string literal supplied by our own code (e.g. readGlobal('p', ...)).
+  // Never pass external/page-derived data as `name` — it is interpolated into an
+  // injected <script>, so a tainted value would become arbitrary code execution.
   async function readGlobal(name, valid) {
     for (let i = 0; i < 40; i++) {
       try {
@@ -217,6 +226,15 @@
     }
   }
 
+  function isPlausibleUrl(v) {
+    try {
+      const u = new URL(v);
+      return (u.protocol === 'http:' || u.protocol === 'https:') && u.host.includes('.');
+    } catch {
+      return false;
+    }
+  }
+
   function goto(url) {
     if (!url || !/^https?:\/\//i.test(url)) return false;
     if (sameAsCurrent(url)) return false;
@@ -271,7 +289,7 @@
       const values = params.getAll(name);
       for (const raw of values) {
         const decoded = decodeMaybe(raw);
-        if (/^https?:\/\//i.test(decoded)) return decoded;
+        if (isPlausibleUrl(decoded)) return decoded;
       }
     }
     const hash = location.hash.replace(/^#\??/, '');
@@ -281,7 +299,7 @@
         const raw = hashParams.get(name);
         if (raw) {
           const decoded = decodeMaybe(raw);
-          if (/^https?:\/\//i.test(decoded)) return decoded;
+          if (isPlausibleUrl(decoded)) return decoded;
         }
       }
     }
@@ -334,7 +352,17 @@
       if (/^https?:\/\//i.test(input.value)) candidates.push(input.value);
     }
     const external = [...new Set(candidates.filter(Boolean))].filter(isExternal);
-    return external.length === 1 ? external[0] : null;
+    if (external.length === 1) {
+      try {
+        const u = new URL(external[0]);
+        if (SOCIAL_HOST.test(u.host.toLowerCase())) {
+          log('single-external-link: ignoring lone social/footer link', external[0]);
+          return null;
+        }
+      } catch {}
+      return external[0];
+    }
+    return null;
   }
 
   async function handleGoLinkForm() {
@@ -1126,7 +1154,9 @@
               doBypass();
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          log('LootLink: fetch response parse failed:', e.message);
+        }
         return res;
       };
     }
@@ -1210,6 +1240,14 @@
         location.reload();
       },
     );
+    GM_registerMenuCommand(
+      `Debug logs: ${VERBOSE ? 'ON' : 'OFF'} (click to toggle)`,
+      () => {
+        VERBOSE = !VERBOSE;
+        GM_setValue('verbose', VERBOSE);
+        location.reload();
+      },
+    );
   }
 
   async function main() {
@@ -1242,6 +1280,10 @@
     }
     enableInteractions();
 
+    // Rules run in declaration order; the first rule whose run() returns truthy
+    // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout
+    // (e.g. captcha-manual waits up to 120s) blocks every later rule until it
+    // resolves — keep fast/early rules before slow ones when ordering matters.
     for (const rule of GENERIC_RULES) {
       if (disabled()) break;
       let shouldRun = false;

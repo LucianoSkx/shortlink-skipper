@@ -1,6 +1,20 @@
 # Changelog
 
-## 1.9.4 — 2026-08-22
+## 1.9.6 — 2026-08-22
+
+### Added
+- Configurable debug logging: `Debug logs` menu command toggles console output (on by default)
+
+### Changed
+- `extractDestFromParams` now requires a plausible domain (host contains a dot) before accepting a decoded destination, reducing false positives
+- `single-external-link` no longer auto-redirects when the only external link is a known social/footer domain
+- Documented rule ordering in `main()`: rules run sequentially and the first that acts wins; a slow rule (e.g. `captcha-manual`, up to 120s) delays later rules
+
+### Fixed
+- `handleLootLinkLocal` now logs fetch/response parse failures instead of failing silently
+- `readGlobal` documented as requiring an internal string-literal `name` (never external data) to avoid script injection
+
+## 1.9.5 — 2026-08-22
 
 ### Added
 - `@exclude` header rules for sensitive sites (email, banks, payment) as an extra execution-surface guard on top of `EXCLUDE_HOSTS`

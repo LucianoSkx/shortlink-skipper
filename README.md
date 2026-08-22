@@ -96,6 +96,19 @@ server-side and cannot be skipped locally.
 - Per-domain on/off switch in the userscript menu
 - Cloudflare challenges pass untouched (verified live)
 
+## Menu commands
+
+Right-click the userscript icon (or open the manager's script menu) to access:
+
+| Command | What it does |
+| --- | --- |
+| **Disable on this site** / **Enable on this site** | Toggles the script for the current domain only |
+| **Debug logs: ON/OFF** | Toggles verbose console logging (on by default) |
+
+The `external-service` rule queries the built-in free **trw.lat** bypass API for
+hardened links (Linkvertise hard case, loot-links, admaven), falling back to
+[bypass.tools](https://bypass.tools).
+
 ## Adding a site-specific rule
 
 ```js
