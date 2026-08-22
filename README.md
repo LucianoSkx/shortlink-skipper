@@ -5,7 +5,11 @@ Userscript próprio para pular encurtadores de links automaticamente. Inspirado 
 ## Instalação
 
 1. Instale [Violentmonkey](https://violentmonkey.github.io/) ou Tampermonkey.
-2. Crie um novo script e cole o conteúdo de `shortlink-skipper.user.js` (ou arraste o arquivo para o painel da extensão).
+2. Instale o script por este link (a extensão abre a tela de instalação sozinha):
+
+   <https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js>
+
+   Ou crie um novo script manualmente e cole o conteúdo de `shortlink-skipper.user.js`.
 
 ## Como funciona
 
