@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.8.0
+// @version      1.9.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -60,6 +60,7 @@
   const REKONISE_HOST = /(^|\.)rekonise\.com$/;
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
+  const LOOTLINK_HOST = /(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)$/;
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.com$/;
@@ -87,6 +88,24 @@
 
   function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function readGlobal(name, valid) {
+    for (let i = 0; i < 40; i++) {
+      try {
+        const s = document.createElement('script');
+        s.textContent = `document.documentElement.setAttribute('data-rg-${name}', JSON.stringify(typeof ${name} !== 'undefined' ? ${name} : null));`;
+        document.documentElement.appendChild(s);
+        s.remove();
+        const raw = document.documentElement.getAttribute(`data-rg-${name}`);
+        if (raw) {
+          const v = JSON.parse(raw);
+          if (valid ? valid(v) : v) return v;
+        }
+      } catch (e) {}
+      await sleep(200);
+    }
+    return null;
   }
 
   async function waitFor(test, timeout = 15000, interval = 250) {
@@ -1068,6 +1087,58 @@
     new MutationObserver(sweep).observe(document.documentElement, { childList: true, subtree: true });
   }
 
+  async function handleLootLinkLocal() {
+    if (!LOOTLINK_HOST.test(location.host)) return false;
+    log('LootLink: attempting local bypass (BypassTools v4.1.0-derived)');
+    const p = await readGlobal('p', (v) => v && v.KEY && v.TID && v.CDN_DOMAIN);
+    if (!p) { log('LootLink: global p unavailable, falling back to API'); return false; }
+    try {
+      const cdnResp = await fetch('//' + p.CDN_DOMAIN + '/?tid=' + p.TID + '&params_only=1');
+      const cdnText = await cdnResp.text();
+      const cdnData = JSON.parse('[' + cdnText.slice(1, -2) + ']');
+      const syncer = cdnData[29];
+      if (!syncer) return false;
+      const sessionId = String(Math.floor(Math.random() * 9 + 1) + Array(16).fill().map(() => Math.floor(Math.random() * 10)).join('') + Math.floor(Math.random() * 10));
+      let cookieId;
+      try { cookieId = localStorage.getItem('ll_cookie_id'); } catch (e) {}
+      if (!cookieId) { cookieId = String(Math.floor(Math.random() * 900000000) + 100000000); try { localStorage.setItem('ll_cookie_id', cookieId); } catch (e) {} }
+      const tcBody = {
+        tid: p.TID,
+        bl: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53],
+        session: sessionId,
+        max_tasks: 1,
+        design_id: 106,
+        cur_url: location.href,
+        doc_ref: document.referrer,
+        tier_id: p.TIER_ID || '',
+        num_of_tasks: 1,
+        is_loot: true,
+        rkey: p.KEY,
+        cookie_id: cookieId,
+        offer: p.OFFER || '0',
+      };
+      const botd = await readGlobal('botd');
+      const botds = await readGlobal('session', (v) => typeof v === 'string');
+      if (botd) tcBody.botd = botd;
+      if (botds) tcBody.botds = botds;
+      await fetch('https://' + syncer + '/tc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        mode: 'cors',
+        redirect: 'follow',
+        body: JSON.stringify(tcBody),
+      }).catch(() => {});
+      const dest = await waitFor(() => {
+        if (unsafeWindow.wokeresponse) return unsafeWindow.wokeresponse;
+        if (document.querySelector('#bypass-title')?.textContent === 'BYPASS DONE' && unsafeWindow.easxResult) return unsafeWindow.easxResult;
+        return null;
+      }, 30000);
+      if (dest) { log('LootLink: local destination obtained'); return goto(dest); }
+    } catch (e) { log('LootLink local failed: ' + e.message); }
+    return false;
+  }
+
   const GENERIC_RULES = [
     { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
     { name: 'adfoc', when: () => ADFOC_FAMILY.test(location.host), run: handleAdFoc },
@@ -1086,6 +1157,7 @@
     { name: 'boost-ink', when: () => true, run: handleBoostInk },
     { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
+    { name: 'lootlink-local', when: () => LOOTLINK_HOST.test(location.host), run: handleLootLinkLocal },
     {
       name: 'external-service',
       when: () => BYPASS_SERVICE_URL.test(location.href),
