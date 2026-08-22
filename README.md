@@ -17,14 +17,14 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 
 | Rule | What it does |
 | --- | --- |
-| `ouo` | ouo.io/press/today: submits `#form-captcha`/`#form-go` in a loop until the step advances; ouo.today uses the `nextUrl` global |
+| `ouo` | ouo.io/press/today and uii.io: submits `#form-captcha`/`#form-go` in a loop until the step advances; ouo.today uses the `nextUrl` global |
 | `adfoc` | adfoc.us, adf.ly, clk.sh, shrink.pe: redirects via the `click_url` global or the hidden `#y` input |
 | `aylink-family` | aylink.co and friends: exchanges `_a/_t/_d` for a token at `/get/tk` and finishes at `/links/go2` |
-| `bcvc` | bc.vc/bcvc.live/xyz/go: clicks `#getLink` after the countdown and POSTs `/ln.php` with the page's obfuscated globals (skips publisher panel pages) |
-| `skip-button-dest` | hurirk/usfinf/xervoo: extracts the destination from `#skip_bu2tton` (the `dest=` param) and resolves `/ad/locked` |
+| `bcvc` | bc.vc/bcvc.live/xyz/go: clicks `#getLink` after the countdown and POSTs `/ln.php` with the page's obfuscated globals (skips publisher panel pages) || `skip-button-dest` | hurirk/usfinf/xervoo: extracts the destination from `#skip_bu2tton` (the `dest=` param) and resolves `/ad/locked` |
 | `token-link` | Token shorteners (tpi.li, oii.la, tei.ai, tii.ai, iir.ai, oko.sh): decodes the base64 `input[name="token"]` (or its base64 tail) into the destination, falling back to an enabled `.get-link` anchor |
 | `zafree-link-view` | za.gl/za.uy: fills the link-view coordinates challenge and submits it |
 | `setc-form` | Any page with a `form#setc`: follows its action directly |
+| `close-interstitial` | doaipomer/ppcnt/lnkparts/zunsoach: popup-only interstitial pages — closes the tab |
 | `acortalink` | acortalink.me: turns popups into same-tab redirects, spoofs the countdown through postMessage and clicks the final button |
 | `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
 | `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |

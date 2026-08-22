@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.7.0
+// @version      0.7.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -46,12 +46,14 @@
   const TASK_WALL_HINTS =
     /spend\s+\d+\s*(minutes?|seconds?)\s+on\s+(the\s+)?(website|site)|visit\s+(multiple|several)\s+pages|come\s+back\s+to\s+this\s+page|complete\s+the\s+verification\s+process\s+in\s+the\s+other\s+tab/i;
 
-  const OUO_HOST = /(^|\.)ouo\.(io|press|today)$/;
-  const ADFOC_HOST = /(^|\.)adfoc\.us$/;
+  const OUO_HOST = /(^|\.)ouo\.(io|press|today)$|(^|\.)uii\.io$/;
+  const ADFOC_FAMILY =
+    /(adfoc\.us|adf\.ly|clk\.sh|shrink\.pe)$/;
   const AYLINK_HOST =
     /(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
-  const BCVC_HOST = /(^|\.)bcvc\.(live|xyz)$/;
+  const BCVC_HOST = /(^|\.)bcvc\.(live|xyz|go)$|(bcvcgo)\.xyz$/;
   const SKIP_BUTTON_HOST = /(hurirk\.net|usfinf\.net|xervoo\.net)$/;
+  const CLOSE_INTERSTITIAL_HOST = /(^|\.)?(doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.com$/;
@@ -455,12 +457,19 @@
   }
 
   async function handleAdFoc() {
-    if (!ADFOC_HOST.test(location.host)) return false;
+    if (!ADFOC_FAMILY.test(location.host)) return false;
     const fromGlobal = typeof PAGE.click_url === 'string' ? PAGE.click_url : null;
     if (fromGlobal) return goto(fromGlobal);
     return waitFor(() => document.getElementById('y')?.value, 15000, 400).then((url) =>
       url ? goto(url) : false,
     );
+  }
+
+  async function handleCloseInterstitial() {
+    if (!CLOSE_INTERSTITIAL_HOST.test(location.host)) return false;
+    log('interstitial-only page detected, closing tab');
+    PAGE.close();
+    return true;
   }
 
   async function handleAylink() {
@@ -791,7 +800,8 @@
 
   const GENERIC_RULES = [
     { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
-    { name: 'adfoc', when: () => ADFOC_HOST.test(location.host), run: handleAdFoc },
+    { name: 'adfoc', when: () => ADFOC_FAMILY.test(location.host), run: handleAdFoc },
+    { name: 'close-interstitial', when: () => CLOSE_INTERSTITIAL_HOST.test(location.host), run: handleCloseInterstitial },
     { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
     { name: 'bcvc', when: () => BCVC_HOST.test(location.host), run: handleBcVc },
     { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
