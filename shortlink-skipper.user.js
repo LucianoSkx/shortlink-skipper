@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.6.0
+// @version      0.7.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -42,6 +42,9 @@
 
   const ADBLOCK_BANNER =
     /(disable|turn off|deactivate).{0,24}ad.?block|ad.?block(er)? (is |was )?(detect|enabled|activ)|we.{0,10}ve detected.{0,20}ad.?block|whitelist (us|this site)/i;
+
+  const TASK_WALL_HINTS =
+    /spend\s+\d+\s*(minutes?|seconds?)\s+on\s+(the\s+)?(website|site)|visit\s+(multiple|several)\s+pages|come\s+back\s+to\s+this\s+page|complete\s+the\s+verification\s+process\s+in\s+the\s+other\s+tab/i;
 
   const OUO_HOST = /(^|\.)ouo\.(io|press|today)$/;
   const ADFOC_HOST = /(^|\.)adfoc\.us$/;
@@ -211,6 +214,11 @@
       score += 1;
     }
     return score >= 2;
+  }
+
+  function looksLikeTaskWall(doc = document) {
+    const text = (doc.body?.innerText || '').slice(0, 4000);
+    return TASK_WALL_HINTS.test(text);
   }
 
   function extractDestFromParams() {
@@ -843,6 +851,13 @@
     if (excluded() || disabled()) return;
 
     const shortish = looksLikeShortlink();
+    const taskWall = shortish && looksLikeTaskWall();
+
+    if (taskWall) {
+      log('engagement task-wall detected: stepping back, complete the steps manually');
+      enableInteractions();
+      return;
+    }
 
     if (shortish) {
       enableBoost();

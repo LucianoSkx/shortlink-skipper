@@ -41,6 +41,7 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 On top of the rules, global protections apply:
 
 - **Confidence-based detection** — a page counts as a shortener when strong structural markers are present (known forms/captchas) or when at least 2 soft indicators match: countdown text, action buttons, URL patterns (`/go/`, `/out/`, "short"/"safelink" hosts), meta refresh or loader/spinner/timer elements
+- **Task-wall detection** — engagement gates that force you to browse another site ("spend 2 minutes on the website", "visit multiple pages") are validated server-side and cannot be bypassed locally; the script steps back on them instead of interfering (its focus tricks would otherwise lock their continue button forever)
 
 - **Boosted timers** — countdowns run up to 15x faster on pages that look like shorteners
 - **Popups blocked** — `window.open` becomes a no-op
