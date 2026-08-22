@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.3.0
+// @version      0.4.0
 // @description  Pula encurtadores de links automaticamente: acelera countdowns, clica botões finais, extrai destino da URL, bloqueia popups e avisos anti-adblock.
 // @author       Luciano
 // @match        *://*/*
@@ -49,6 +49,13 @@
     /(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
   const BCVC_HOST = /(^|\.)bcvc\.(live|xyz)$/;
   const SKIP_BUTTON_HOST = /(hurirk\.net|usfinf\.net|xervoo\.net)$/;
+  const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
+  const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
+  const LINKVERTISE_HOST = /(^|\.)linkvertise\.com$/;
+  const BYPASS_SERVICE_URL =
+    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)\/s\?.+|linkvertise\.com\/.+)/;
+  const INFRA_HOST =
+    /googleapis|gstatic|jsdelivr|unpkg|cdnjs|cloudflare|fontawesome|jquery|bootstrapcdn|w3\.org|schema\.org|gravatar|recaptcha|hcaptcha|youtube|youtu\.be|vimeo|dailymotion|twitch|spotify|soundcloud|doubleclick|googlesyndication|googletagmanager|google-analytics|adservice|adsystem|amazon-adsystem|facebook|fbcdn|instagram|cdninstagram|twitter|x\.com|twimg|tiktok|pinterest|reddit|telegram|t\.me|discord|whatsapp|github|gitlab|codepen|stackexchange|wikipedia/i;
 
   function disabled() {
     const off = GM_getValue('disabled_hosts', {});
@@ -225,7 +232,13 @@
     };
     const anchors = [...document.querySelectorAll('a[href^="http"]')]
       .map((a) => a.getAttribute('href'))
-      .filter(isExternal);
+      .filter((href) => {
+        try {
+          return isExternal(href) && !INFRA_HOST.test(new URL(href).host);
+        } catch {
+          return false;
+        }
+      });
     if (anchors.length === 1) return anchors[0];
     const inlineScripts = [...document.querySelectorAll('script:not([src])')]
       .map((s) => s.textContent)
@@ -467,6 +480,76 @@
     return dest ? goto(decodeURIComponent(dest)) : goto(href);
   }
 
+  async function handleLinkvertiseEasy() {
+    if (!LINKVERTISE_HOST.test(location.host)) return false;
+    const r = new URLSearchParams(location.search).get('r');
+    if (!r) return false;
+    try {
+      const dest = atob(r);
+      return /^https?:\/\//.test(dest) ? goto(dest) : false;
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleBypassService() {
+    if (!BYPASS_SERVICE_URL.test(location.href)) return false;
+    log('site dificil, delegando ao servico publico adbypass.org');
+    return goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`);
+  }
+
+  async function handleAcortalink() {
+    if (!ACORTALINK_HOST.test(location.host)) return false;
+    log('acortalink.me detectado');
+    PAGE.open = (url) => (location.assign(url), PAGE);
+    PAGE.addEventListener(
+      'message',
+      (event) => {
+        if (typeof event.data === 'string' && event.data.includes('__done__') && event.data.length < 9) {
+          Object.defineProperty(event, 'source', { value: '' });
+        }
+      },
+      true,
+    );
+    const observer = new MutationObserver(() => {
+      if (document.querySelector('a.button#contador')) {
+        observer.disconnect();
+        setTimeout(() => PAGE.postMessage('__done__', PAGE.location.origin), 100);
+      }
+    });
+    observer.observe(document, { childList: true, subtree: true });
+    const btn = await waitFor('#contador', 30000, 300);
+    if (btn && visible(btn)) fireClick(btn);
+    return Boolean(btn);
+  }
+
+  async function handleBstlar() {
+    if (!BSTLAR_HOST.test(location.host)) return false;
+    log('bstlar.com detectado, interceptando XHR de tasks');
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (...args) {
+      this.addEventListener('load', async () => {
+        try {
+          if (!this.responseText?.includes('tasks')) return;
+          const response = JSON.parse(this.responseText);
+          const linkId = response?.link?.id;
+          if (!linkId) return;
+          const res = await fetch('https://bstlar.com/api/link-completed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ link_id: linkId }),
+          });
+          if (!res.ok) return;
+          const text = (await res.text()).trim();
+          if (/^https?:\/\//.test(text)) goto(text);
+        } catch {}
+      });
+      return originalOpen.apply(this, args);
+    };
+    return false;
+  }
+
   function solveMathCaptcha(root = document) {
     const source = root.body?.innerText || '';
     const match = source.match(/(\d{1,4})\s*([+\-*x])\s*(\d{1,4})/);
@@ -597,6 +680,15 @@
     { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
     { name: 'bcvc', when: () => BCVC_HOST.test(location.host), run: handleBcVc },
     { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
+    { name: 'acortalink', when: () => ACORTALINK_HOST.test(location.host), run: handleAcortalink },
+    { name: 'bstlar', when: () => BSTLAR_HOST.test(location.host), run: handleBstlar },
+    { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
+    {
+      name: 'servico-externo',
+      when: () => BYPASS_SERVICE_URL.test(location.href),
+      run: async () =>
+        goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`),
+    },
     { name: 'destino-na-url', when: () => looksLikeShortlink(), run: async () => goto(extractDestFromParams()) },
     { name: 'adlinkfly', when: () => true, run: handleAdLinkFly },
     { name: 'adlinkfly-captcha', when: () => true, run: handleInvisibleCaptcha },

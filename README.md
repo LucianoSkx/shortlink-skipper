@@ -22,6 +22,10 @@ Em vez de manter milhares de regras por site, usa ferramentas genéricas que cob
 | `aylink-family` | aylink.co e afins: troca `_a/_t/_d` por token em `/get/tk` e conclui em `/links/go2` |
 | `bcvc` | bcvc.live/xyz: POST `/ln.php` com os globals ofuscados da página |
 | `skip-button-dest` | hurirk/usfinf/xervoo: extrai destino do `#skip_bu2tton` (param `dest=`) e resolve `/ad/locked` |
+| `acortalink` | acortalink.me: converte popups em redirects, engana o contador via postMessage e clica o botão final |
+| `bstlar` | bstlar.com: intercepta o XHR de "tasks" e marca a tarefa como concluída na API para receber o destino |
+| `linkvertise-easy` | linkvertise.com com `?r=` base64: decodifica e vai direto ao destino |
+| `servico-externo` | Sites sem bypass local conhecido (Linkvertise hard case, loot-links, admaven): delega ao serviço público [adbypass.org](https://adbypass.org) |
 | `destino-na-url` | Extrai `?url=`, `?u=`, `?go=` etc. da barra de endereço (com decodificação base64/hex) e vai direto ao destino |
 | `adlinkfly` | Template AdLinkFly (usado por ~20 encurtadores: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializa os campos hidden e faz POST em `/links/go`, com retentativas |
 | `adlinkfly-captcha` | Clica o captcha invisível (`#invisibleCaptchaShortlink`) assim que ele habilita |
@@ -35,6 +39,8 @@ Em vez de manter milhares de regras por site, usa ferramentas genéricas que cob
 ## Créditos
 
 As famílias `ouo`, `adfoc`, `aylink-family`, `bcvc`, `skip-button-dest`, `adlinkfly` e `adlinkfly-captcha` são portas dos handlers do [adLBypasser v1.6](https://greasyfork.org/pt-BR/scripts/439469) de [fir4tozden](https://greasyfork.org/pt-BR/users/932504-fir4tozden), licenciado sob **MIT** — reescritas no formato de regras deste projeto.
+
+As famílias `acortalink`, `bstlar`, `linkvertise-easy`, `servico-externo` e o filtro de infraestrutura do detector de links são inspirados nas técnicas do fork [bypass-all-shortlinks-debloated](https://codeberg.org/Amm0ni4/bypass-all-shortlinks-debloated) de Amm0ni4 (que por sua vez credita AdGuard Team e FastForward), reimplementadas do zero aqui.
 
 Além das regras, aplica proteções globais:
 
