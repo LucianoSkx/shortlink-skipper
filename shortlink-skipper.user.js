@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.7.0
+// @version      1.7.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -832,12 +832,6 @@
     } catch {
       return false;
     }
-  }
-
-  async function handleBypassService() {
-    if (!BYPASS_SERVICE_URL.test(location.href)) return false;
-    log('hard site detected, delegating to public service adbypass.org');
-    return goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`);
   }
 
   async function handleAcortalink() {
