@@ -42,6 +42,7 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 | `captcha-manual` | If hCaptcha/reCAPTCHA/Turnstile is present, waits for you to solve it manually (up to 3 min) then auto-submits the form/button — never touches the captcha itself |
 | `math-captcha` | Solves "12 + 7 = ?"-style captchas and fills in the field |
 | `final-button` | Automatically clicks "Get Link", "Continue", "Skip" etc. |
+| `network-capture` | Hooks `fetch`/XHR at document-start and watches JSON responses for destination fields (`"url":`, `"redirect":`...); if a shortener reveals its target through any API call, the script picks it up and follows |
 | `single-external-link` | If the page has only one plausible external link, redirects to it. Scans anchors, inline JS assignments (`location.href =`, `location.replace(`, `url =`...), `meta[http-equiv=refresh]`, `data-url/href/link/destination` attributes and hidden inputs |
 
 On top of the rules, global protections apply:

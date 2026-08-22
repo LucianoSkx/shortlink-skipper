@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.1.0
+// @version      1.2.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -841,6 +841,64 @@
 
   let boostEnabled = false;
 
+  let capturedDestUrl = null;
+
+  function installNetworkDestCapture() {
+    if (PAGE.__slNetCapturing) return;
+    PAGE.__slNetCapturing = true;
+    const scan = (text) => {
+      if (capturedDestUrl || typeof text !== 'string' || text.length > 500000) return;
+      const pattern =
+        /"(?:url|link|redirect(?:_url|_uri)?|final(?:_url)?|destination|target|go)"\s*:\s*"(https?:\/\/[^"\\]+)"/gi;
+      let match;
+      while ((match = pattern.exec(text))) {
+        try {
+          const u = new URL(match[1].replace(/\\u002F/gi, '/'));
+          const host = u.host.toLowerCase();
+          if (
+            u.host &&
+            host !== location.host.toLowerCase() &&
+            !EXCLUDE_HOSTS.some((re) => re.test(host)) &&
+            !INFRA_HOST.test(host)
+          ) {
+            capturedDestUrl = u.href;
+            log('destination captured from network:', u.href);
+            return;
+          }
+        } catch {}
+      }
+    };
+    const originalFetch = PAGE.fetch?.bind(PAGE);
+    if (originalFetch) {
+      PAGE.fetch = (...args) =>
+        originalFetch(...args).then((res) => {
+          try {
+            res.clone().text().then(scan).catch(() => {});
+          } catch {}
+          return res;
+        });
+    }
+    const originalOpen = XMLHttpRequest.prototype.open;
+    const originalSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function (...args) {
+      return originalOpen.apply(this, args);
+    };
+    XMLHttpRequest.prototype.send = function (...args) {
+      this.addEventListener('load', () => {
+        try {
+          scan(this.responseText);
+        } catch {}
+      });
+      return originalSend.apply(this, args);
+    };
+  }
+
+  async function handleNetworkCapture() {
+    if (!capturedDestUrl) return false;
+    log('using network-captured destination');
+    return goto(capturedDestUrl);
+  }
+
   function prepareBoost(factor = 15) {
     const originalTimeout = PAGE.setTimeout.bind(PAGE);
     const originalInterval = PAGE.setInterval.bind(PAGE);
@@ -956,6 +1014,7 @@
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
     { name: 'setc-form', when: () => true, run: handleSetcForm },
     { name: 'boost-ink', when: () => true, run: handleBoostInk },
+    { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
     {
       name: 'external-service',
@@ -999,6 +1058,7 @@
     registerMenu();
     if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
     prepareBoost();
+    installNetworkDestCapture();
     if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
 
     if (document.readyState === 'loading') {
