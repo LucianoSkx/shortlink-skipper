@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.6.0
+// @version      1.7.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -321,6 +321,51 @@
       return true;
     }
     return false;
+  }
+
+  function gmGetJson(url) {
+    return new Promise((resolve) => {
+      if (typeof GM_xmlhttpRequest !== 'function') return resolve(null);
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url,
+        timeout: 20000,
+        onload: (res) => {
+          try {
+            resolve(JSON.parse(res.responseText));
+          } catch {
+            resolve(null);
+          }
+        },
+        onerror: () => resolve(null),
+        ontimeout: () => resolve(null),
+      });
+    });
+  }
+
+  async function handleExternalService() {
+    if (!BYPASS_SERVICE_URL.test(location.href)) return false;
+    log('hard site detected, trying direct bypass APIs');
+    const data = await gmGetJson(
+      'https://trw.lat/api/bypass?apikey=TRW_FREE-GAY-15a92945-9b04-4c75-8337-f2a6007281e9&url=' +
+        encodeURIComponent(location.href),
+    );
+    if (
+      data?.success &&
+      typeof data.result === 'string' &&
+      /^https?:\/\//i.test(data.result)
+    ) {
+      log('direct destination from bypass API');
+      return goto(data.result);
+    }
+    log('API unavailable, delegating to bypass.tools');
+    return goto(`https://bypass.tools/bypass?url=${encodeURIComponent(location.href)}`);
+  }
+
+  async function handleServiceLastResort() {
+    if (!/^bypass\.tools$/.test(location.host) || !location.search.includes('url=')) return false;
+    log('bypass.tools did not resolve either, last resort adbypass.org');
+    return goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`);
   }
 
   async function handleButtons() {
@@ -1062,6 +1107,7 @@
         return solveMathCaptcha();
       } },
     { name: 'final-button', when: () => looksLikeShortlink(), run: handleButtons },
+    { name: 'service-last-resort', when: () => /^bypass\.tools$/.test(location.host), run: handleServiceLastResort },
     { name: 'captcha-manual', when: () => looksLikeShortlink(), run: handleManualCaptcha },
     { name: 'single-external-link', when: () => looksLikeShortlink(), run: async () => {
         await sleep(4000);

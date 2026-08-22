@@ -66,7 +66,8 @@ share the same templates.
 | `final-button` | Clicks unlocked "Get Link" / "Continue" buttons |
 | `network-capture` | Hooks fetch/XHR; follows destination-shaped JSON responses |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
-| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat bypass API for an instant destination, falling back to the public adbypass.org service |
+| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat bypass API for an instant destination, falling back to the [bypass.tools](https://bypass.tools) resolver |
+| `service-last-resort` | If even bypass.tools fails on a delegated link, forwards the job to adbypass.org |
 
 </details>
 
@@ -131,5 +132,6 @@ rule format. See [Credits](#credits).
 | [ugiBypass v2.1.0](https://greasyfork.org/en/scripts/584507) by ugilabs | MIT | token-link, zafree-link-view, setc-form, bcvc flow, `#y` fallback |
 | [bypass-all-shortlinks-debloated](https://codeberg.org/Amm0ni4/bypass-all-shortlinks-debloated) by Amm0ni4 | mixed | acortalink, bstlar, linkvertise-easy, external-service concepts (AdGuard/FastForward lineage) |
 | [nOneCode4u/bypass-shortlinks](https://github.com/nOneCode4u/bypass-shortlinks) | Unlicense | network capture technique |
+| [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | bypass.tools as second-level resolver for hardened links |
 | Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
