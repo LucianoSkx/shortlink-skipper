@@ -1,0 +1,42 @@
+name: Auto Release
+
+on:
+  push:
+    branches: [main]
+    paths: ["shortlink-skipper.user.js"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from userscript
+        id: ver
+        run: |
+          VERSION=$(grep -oP '(?<=@version)\s+\K[0-9.]+' shortlink-skipper.user.js | tr -d ' ')
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Releasing: v${VERSION}"
+
+      - name: Skip if tag already exists
+        id: check
+        run: |
+          if git rev-parse "refs/tags/${{ steps.ver.outputs.tag }}" >/dev/null 2>&1; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+            echo "Tag ${{ steps.ver.outputs.tag }} already exists - nothing to do"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish release
+        if: steps.check.outputs.new == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          files: shortlink-skipper.user.js
+          generate_release_notes: true

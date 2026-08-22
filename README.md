@@ -116,6 +116,10 @@ The first rule that acts wins — order specific rules first.
 node --check shortlink-skipper.user.js   # what CI runs
 ```
 
+**Releasing**: bump `@version` in the userscript and push to `main` — the
+[Auto Release workflow](.github/workflows/auto-release.yml) tags the commit
+and publishes a GitHub release with the script attached automatically.
+
 Techniques are distilled from other projects, reimplemented in this codebase's
 rule format. See [Credits](#credits).
 
