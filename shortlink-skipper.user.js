@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.1
+// @version      1.9.2
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -1089,54 +1089,61 @@
 
   async function handleLootLinkLocal() {
     if (!LOOTLINK_HOST.test(location.host)) return false;
-    log('LootLink: attempting local bypass (BypassTools v4.1.0-derived)');
+    // Local bypass derived from d15c0rdh4ckr's "loot-link.com bypasser" (GreasyFork #483207, MIT).
     const p = await readGlobal('p', (v) => v && v.KEY && v.TID && v.CDN_DOMAIN);
-    if (!p) { log('LootLink: global p unavailable, falling back to API'); return false; }
-    try {
-      const cdnResp = await fetch('//' + p.CDN_DOMAIN + '/?tid=' + p.TID + '&params_only=1');
-      const cdnText = await cdnResp.text();
-      const cdnData = JSON.parse('[' + cdnText.slice(1, -2) + ']');
-      const syncer = cdnData[29];
-      if (!syncer) return false;
-      const sessionId = String(Math.floor(Math.random() * 9 + 1) + Array(16).fill().map(() => Math.floor(Math.random() * 10)).join('') + Math.floor(Math.random() * 10));
-      let cookieId;
-      try { cookieId = localStorage.getItem('ll_cookie_id'); } catch (e) {}
-      if (!cookieId) { cookieId = String(Math.floor(Math.random() * 900000000) + 100000000); try { localStorage.setItem('ll_cookie_id', cookieId); } catch (e) {} }
-      const tcBody = {
-        tid: p.TID,
-        bl: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53],
-        session: sessionId,
-        max_tasks: 1,
-        design_id: 106,
-        cur_url: location.href,
-        doc_ref: document.referrer,
-        tier_id: p.TIER_ID || '',
-        num_of_tasks: 1,
-        is_loot: true,
-        rkey: p.KEY,
-        cookie_id: cookieId,
-        offer: p.OFFER || '0',
+    if (!p) { log('LootLink: global p unavailable, falling back'); return false; }
+    log('LootLink: installing local bypass (MIT, d15c0rdh4ckr #483207)');
+    let initData = null, syncer = null, sessionData = null, resolved = false;
+    const origFetch = window.fetch ? window.fetch.bind(window) : null;
+    if (origFetch) {
+      window.fetch = async function (url, ...opts) {
+        const res = await origFetch(url, ...opts);
+        try {
+          if (typeof url === 'string') {
+            if (url.includes(p.CDN_DOMAIN)) {
+              const t = await res.clone().text();
+              initData = JSON.parse('[' + t.slice(1, -2) + ']');
+              syncer = initData[10];
+            } else if (syncer && url.includes(syncer) && !sessionData) {
+              sessionData = await res.clone().json();
+              doBypass();
+            }
+          }
+        } catch (e) {}
+        return res;
       };
-      const botd = await readGlobal('botd');
-      const botds = await readGlobal('session', (v) => typeof v === 'string');
-      if (botd) tcBody.botd = botd;
-      if (botds) tcBody.botds = botds;
-      await fetch('https://' + syncer + '/tc', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        mode: 'cors',
-        redirect: 'follow',
-        body: JSON.stringify(tcBody),
-      }).catch(() => {});
-      const dest = await waitFor(() => {
-        if (unsafeWindow.wokeresponse) return unsafeWindow.wokeresponse;
-        if (document.querySelector('#bypass-title')?.textContent === 'BYPASS DONE' && unsafeWindow.easxResult) return unsafeWindow.easxResult;
-        return null;
-      }, 30000);
-      if (dest) { log('LootLink: local destination obtained'); return goto(dest); }
-    } catch (e) { log('LootLink local failed: ' + e.message); }
-    return false;
+    }
+    function decryptData(encoded, keyLength = 5) {
+      const b64 = atob(encoded);
+      const key = b64.substring(0, keyLength);
+      const enc = b64.substring(keyLength);
+      let out = '';
+      for (let i = 0; i < enc.length; i++) out += String.fromCharCode(enc.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      return out;
+    }
+    function doBypass() {
+      try {
+        const urid = sessionData[0].urid;
+        let server = initData[9];
+        server = (Number(String(urid).substr(-5)) % 3) + '.' + server;
+        try { fetch(sessionData[0].action_pixel_url).catch(() => {}); } catch (e) {}
+        const ws = new WebSocket(`wss://${server}/c?uid=${urid}&cat=54&key=${p.KEY}`);
+        ws.onopen = async () => {
+          try {
+            await fetch(`https://${server}/st?uid=${urid}&cat=54`, { method: 'POST' }).catch(() => {});
+            await fetch(`https://${syncer}/td?ac=1&urid=${urid}&&cat=54&tid=${p.TID}`).catch(() => {});
+          } catch (e) {}
+        };
+        ws.onmessage = (ev) => {
+          if (resolved) return;
+          if (typeof ev.data === 'string' && ev.data.startsWith('r:')) {
+            const data = decryptData(ev.data.split(':')[1]);
+            if (/^https?:\/\//i.test(data)) { resolved = true; log('LootLink: local destination obtained'); goto(data); }
+          }
+        };
+      } catch (e) { log('LootLink bypass error: ' + e.message); }
+    }
+    return await waitFor(() => (resolved ? true : null), 45000);
   }
 
   const GENERIC_RULES = [
