@@ -10,6 +10,8 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
+// @downloadURL  https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
+// @updateURL    https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
 // ==/UserScript==
 
 (function () {

@@ -1,0 +1,23 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check
+        run: node --check shortlink-skipper.user.js
+      - name: Metadata check
+        run: |
+          grep -q "@name         Shortlink Skipper" shortlink-skipper.user.js
+          grep -q "@version" shortlink-skipper.user.js
+          grep -q "@downloadURL" shortlink-skipper.user.js
+          ! grep -P "[\x{00C0}-\x{017F}]" <(tail -n +15 shortlink-skipper.user.js) || (echo "non-ASCII found in code" && exit 1)
