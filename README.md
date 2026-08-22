@@ -66,7 +66,7 @@ share the same templates.
 | `final-button` | Clicks unlocked "Get Link" / "Continue" buttons |
 | `network-capture` | Hooks fetch/XHR; follows destination-shaped JSON responses |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
-| `external-service` | Delegates hardened links (Linkvertise hard case, loot-links, admaven) to adbypass.org |
+| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat bypass API for an instant destination, falling back to the public adbypass.org service |
 
 </details>
 

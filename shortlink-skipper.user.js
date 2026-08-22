@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.5.0
+// @version      1.6.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -10,6 +10,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
+// @grant        GM_xmlhttpRequest
 // @downloadURL  https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
 // @updateURL    https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
 // ==/UserScript==
@@ -1049,8 +1050,7 @@
     {
       name: 'external-service',
       when: () => BYPASS_SERVICE_URL.test(location.href),
-      run: async () =>
-        goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`),
+      run: handleExternalService,
     },
     { name: 'url-destination', when: () => looksLikeShortlink(), run: async () => goto(extractDestFromParams()) },
     { name: 'adlinkfly', when: () => true, run: handleAdLinkFly },
