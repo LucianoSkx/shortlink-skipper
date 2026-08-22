@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.8.0
+// @version      0.9.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -56,6 +56,7 @@
   const CLOSE_INTERSTITIAL_HOST = /(^|\.)?(doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
   const REKONISE_HOST = /(^|\.)rekonise\.com$/;
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
+  const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.com$/;
@@ -500,6 +501,62 @@
     return match ? goto(match[1]) : false;
   }
 
+  function decodeLootlabsPayload(encoded) {
+    try {
+      let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      const raw = atob(b64);
+      const key = raw.slice(0, 5);
+      const data = raw.slice(5);
+      let out = '';
+      for (let i = 0; i < data.length; i++) {
+        out += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return out || null;
+    } catch {
+      return null;
+    }
+  }
+
+  let lootlabsResolved = false;
+
+  function installLootlabsWsHook() {
+    if (PAGE.__slLootHooked) return;
+    PAGE.__slLootHooked = true;
+    const OriginalWebSocket = PAGE.WebSocket;
+    function HookedWebSocket(url, protocols) {
+      const ws = protocols ? new OriginalWebSocket(url, protocols) : new OriginalWebSocket(url);
+      ws.addEventListener('message', (event) => {
+        if (lootlabsResolved) return;
+        if (typeof event.data !== 'string' || !event.data.startsWith('r:')) return;
+        const decoded = decodeLootlabsPayload(event.data.slice(2));
+        if (decoded && /^https?:\/\//i.test(decoded.trim())) {
+          lootlabsResolved = true;
+          log('lootlabs payload intercepted');
+          goto(decoded.trim());
+        }
+      });
+      return ws;
+    }
+    Object.assign(HookedWebSocket, OriginalWebSocket);
+    HookedWebSocket.prototype = OriginalWebSocket.prototype;
+    PAGE.WebSocket = HookedWebSocket;
+    log('lootlabs detected, WebSocket hooked');
+  }
+
+  async function handleLootlabs() {
+    if (!LOOTLABS_HOST.test(location.host)) return false;
+    await waitFor(() => document.querySelector('.ind-idle'), 30000, 500);
+    const tasks = [...document.querySelectorAll('.ind-idle')]
+      .map((el) => el.parentElement)
+      .filter(Boolean);
+    for (const [index, task] of tasks.entries()) {
+      setTimeout(() => fireClick(task), index * 2000);
+    }
+    await waitFor(() => (lootlabsResolved ? true : null), 180000, 500);
+    return lootlabsResolved;
+  }
+
   async function handleAylink() {
     if (!AYLINK_HOST.test(location.host)) return false;
     const csrf = PAGE.app?.csrf;
@@ -832,6 +889,7 @@
     { name: 'close-interstitial', when: () => CLOSE_INTERSTITIAL_HOST.test(location.host), run: handleCloseInterstitial },
     { name: 'rekonise', when: () => REKONISE_HOST.test(location.host), run: handleRekonise },
     { name: 'mboost', when: () => MBOOST_HOST.test(location.host), run: handleMboost },
+    { name: 'lootlabs', when: () => LOOTLABS_HOST.test(location.host), run: handleLootlabs },
     { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
     { name: 'bcvc', when: () => BCVC_HOST.test(location.host), run: handleBcVc },
     { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
@@ -883,6 +941,7 @@
     registerMenu();
     if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
     prepareBoost();
+    if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
 
     if (document.readyState === 'loading') {
       await new Promise((resolve) => PAGE.addEventListener('DOMContentLoaded', resolve, { once: true }));

@@ -27,6 +27,7 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 | `close-interstitial` | doaipomer/ppcnt/lnkparts/zunsoach: popup-only interstitial pages — closes the tab |
 | `rekonise` | rekonise.com: calls the `social-unlocks{path}/unlock` API directly and extracts the destination from the JSON response |
 | `mboost` | mboost.me: pulls the escaped `"targeturl"` field embedded in the page source |
+| `lootlabs` | links.lootlabs.gg: hooks `window.WebSocket` at document-start, auto-clicks the `.ind-idle` tasks, and decodes the `r:` WebSocket payload (base64url + 5-byte XOR key) into the destination |
 | `acortalink` | acortalink.me: turns popups into same-tab redirects, spoofs the countdown through postMessage and clicks the final button |
 | `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
 | `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |
