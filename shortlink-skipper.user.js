@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.3.0
+// @version      1.4.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -323,9 +323,23 @@
   }
 
   async function handleButtons() {
-    const clicked = await clickWhen(() => findByText(BUTTON_TEXTS), 30000);
-    if (clicked) await sleep(1500);
-    return clicked;
+    log('watching for sequential action buttons');
+    let clicks = 0;
+    const deadline = Date.now() + 90000;
+    while (Date.now() < deadline && clicks < 6) {
+      const btn =
+        findByText(BUTTON_TEXTS) ||
+        findByText(/\b(continue|proceed|free\s+download|download\s+now|get\s+link)\b/i);
+      if (btn && visible(btn)) {
+        fireClick(btn);
+        clicks += 1;
+        log(`action button #${clicks}:`, (btn.innerText || '').trim().slice(0, 40));
+        await sleep(2500);
+      } else {
+        await sleep(1500);
+      }
+    }
+    return clicks > 0;
   }
 
   async function handleWpSafeLink() {
@@ -1043,12 +1057,12 @@
     { name: 'adlinkfly-captcha', when: () => true, run: handleInvisibleCaptcha },
     { name: 'go-link-form', when: () => looksLikeShortlink(), run: handleGoLinkForm },
     { name: 'wpsafelink', when: () => looksLikeShortlink(), run: handleWpSafeLink },
-    { name: 'captcha-manual', when: () => looksLikeShortlink(), run: handleManualCaptcha },
     { name: 'math-captcha', when: () => looksLikeShortlink(), run: async () => {
         await waitFor(() => document.querySelector('input[name*="captcha" i], input[id*="captcha" i]'), 10000);
         return solveMathCaptcha();
       } },
     { name: 'final-button', when: () => looksLikeShortlink(), run: handleButtons },
+    { name: 'captcha-manual', when: () => looksLikeShortlink(), run: handleManualCaptcha },
     { name: 'single-external-link', when: () => looksLikeShortlink(), run: async () => {
         await sleep(4000);
         const dest = findExternalExit();
