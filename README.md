@@ -1,99 +1,130 @@
+<div align="center">
+
 # Shortlink Skipper
 
-A userscript that automatically skips link shorteners. Inspired by the concept of [Bypass All Shortlinks](https://greasyfork.org/pt-BR/scripts/431691) and its [Manual Captcha variant](https://openuserjs.org/scripts/Bloggerpemula/Bypass_All_Shortlinks_Manual_Captcha), but written from scratch with a lean, extensible architecture.
+**Skip link shorteners automatically — countdowns, captchas, popups and all.**
+
+A lean, extensible userscript that distills the best techniques from
+eight popular bypass projects into one clean rule engine.
+
+[![Validate](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml/badge.svg)](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/LucianoSkx/shortlink-skipper)](https://github.com/LucianoSkx/shortlink-skipper/releases/latest)
+![Userscript managers](https://img.shields.io/badge/Violentmonkey%20·%20Tampermonkey-compatible-blue)
+
+[**Install**](#install) · [How it works](#how-it-works) · [Safety](#built-in-safety) · [Extending](#adding-a-site-specific-rule) · [Credits](#credits)
+
+</div>
+
+---
 
 ## Install
 
-1. Install [Violentmonkey](https://violentmonkey.github.io/) or Tampermonkey.
-2. Install the script through this link (the extension opens the install prompt automatically):
+| Step | |
+| --- | --- |
+| 1 | Install [Violentmonkey](https://violentmonkey.github.io/) or Tampermonkey |
+| 2 | Open the install link below — your manager picks it up automatically |
 
-   <https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js>
+```text
+https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
+```
 
-   Or create a new script manually and paste the contents of `shortlink-skipper.user.js`.
+Updates are automatic: every push to `main` reaches installed users.
 
 ## How it works
 
-Instead of keeping thousands of per-site rules, it relies on generic tools that cover most shorteners (they share the same templates):
+Instead of thousands of hardcoded per-site handlers, Shortlink Skipper runs a
+small engine of **generic techniques** that cover most shorteners — they all
+share the same templates.
 
-| Rule | What it does |
+<details open>
+<summary><b>The 27 rules</b></summary>
+
+| Rule | Technique |
 | --- | --- |
-| `ouo` | ouo.io/press/today and uii.io: submits `#form-captcha`/`#form-go` in a loop until the step advances; ouo.today uses the `nextUrl` global |
-| `adfoc` | adfoc.us, adf.ly, clk.sh, shrink.pe: redirects via the `click_url` global or the hidden `#y` input |
-| `aylink-family` | aylink.co and friends: exchanges `_a/_t/_d` for a token at `/get/tk` and finishes at `/links/go2` |
-| `bcvc` | bc.vc/bcvc.live/xyz/go: clicks `#getLink` after the countdown and POSTs `/ln.php` with the page's obfuscated globals (skips publisher panel pages) || `skip-button-dest` | hurirk/usfinf/xervoo: extracts the destination from `#skip_bu2tton` (the `dest=` param) and resolves `/ad/locked` |
-| `token-link` | Token shorteners (tpi.li, oii.la, tei.ai, tii.ai, iir.ai, oko.sh): decodes the base64 `input[name="token"]` (or its base64 tail) into the destination, falling back to an enabled `.get-link` anchor |
-| `zafree-link-view` | za.gl/za.uy: fills the link-view coordinates challenge and submits it |
-| `setc-form` | Any page with a `form#setc`: follows its action directly |
-| `close-interstitial` | doaipomer/ppcnt/lnkparts/zunsoach: popup-only interstitial pages — closes the tab |
-| `rekonise` | rekonise.com: calls the `social-unlocks{path}/unlock` API directly and extracts the destination from the JSON response |
-| `mboost` | mboost.me: pulls the escaped `"targeturl"` field embedded in the page source |
-| `boost-ink` | boost.ink: fetches its own page source and decodes the payload hidden behind an internal marker key |
-| `lootlabs` | links.lootlabs.gg: hooks `window.WebSocket` at document-start, auto-clicks the `.ind-idle` tasks, and decodes the `r:` WebSocket payload (base64url + 5-byte XOR key) into the destination |
-| `acortalink` | acortalink.me: turns popups into same-tab redirects, spoofs the countdown through postMessage and clicks the final button |
-| `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
-| `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |
-| `external-service` | Sites without a known local bypass (Linkvertise hard case, loot-links, admaven): delegates to the public service [adbypass.org](https://adbypass.org) |
-| `url-destination` | Extracts `?url=`, `?u=`, `?go=`, `?shortid=`, `?id=` etc. from the address bar (with base64/hex decoding), plus base64 destination hidden in the last path segment (`/goto/<b64>`, `/away/<b64>`), and goes straight to the destination |
-| `adlinkfly` | The AdLinkFly template (used by ~20 shorteners: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializes the hidden fields and POSTs to `/links/go` — first attempt immediately, then retries every 5s while clicking the invisible captcha and following the button once the countdown unlocks it (60s window) |
-| `adlinkfly-captcha` | Clicks the invisible captcha (`#invisibleCaptchaShortlink`) as soon as it becomes enabled |
-| `go-link-form` | Finds `form#go-link`, waits for the button to unlock and submits/clicks it on its own |
-| `wpsafelink` | Template WordPress WPSafeLink: clicks the landing button, waits for the timer to hit zero, calls `wpsafegenerate()` and extracts the final link; also handles the JSON variant where an `atob(input)` payload carries the `linkr` field |
-| `setc-form` | Any page with a `form#setc`: follows its action directly; a `form#landing` with a base64 `go` field gets decoded instead |
-| `captcha-manual` | If hCaptcha/reCAPTCHA/Turnstile is present, waits for you to solve it manually (up to 3 min) then auto-submits the form/button — never touches the captcha itself |
-| `math-captcha` | Solves "12 + 7 = ?"-style captchas and fills in the field |
-| `final-button` | Automatically clicks "Get Link", "Continue", "Skip" etc. |
-| `network-capture` | Hooks `fetch`/XHR at document-start and watches JSON responses for destination fields (`"url":`, `"redirect":`...); if a shortener reveals its target through any API call, the script picks it up and follows |
-| `single-external-link` | If the page has only one plausible external link, redirects to it. Scans anchors, inline JS assignments (`location.href =`, `location.replace(`, `url =`...), `meta[http-equiv=refresh]`, `data-url/href/link/destination` attributes and hidden inputs |
+| `ouo` | Submits `#form-captcha` / `#form-go` in a loop until each stage advances (`ouo.today` uses the `nextUrl` global) |
+| `adfoc` | Follows `click_url` / hidden `#y` input (`adfoc.us`, `adf.ly`, `clk.sh`, `shrink.pe`) |
+| `aylink-family` | Exchanges `_a/_t/_d` for a token at `/get/tk`, finishes at `/links/go2` |
+| `bcvc` | Clicks `#getLink` after countdown, POSTs `/ln.php` with page globals |
+| `skip-button-dest` | Reads `dest=` from `#skip_bu2tton`; resolves `/ad/locked` hops |
+| `acortalink` | Spoofs `postMessage("__done__")` to defeat the counter, clicks through |
+| `bstlar` | Intercepts the tasks XHR, marks steps complete on their API |
+| `token-link` | Decodes base64 `input[name=token]` (or its tail) into the destination |
+| `zafree-link-view` | Fills za.gl's coordinate challenge and submits |
+| `setc-form` / landing forms | Follows `form#setc` action; decodes base64 `go` field on `form#landing` |
+| `boost-ink` | Fetches own source, decodes payload behind internal marker key |
+| `lootlabs` | WebSocket hook at document-start; decodes `r:` payloads (base64url + XOR) |
+| `rekonise` | Calls the social-unlock API directly |
+| `mboost` | Pulls escaped `"targeturl"` from page source |
+| `url-destination` | Base64/hex destinations in query params *and* path segments (`/goto/<b64>`) |
+| `adlinkfly` | Serializes hidden fields, POSTs `/links/go` with adaptive retries |
+| `adlinkfly-captcha` | Clicks `#invisibleCaptchaShortlink` when it enables |
+| `go-link-form` | Waits out the timer, then submits/clicks `form#go-link` |
+| `wpsafelink` | Full WPSafeLink flow incl. JSON variant (`atob(input).linkr`) |
+| `captcha-manual` | Watches hCaptcha/reCAPTCHA/Turnstile; auto-submits **after you solve** |
+| `math-captcha` | Solves "12 + 7 = ?"-style questions |
+| `final-button` | Clicks unlocked "Get Link" / "Continue" buttons |
+| `network-capture` | Hooks fetch/XHR; follows destination-shaped JSON responses |
+| `single-external-link` | Redirects when exactly one plausible external exit exists |
+| `external-service` | Delegates hardened links (Linkvertise hard case, loot-links, admaven) to adbypass.org |
 
-On top of the rules, global protections apply:
+</details>
 
-- **Confidence-based detection** — a page counts as a shortener when strong structural markers are present (known forms/captchas) or when at least 2 soft indicators match: countdown text, action buttons, URL patterns (`/go/`, `/out/`, "short"/"safelink" hosts), meta refresh or loader/spinner/timer elements
-- **Task-wall detection** — engagement gates that force you to browse another site ("spend 2 minutes on the website", "visit multiple pages") are validated server-side and cannot be bypassed locally; the script steps back on them instead of interfering (its focus tricks would otherwise lock their continue button forever)
+### Global protections
 
-- **Boosted timers** — countdowns run up to 15x faster on pages that look like shorteners
-- **Popups blocked** — `window.open` becomes a no-op
-- **Focus restored** — the page never "loses focus" (defeats inactive tab detection)
-- **Anti-adblock banners removed**
-- **Interactions unlocked** — right-click, copy and text selection work again
-- **Anti-loop** — keeps a session navigation history; if it detects a circular redirect, it aborts
+- **Timer boost** — countdowns run up to 15× faster on shortener pages
+- **Popup shield** — `window.open` is neutralized
+- **Focus lock** — the tab never reports being unfocused
+- **Anti-adblock banners removed**, right-click/copy/select restored
+- **Anti-loop** — circular redirects abort via session history
+
+### Detection engine
+
+A page counts as a shortener when strong structural markers exist
+(`form#go-link`, `ad_form_data`, invisible captchas...) **or** when at least
+two soft indicators match: countdown text, action buttons, URL patterns,
+meta refresh, loader/timer elements. Engagement task-walls ("spend N minutes",
+social unlockers) are detected and deliberately left alone — they validate
+server-side and cannot be skipped locally.
 
 ## Built-in safety
 
-- Runs only on the top frame (`window.top`)
-- Exclusion list: Google, YouTube, hCaptcha/reCAPTCHA and Cloudflare are never touched
-- Timer boosting and auto-click only activate when the page looks like a shortener (`form#go-link` or phrases like "please wait")
-- The userscript menu lets you **disable it per domain** with one click
+- Top frame only; iframes never touched
+- Google, YouTube, hCaptcha/reCAPTCHA and Cloudflare are hard-excluded
+- Captcha widgets are never solved or tampered with — only observed
+- Per-domain on/off switch in the userscript menu
+- Cloudflare challenges pass untouched (verified live)
 
 ## Adding a site-specific rule
-
-For a site with its own behavior, add an object to `GENERIC_RULES`:
 
 ```js
 {
   name: 'my-site',
   when: () => /mysite\.example/.test(location.host),
   run: async () => {
-    const dest = await waitFor(() =>
-      document.querySelector('#token')?.value);
-    return goto(`https://final.destination/?t=${encodeURIComponent(dest)}`);
+    const token = await waitFor(() => document.querySelector('#token')?.value);
+    return goto(`https://final.destination/?t=${encodeURIComponent(token)}`);
   },
 }
 ```
 
-The first rule that acts ends the flow — put the most specific ones first.
+The first rule that acts wins — order specific rules first.
 
 ## Development
 
-Validate syntax after edits:
+```bash
+node --check shortlink-skipper.user.js   # what CI runs
+```
 
-```
-node --check shortlink-skipper.user.js
-```
+Techniques are distilled from other projects, reimplemented in this codebase's
+rule format. See [Credits](#credits).
 
 ## Credits
 
-The `ouo`, `adfoc`, `aylink-family`, `bcvc`, `skip-button-dest`, `adlinkfly` and `adlinkfly-captcha` families are ports of the handlers from [ADLbypasser v1.6](https://greasyfork.org/pt-BR/scripts/439469) by [fir4tozden](https://greasyfork.org/pt-BR/users/932504-fir4tozden), licensed under **MIT** — rewritten into this project's rule format.
-
-The `acortalink`, `bstlar`, `linkvertise-easy`, `external-service` families and the infrastructure filter of the link detector are inspired by the techniques from Amm0ni4's fork [bypass-all-shortlinks-debloated](https://codeberg.org/Amm0ni4/bypass-all-shortlinks-debloated) (which itself credits AdGuard Team and FastForward), reimplemented from scratch here.
-
-The `token-link`, `zafree-link-view`, `setc-form` families, plus the improved `bcvc` flow (#getLink click, panel-page skip) and the `#y` fallback of `adfoc`, are distilled from [ugiBypass v2.1.0](https://greasyfork.org/en/scripts/584507) by [ugilabs](https://greasyfork.org/en/users/1993234-ugilabs), licensed under **MIT** — rewritten into this project's rule format.
+| Source | License | What was taken |
+| --- | --- | --- |
+| [ADLbypasser v1.6](https://greasyfork.org/pt-BR/scripts/439469) by fir4tozden | MIT | ouo, adfoc, aylink-family, bcvc, skip-button-dest, AdLinkFly families |
+| [ugiBypass v2.1.0](https://greasyfork.org/en/scripts/584507) by ugilabs | MIT | token-link, zafree-link-view, setc-form, bcvc flow, `#y` fallback |
+| [bypass-all-shortlinks-debloated](https://codeberg.org/Amm0ni4/bypass-all-shortlinks-debloated) by Amm0ni4 | mixed | acortalink, bstlar, linkvertise-easy, external-service concepts (AdGuard/FastForward lineage) |
+| [nOneCode4u/bypass-shortlinks](https://github.com/nOneCode4u/bypass-shortlinks) | Unlicense | network capture technique |
+| Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
+| Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
