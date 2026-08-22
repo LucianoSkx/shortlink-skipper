@@ -9,6 +9,7 @@ eight popular bypass projects into one clean rule engine.
 
 [![Validate](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml/badge.svg)](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/LucianoSkx/shortlink-skipper)](https://github.com/LucianoSkx/shortlink-skipper/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Userscript managers](https://img.shields.io/badge/Violentmonkey%20·%20Tampermonkey-compatible-blue)
 
 [**Install**](#install) · [How it works](#how-it-works) · [Safety](#built-in-safety) · [Extending](#adding-a-site-specific-rule) · [Credits](#credits)
