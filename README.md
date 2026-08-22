@@ -20,14 +20,12 @@ eight popular bypass projects into one clean rule engine.
 
 ## Install
 
-| Step | |
-| --- | --- |
-| 1 | Install [Violentmonkey](https://violentmonkey.github.io/) or Tampermonkey |
-| 2 | Open the install link below — your manager picks it up automatically |
+1. Install [Violentmonkey](https://violentmonkey.github.io/) or [Tampermonkey](https://www.tampermonkey.net/).
+2. Click the install link below — your manager picks it up automatically:
 
-```text
-https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
-```
+➡️ **[Install Shortlink Skipper](https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js)**
+
+> `https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js`
 
 Updates are automatic: every push to `main` reaches installed users.
 
