@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.0.0
+// @version      1.0.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -44,7 +44,7 @@
     /(disable|turn off|deactivate).{0,24}ad.?block|ad.?block(er)? (is |was )?(detect|enabled|activ)|we.{0,10}ve detected.{0,20}ad.?block|whitelist (us|this site)/i;
 
   const TASK_WALL_HINTS =
-    /spend\s+\d+\s*(minutes?|seconds?)\s+on\s+(the\s+)?(website|site)|visit\s+(multiple|several)\s+pages|come\s+back\s+to\s+this\s+page|complete\s+the\s+verification\s+process\s+in\s+the\s+other\s+tab/i;
+    /spend\s+\d+\s*(minutes?|seconds?)\s+on\s+(the\s+)?(website|site)|visit\s+(multiple|several)\s+pages|come\s+back\s+to\s+this\s+page|complete\s+the\s+verification\s+process\s+in\s+the\s+other\s+tab|complete\s+the\s+actions\s+and\s+unlock\s+the\s+link|steps?\s+completed\s+\d+\s*\/\s*\d+|please\s+like\s+and\s+subscri/i;
 
   const OUO_HOST = /(^|\.)ouo\.(io|press|today)$|(^|\.)uii\.io$/;
   const ADFOC_FAMILY =
