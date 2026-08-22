@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.9.1
+// @version      1.0.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -410,14 +410,29 @@
     if (!field) return false;
     log('AdLinkFly template detected');
     const form = field.closest('form') || field.parentElement;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      await sleep(5000);
-      const json = await postForm('/links/go', hiddenFields(form));
+
+    let first = true;
+    const deadline = Date.now() + 60000;
+    while (Date.now() < deadline) {
+      if (!first) await sleep(5000);
+      first = false;
+
+      const json = await postForm('/links/go', hiddenFields(form)).catch(() => null);
       if (json?.url) {
         log('AdLinkFly: destination obtained');
         return goto(json.url);
       }
+
+      const invisible = document.querySelector('#invisibleCaptchaShortlink');
+      if (invisible && !invisible.disabled) fireClick(invisible);
+
+      const ready = document.querySelector('a.get-link:not(.disabled)[href]');
+      if (ready?.href && /^https?:\/\//i.test(ready.href)) {
+        log('AdLinkFly: button unlocked by countdown');
+        return goto(ready.href);
+      }
     }
+    log('AdLinkFly: no destination after retries');
     return false;
   }
 

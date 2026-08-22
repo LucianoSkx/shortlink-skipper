@@ -32,7 +32,8 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 | `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
 | `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |
 | `external-service` | Sites without a known local bypass (Linkvertise hard case, loot-links, admaven): delegates to the public service [adbypass.org](https://adbypass.org) |
-| `url-destination` | Extracts `?url=`, `?u=`, `?go=` etc. from the address bar (with base64/hex decoding) and goes straight to the destination || `adlinkfly` | The AdLinkFly template (used by ~20 shorteners: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializes the hidden fields and POSTs to `/links/go`, with retries |
+| `url-destination` | Extracts `?url=`, `?u=`, `?go=` etc. from the address bar (with base64/hex decoding) and goes straight to the destination |
+| `adlinkfly` | The AdLinkFly template (used by ~20 shorteners: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializes the hidden fields and POSTs to `/links/go` — first attempt immediately, then retries every 5s while clicking the invisible captcha and following the button once the countdown unlocks it (60s window) |
 | `adlinkfly-captcha` | Clicks the invisible captcha (`#invisibleCaptchaShortlink`) as soon as it becomes enabled |
 | `go-link-form` | Finds `form#go-link`, waits for the button to unlock and submits/clicks it on its own |
 | `wpsafelink` | The WordPress WPSafeLink template: clicks the landing button, waits for the timer to hit zero, calls `wpsafegenerate()` and extracts the final link |
