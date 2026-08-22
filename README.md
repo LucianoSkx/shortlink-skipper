@@ -18,10 +18,13 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 | Rule | What it does |
 | --- | --- |
 | `ouo` | ouo.io/press/today: submits `#form-captcha`/`#form-go` in a loop until the step advances; ouo.today uses the `nextUrl` global |
-| `adfoc` | adfoc.us: redirects via the `click_url` global |
+| `adfoc` | adfoc.us, adf.ly, clk.sh, shrink.pe: redirects via the `click_url` global or the hidden `#y` input |
 | `aylink-family` | aylink.co and friends: exchanges `_a/_t/_d` for a token at `/get/tk` and finishes at `/links/go2` |
-| `bcvc` | bcvc.live/xyz: POST `/ln.php` with the page's obfuscated globals |
+| `bcvc` | bc.vc/bcvc.live/xyz/go: clicks `#getLink` after the countdown and POSTs `/ln.php` with the page's obfuscated globals (skips publisher panel pages) |
 | `skip-button-dest` | hurirk/usfinf/xervoo: extracts the destination from `#skip_bu2tton` (the `dest=` param) and resolves `/ad/locked` |
+| `token-link` | Token shorteners (tpi.li, oii.la, tei.ai, tii.ai, iir.ai, oko.sh): decodes the base64 `input[name="token"]` (or its base64 tail) into the destination, falling back to an enabled `.get-link` anchor |
+| `zafree-link-view` | za.gl/za.uy: fills the link-view coordinates challenge and submits it |
+| `setc-form` | Any page with a `form#setc`: follows its action directly |
 | `acortalink` | acortalink.me: turns popups into same-tab redirects, spoofs the countdown through postMessage and clicks the final button |
 | `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
 | `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |
@@ -83,3 +86,5 @@ node --check shortlink-skipper.user.js
 The `ouo`, `adfoc`, `aylink-family`, `bcvc`, `skip-button-dest`, `adlinkfly` and `adlinkfly-captcha` families are ports of the handlers from [ADLbypasser v1.6](https://greasyfork.org/pt-BR/scripts/439469) by [fir4tozden](https://greasyfork.org/pt-BR/users/932504-fir4tozden), licensed under **MIT** — rewritten into this project's rule format.
 
 The `acortalink`, `bstlar`, `linkvertise-easy`, `external-service` families and the infrastructure filter of the link detector are inspired by the techniques from Amm0ni4's fork [bypass-all-shortlinks-debloated](https://codeberg.org/Amm0ni4/bypass-all-shortlinks-debloated) (which itself credits AdGuard Team and FastForward), reimplemented from scratch here.
+
+The `token-link`, `zafree-link-view`, `setc-form` families, plus the improved `bcvc` flow (#getLink click, panel-page skip) and the `#y` fallback of `adfoc`, are distilled from [ugiBypass v2.1.0](https://greasyfork.org/en/scripts/584507) by [ugilabs](https://greasyfork.org/en/users/1993234-ugilabs), licensed under **MIT** — rewritten into this project's rule format.

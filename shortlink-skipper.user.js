@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.4.0
+// @version      0.5.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -52,6 +52,9 @@
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.com$/;
+  const TOKEN_HOST = /(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
+  const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
+  const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
     /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)\/s\?.+|linkvertise\.com\/.+)/;
   const INFRA_HOST =
@@ -418,7 +421,11 @@
 
   async function handleAdFoc() {
     if (!ADFOC_HOST.test(location.host)) return false;
-    return typeof PAGE.click_url === 'string' ? goto(PAGE.click_url) : false;
+    const fromGlobal = typeof PAGE.click_url === 'string' ? PAGE.click_url : null;
+    if (fromGlobal) return goto(fromGlobal);
+    return waitFor(() => document.getElementById('y')?.value, 15000, 400).then((url) =>
+      url ? goto(url) : false,
+    );
   }
 
   async function handleAylink() {
@@ -439,25 +446,98 @@
 
   async function handleBcVc() {
     if (!BCVC_HOST.test(location.host)) return false;
-    const g = (key) => PAGE[key];
-    if ([g('tZ'), g('cW'), g('cH'), g('tkn'), g('sW'), g('sH'), g('xyz')].some((v) => typeof v === 'undefined')) {
+    if (/^\/(panel|member|auth|admin|api|static)\//.test(location.pathname) || /^\/?$/.test(location.pathname)) {
       return false;
     }
+    const g = (key) => PAGE[key];
+    const hasGlobals = [g('tZ'), g('cW'), g('cH'), g('tkn'), g('sW'), g('sH'), g('xyz')].every((v) => typeof v !== 'undefined');
+    if (!hasGlobals && !document.querySelector('.bcvcCountDown, input#recaptchaToken, #getLink')) return false;
+    log('bc.vc detectado');
     const token = document.querySelector('#recaptchaToken')?.value || '';
-    const json = await postForm(`/ln.php?wds=${encodeURIComponent(String(g('xyz')))}`, {
-      xdf: JSON.stringify({
-        afg: g('tZ'),
-        bfg: g('cW'),
-        cfg: g('cH'),
-        jki: g('tkn'),
-        dfg: g('sW'),
-        efg: g('sH'),
-        rt: token,
-      }),
-      ojk: 'jfhg',
-    });
-    const url = json?.message?.url ?? json?.message;
-    return typeof url === 'string' ? goto(url) : false;
+    if (hasGlobals) {
+      postForm(`/ln.php?wds=${encodeURIComponent(String(g('xyz')))}`, {
+        xdf: JSON.stringify({
+          afg: g('tZ'),
+          bfg: g('cW'),
+          cfg: g('cH'),
+          jki: g('tkn'),
+          dfg: g('sW'),
+          efg: g('sH'),
+          rt: token,
+        }),
+        ojk: 'jfhg',
+      }).then((json) => {
+        const url = json?.message?.url ?? json?.message;
+        if (typeof url === 'string') goto(url);
+      });
+    }
+    const clicked = await clickWhen(() => {
+      const btn = document.getElementById('getLink');
+      return btn && !btn.disabled ? btn : null;
+    }, 90000);
+    return Boolean(clicked);
+  }
+
+  function decodeTokenValue(raw) {
+    const tryB64 = (value) => {
+      try {
+        const decoded = atob(value);
+        return /^https?:\/\//i.test(decoded) ? decoded : null;
+      } catch {
+        return null;
+      }
+    };
+    const full = tryB64(String(raw).trim());
+    if (full) return full;
+    const tail = String(raw).match(/[A-Za-z0-9+/]{16,}={0,2}$/);
+    return tail ? tryB64(tail[0]) : null;
+  }
+
+  async function handleTokenLink() {
+    if (!TOKEN_HOST.test(location.host)) return false;
+    log('token shortener detected');
+    const resolved = await waitFor(() => {
+      const input = document.querySelector('input[name="token"]');
+      if (input?.value) {
+        const url = decodeTokenValue(input.value);
+        if (url) return { kind: 'url', value: url };
+      }
+      const link = document.querySelector('a.get-link:not(.disabled)[href]');
+      if (link?.href && link.href !== location.href && !/^javascript:/i.test(link.href)) {
+        return { kind: 'url', value: link.href };
+      }
+      return null;
+    }, 120000, 800);
+    return resolved ? goto(resolved.value) : false;
+  }
+
+  async function handleSetcForm() {
+    const form = await waitFor(() => {
+      const f = document.querySelector(SETC_FORM);
+      return f?.action ? f : null;
+    }, 4000);
+    if (!form) return false;
+    log('#setc form found, following action:', form.action);
+    return goto(form.action);
+  }
+
+  async function handleZafree() {
+    if (!ZAFREE_HOST.test(location.host)) return false;
+    const linkView = await waitFor('form#link-view', 5000);
+    if (linkView) {
+      log('za.gl link-view detected, filling coordinates');
+      const setVal = (sel, val) => {
+        const el = linkView.querySelector(sel);
+        if (el) el.value = val;
+      };
+      setVal('#x', '192');
+      setVal('#y', '114');
+      setVal('input[name="givenX"]', 'VFl0utOEF6a7BiS8YJdqTg==');
+      setVal('input[name="givenY"]', 'rsW06vBB1oIFVpnFz61t5Q==');
+      submitFormLoop(linkView, 10);
+      return true;
+    }
+    return false;
   }
 
   async function handleSkipButtonDest() {
@@ -682,6 +762,9 @@
     { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
     { name: 'acortalink', when: () => ACORTALINK_HOST.test(location.host), run: handleAcortalink },
     { name: 'bstlar', when: () => BSTLAR_HOST.test(location.host), run: handleBstlar },
+    { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
+    { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
+    { name: 'setc-form', when: () => true, run: handleSetcForm },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
     {
       name: 'external-service',
