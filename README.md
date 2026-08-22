@@ -17,13 +17,24 @@ Em vez de manter milhares de regras por site, usa ferramentas genéricas que cob
 
 | Regra | O que faz |
 | --- | --- |
+| `ouo` | ouo.io/press/today: submete `#form-captcha`/`#form-go` em loop até a etapa avançar; ouo.today usa o global `nextUrl` |
+| `adfoc` | adfoc.us: redireciona via global `click_url` |
+| `aylink-family` | aylink.co e afins: troca `_a/_t/_d` por token em `/get/tk` e conclui em `/links/go2` |
+| `bcvc` | bcvc.live/xyz: POST `/ln.php` com os globals ofuscados da página |
+| `skip-button-dest` | hurirk/usfinf/xervoo: extrai destino do `#skip_bu2tton` (param `dest=`) e resolve `/ad/locked` |
 | `destino-na-url` | Extrai `?url=`, `?u=`, `?go=` etc. da barra de endereço (com decodificação base64/hex) e vai direto ao destino |
+| `adlinkfly` | Template AdLinkFly (usado por ~20 encurtadores: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializa os campos hidden e faz POST em `/links/go`, com retentativas |
+| `adlinkfly-captcha` | Clica o captcha invisível (`#invisibleCaptchaShortlink`) assim que ele habilita |
 | `go-link-form` | Encontra `form#go-link`, espera o botão liberar e submete/clica sozinho |
 | `wpsafelink` | Template WordPress WPSafeLink: clica o botão da landing, espera o timer zerar, chama `wpsafegenerate()` e extrai o link final |
 | `captcha-manual` | Se há hCaptcha/reCAPTCHA/Turnstile, aguarda você resolver manualmente (até 3 min) e então auto-submete o formulário/botão — nunca toca no captcha em si |
 | `captcha-matematica` | Resolve captchas do tipo "12 + 7 = ?" e preenche o campo |
 | `botao-final` | Clica automaticamente em "Get Link", "Continue", "Skip" etc. |
 | `unico-link-externo` | Se a página só tem um link externo plausível, redireciona |
+
+## Créditos
+
+As famílias `ouo`, `adfoc`, `aylink-family`, `bcvc`, `skip-button-dest`, `adlinkfly` e `adlinkfly-captcha` são portas dos handlers do [adLBypasser v1.6](https://greasyfork.org/pt-BR/scripts/439469) de [fir4tozden](https://greasyfork.org/pt-BR/users/932504-fir4tozden), licenciado sob **MIT** — reescritas no formato de regras deste projeto.
 
 Além das regras, aplica proteções globais:
 

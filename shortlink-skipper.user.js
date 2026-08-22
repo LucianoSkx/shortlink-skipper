@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.2.0
+// @version      0.3.0
 // @description  Pula encurtadores de links automaticamente: acelera countdowns, clica botões finais, extrai destino da URL, bloqueia popups e avisos anti-adblock.
 // @author       Luciano
 // @match        *://*/*
@@ -42,6 +42,13 @@
 
   const ADBLOCK_BANNER =
     /(disable|turn off|deactivate).{0,24}ad.?block|ad.?block(er)? (is |was )?(detect|enabled|activ)|we.{0,10}ve detected.{0,20}ad.?block|whitelist (us|this site)/i;
+
+  const OUO_HOST = /(^|\.)ouo\.(io|press|today)$/;
+  const ADFOC_HOST = /(^|\.)adfoc\.us$/;
+  const AYLINK_HOST =
+    /(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
+  const BCVC_HOST = /(^|\.)bcvc\.(live|xyz)$/;
+  const SKIP_BUTTON_HOST = /(hurirk\.net|usfinf\.net|xervoo\.net)$/;
 
   function disabled() {
     const off = GM_getValue('disabled_hosts', {});
@@ -230,7 +237,7 @@
   }
 
   async function handleGoLinkForm() {
-    const form = await waitFor(GO_LINK_FORM, 5000);
+    const form = await waitFor(GO_LINK_FORM, 4000);
     if (!form) return false;
     log('formulario go-link encontrado');
     const submitBtn = await waitFor(() => {
@@ -319,6 +326,145 @@
       return true;
     }
     return false;
+  }
+
+  function hiddenFields(scope) {
+    const data = {};
+    for (const input of scope.querySelectorAll('input[type="hidden"]')) {
+      if (input.name) data[input.name] = input.value;
+    }
+    return data;
+  }
+
+  async function postForm(url, body) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(body),
+    });
+    return res.json().catch(() => null);
+  }
+
+  async function handleAdLinkFly() {
+    const field = await waitFor(() => {
+      const el = document.querySelector('input[name="ad_form_data"]');
+      return el?.value ? el : null;
+    }, 2500);
+    if (!field) return false;
+    log('template AdLinkFly detectado');
+    const form = field.closest('form') || field.parentElement;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await sleep(5000);
+      const json = await postForm('/links/go', hiddenFields(form));
+      if (json?.url) {
+        log('AdLinkFly: destino obtido');
+        return goto(json.url);
+      }
+    }
+    return false;
+  }
+
+  async function handleInvisibleCaptcha() {
+    const btn = await waitFor('#invisibleCaptchaShortlink', 2500);
+    if (!btn) return false;
+    log('captcha invisivel AdLinkFly detectado');
+    return clickWhen(() => (!btn.disabled ? btn : null), 60000);
+  }
+
+  function submitFormLoop(form, attempts = 30) {
+    return new Promise((resolve) => {
+      let done = 0;
+      const timer = setInterval(() => {
+        done += 1;
+        if (!document.contains(form) || done >= attempts) {
+          clearInterval(timer);
+          resolve(!document.contains(form));
+          return;
+        }
+        try {
+          form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          try {
+            form.requestSubmit();
+          } catch {}
+        } catch {}
+      }, 1000);
+    });
+  }
+
+  async function handleOuo() {
+    if (!OUO_HOST.test(location.host)) return false;
+    if (location.hostname.endsWith('ouo.today')) {
+      return typeof PAGE.nextUrl === 'string' ? goto(PAGE.nextUrl) : false;
+    }
+    const formId = location.pathname.startsWith('/go') ? '#form-go' : '#form-captcha';
+    const form = await waitFor(formId, 8000);
+    if (!form) return false;
+    log('ouo.io detectado, submetendo em loop:', formId);
+    return submitFormLoop(form);
+  }
+
+  async function handleAdFoc() {
+    if (!ADFOC_HOST.test(location.host)) return false;
+    return typeof PAGE.click_url === 'string' ? goto(PAGE.click_url) : false;
+  }
+
+  async function handleAylink() {
+    if (!AYLINK_HOST.test(location.host)) return false;
+    const csrf = PAGE.app?.csrf;
+    if (!csrf || typeof PAGE._a === 'undefined') return false;
+    try {
+      const tk = await postForm('/get/tk', { _a: PAGE._a, _t: PAGE._t, _d: PAGE._d });
+      if (!tk?.th) return false;
+      const alias = decodeURIComponent(location.pathname.replace(/^\/+/, '')).split('/')[0];
+      const json = await postForm('/links/go2', { alias, csrf, tkn: tk.th });
+      return json?.url ? goto(json.url) : false;
+    } catch (error) {
+      log('aylink-family: erro:', error.message);
+      return false;
+    }
+  }
+
+  async function handleBcVc() {
+    if (!BCVC_HOST.test(location.host)) return false;
+    const g = (key) => PAGE[key];
+    if ([g('tZ'), g('cW'), g('cH'), g('tkn'), g('sW'), g('sH'), g('xyz')].some((v) => typeof v === 'undefined')) {
+      return false;
+    }
+    const token = document.querySelector('#recaptchaToken')?.value || '';
+    const json = await postForm(`/ln.php?wds=${encodeURIComponent(String(g('xyz')))}`, {
+      xdf: JSON.stringify({
+        afg: g('tZ'),
+        bfg: g('cW'),
+        cfg: g('cH'),
+        jki: g('tkn'),
+        dfg: g('sW'),
+        efg: g('sH'),
+        rt: token,
+      }),
+      ojk: 'jfhg',
+    });
+    const url = json?.message?.url ?? json?.message;
+    return typeof url === 'string' ? goto(url) : false;
+  }
+
+  async function handleSkipButtonDest() {
+    if (!SKIP_BUTTON_HOST.test(location.host)) return false;
+    if (location.pathname.startsWith('/ad/locked')) {
+      const params = new URLSearchParams(location.search);
+      if (params.has('h') && params.has('url')) {
+        return goto(`/-${params.get('h')}/${params.get('url')}`);
+      }
+      return false;
+    }
+    const link = await waitFor(() => {
+      const el = document.querySelector('#skip_bu2tton');
+      return el?.getAttribute('href') ? el : null;
+    }, 60000, 500);
+    if (!link) return false;
+    const href = link.getAttribute('href');
+    const dest = href.split('dest=')[1];
+    log('botao skip com dest encontrado');
+    return dest ? goto(decodeURIComponent(dest)) : goto(href);
   }
 
   function solveMathCaptcha(root = document) {
@@ -446,7 +592,14 @@
   }
 
   const GENERIC_RULES = [
+    { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
+    { name: 'adfoc', when: () => ADFOC_HOST.test(location.host), run: handleAdFoc },
+    { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
+    { name: 'bcvc', when: () => BCVC_HOST.test(location.host), run: handleBcVc },
+    { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
     { name: 'destino-na-url', when: () => looksLikeShortlink(), run: async () => goto(extractDestFromParams()) },
+    { name: 'adlinkfly', when: () => true, run: handleAdLinkFly },
+    { name: 'adlinkfly-captcha', when: () => true, run: handleInvisibleCaptcha },
     { name: 'go-link-form', when: () => looksLikeShortlink(), run: handleGoLinkForm },
     { name: 'wpsafelink', when: () => looksLikeShortlink(), run: handleWpSafeLink },
     { name: 'captcha-manual', when: () => looksLikeShortlink(), run: handleManualCaptcha },
