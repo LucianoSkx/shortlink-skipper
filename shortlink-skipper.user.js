@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.9.0
+// @version      0.9.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -222,8 +222,9 @@
   }
 
   function looksLikeTaskWall(doc = document) {
-    const text = (doc.body?.innerText || '').slice(0, 4000);
-    return TASK_WALL_HINTS.test(text);
+    const text = doc.body?.innerText || '';
+    if (TASK_WALL_HINTS.test(text)) return true;
+    return TASK_WALL_HINTS.test(doc.documentElement.outerHTML.slice(0, 200000));
   }
 
   function extractDestFromParams() {
