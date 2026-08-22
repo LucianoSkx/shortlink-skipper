@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.0.1
+// @version      1.1.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -37,7 +37,7 @@
   const DEST_PARAMS = [
     'url', 'u', 'go', 'target', 'dest', 'destination', 'redirect',
     'redirect_uri', 'redirect_url', 'r', 'redir', 'link', 'out', 'to',
-    'continue', 'next', 'forward', 'jump', 's', 'safe',
+    'continue', 'next', 'forward', 'jump', 's', 'safe', 'shortid', 'id',
   ];
 
   const ADBLOCK_BANNER =
@@ -247,6 +247,12 @@
         }
       }
     }
+    const segments = location.pathname.split('/').filter(Boolean);
+    for (const seg of segments.reverse()) {
+      if (seg.length < 8 || /[._-]/.test(seg)) continue;
+      const decoded = decodeMaybe(seg);
+      if (/^https?:\/\//i.test(decoded)) return decoded;
+    }
     return null;
   }
 
@@ -321,6 +327,16 @@
   }
 
   async function handleWpSafeLink() {
+    const jsonInput = document.querySelector('input[name="newwpsafelink"], #wpsafelink-landing input');
+    if (jsonInput?.value) {
+      try {
+        const parsed = JSON.parse(atob(jsonInput.value));
+        if (parsed?.linkr) {
+          log('WPSafeLink JSON variant detected');
+          return goto(parsed.linkr);
+        }
+      } catch {}
+    }
     const marker = document.querySelector('#wpsafegenerate, .wpsafelink-landing, #wpsafe-generate, .wpsafelink-button');
     if (!marker) return false;
     log('WPSafeLink template detected');
@@ -661,9 +677,34 @@
       const f = document.querySelector(SETC_FORM);
       return f?.action ? f : null;
     }, 4000);
-    if (!form) return false;
-    log('#setc form found, following action:', form.action);
-    return goto(form.action);
+    if (form) {
+      log('#setc form found, following action:', form.action);
+      return goto(form.action);
+    }
+    const landing = document.querySelector('form#landing');
+    const goValue = landing?.querySelector('[name="go"]')?.value;
+    if (!goValue) return false;
+    log('#landing form with go field detected');
+    const stripped = `aH${goValue.split('aH').slice(1).join('aH')}`;
+    const dest = decodeMaybe(stripped);
+    if (/^https?:\/\//i.test(dest)) return goto(dest);
+    return false;
+  }
+
+  async function handleBoostInk() {
+    if (!/(^|\.)boost\.ink$/.test(location.host)) return false;
+    log('boost.ink detected, fetching page for embedded payload');
+    const html = await fetch(location.href, { credentials: 'include' })
+      .then((r) => r.text())
+      .catch(() => null);
+    const chunk = html?.split('bufpsvdhmjybvgfncqfa="')[1]?.split('"')[0];
+    if (!chunk) return false;
+    try {
+      const dest = atob(chunk);
+      return /^https?:\/\//i.test(dest) ? goto(dest) : false;
+    } catch {
+      return false;
+    }
   }
 
   async function handleZafree() {
@@ -914,6 +955,7 @@
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
     { name: 'setc-form', when: () => true, run: handleSetcForm },
+    { name: 'boost-ink', when: () => true, run: handleBoostInk },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
     {
       name: 'external-service',

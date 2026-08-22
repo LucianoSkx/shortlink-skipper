@@ -27,16 +27,18 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 | `close-interstitial` | doaipomer/ppcnt/lnkparts/zunsoach: popup-only interstitial pages — closes the tab |
 | `rekonise` | rekonise.com: calls the `social-unlocks{path}/unlock` API directly and extracts the destination from the JSON response |
 | `mboost` | mboost.me: pulls the escaped `"targeturl"` field embedded in the page source |
+| `boost-ink` | boost.ink: fetches its own page source and decodes the payload hidden behind an internal marker key |
 | `lootlabs` | links.lootlabs.gg: hooks `window.WebSocket` at document-start, auto-clicks the `.ind-idle` tasks, and decodes the `r:` WebSocket payload (base64url + 5-byte XOR key) into the destination |
 | `acortalink` | acortalink.me: turns popups into same-tab redirects, spoofs the countdown through postMessage and clicks the final button |
 | `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
 | `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |
 | `external-service` | Sites without a known local bypass (Linkvertise hard case, loot-links, admaven): delegates to the public service [adbypass.org](https://adbypass.org) |
-| `url-destination` | Extracts `?url=`, `?u=`, `?go=` etc. from the address bar (with base64/hex decoding) and goes straight to the destination |
+| `url-destination` | Extracts `?url=`, `?u=`, `?go=`, `?shortid=`, `?id=` etc. from the address bar (with base64/hex decoding), plus base64 destination hidden in the last path segment (`/goto/<b64>`, `/away/<b64>`), and goes straight to the destination |
 | `adlinkfly` | The AdLinkFly template (used by ~20 shorteners: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializes the hidden fields and POSTs to `/links/go` — first attempt immediately, then retries every 5s while clicking the invisible captcha and following the button once the countdown unlocks it (60s window) |
 | `adlinkfly-captcha` | Clicks the invisible captcha (`#invisibleCaptchaShortlink`) as soon as it becomes enabled |
 | `go-link-form` | Finds `form#go-link`, waits for the button to unlock and submits/clicks it on its own |
-| `wpsafelink` | The WordPress WPSafeLink template: clicks the landing button, waits for the timer to hit zero, calls `wpsafegenerate()` and extracts the final link |
+| `wpsafelink` | Template WordPress WPSafeLink: clicks the landing button, waits for the timer to hit zero, calls `wpsafegenerate()` and extracts the final link; also handles the JSON variant where an `atob(input)` payload carries the `linkr` field |
+| `setc-form` | Any page with a `form#setc`: follows its action directly; a `form#landing` with a base64 `go` field gets decoded instead |
 | `captcha-manual` | If hCaptcha/reCAPTCHA/Turnstile is present, waits for you to solve it manually (up to 3 min) then auto-submits the form/button — never touches the captcha itself |
 | `math-captcha` | Solves "12 + 7 = ?"-style captchas and fills in the field |
 | `final-button` | Automatically clicks "Get Link", "Continue", "Skip" etc. |
