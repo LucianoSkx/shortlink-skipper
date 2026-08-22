@@ -25,6 +25,8 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 | `zafree-link-view` | za.gl/za.uy: fills the link-view coordinates challenge and submits it |
 | `setc-form` | Any page with a `form#setc`: follows its action directly |
 | `close-interstitial` | doaipomer/ppcnt/lnkparts/zunsoach: popup-only interstitial pages — closes the tab |
+| `rekonise` | rekonise.com: calls the `social-unlocks{path}/unlock` API directly and extracts the destination from the JSON response |
+| `mboost` | mboost.me: pulls the escaped `"targeturl"` field embedded in the page source |
 | `acortalink` | acortalink.me: turns popups into same-tab redirects, spoofs the countdown through postMessage and clicks the final button |
 | `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
 | `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |

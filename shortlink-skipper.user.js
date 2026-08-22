@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.7.1
+// @version      0.8.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -54,6 +54,8 @@
   const BCVC_HOST = /(^|\.)bcvc\.(live|xyz|go)$|(bcvcgo)\.xyz$/;
   const SKIP_BUTTON_HOST = /(hurirk\.net|usfinf\.net|xervoo\.net)$/;
   const CLOSE_INTERSTITIAL_HOST = /(^|\.)?(doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
+  const REKONISE_HOST = /(^|\.)rekonise\.com$/;
+  const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.com$/;
@@ -472,6 +474,32 @@
     return true;
   }
 
+  async function handleRekonise() {
+    if (!REKONISE_HOST.test(location.host)) return false;
+    log('rekonise detected, querying unlock API');
+    try {
+      const res = await fetch(`https://api.rekonise.com/social-unlocks${location.pathname}/unlock`, {
+        headers: { accept: 'application/json, text/plain, */*' },
+      });
+      const data = JSON.stringify(await res.json());
+      const urls = data.match(/https?:\/\/[^\s"\\]+/g) || [];
+      const dest = urls.find(
+        (u) => !INFRA_HOST.test(u) && !/\.(png|jpe?g|gif|svg|webp|ico)(\?|$)/i.test(u),
+      );
+      return dest ? goto(dest) : false;
+    } catch (error) {
+      log('rekonise error:', error.message);
+      return false;
+    }
+  }
+
+  async function handleMboost() {
+    if (!MBOOST_HOST.test(location.host)) return false;
+    log('mboost detected, extracting targeturl from page source');
+    const match = document.documentElement.outerHTML.match(/"targeturl\\":\\"(https?:\/\/[^\\"]+)/);
+    return match ? goto(match[1]) : false;
+  }
+
   async function handleAylink() {
     if (!AYLINK_HOST.test(location.host)) return false;
     const csrf = PAGE.app?.csrf;
@@ -802,6 +830,8 @@
     { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
     { name: 'adfoc', when: () => ADFOC_FAMILY.test(location.host), run: handleAdFoc },
     { name: 'close-interstitial', when: () => CLOSE_INTERSTITIAL_HOST.test(location.host), run: handleCloseInterstitial },
+    { name: 'rekonise', when: () => REKONISE_HOST.test(location.host), run: handleRekonise },
+    { name: 'mboost', when: () => MBOOST_HOST.test(location.host), run: handleMboost },
     { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
     { name: 'bcvc', when: () => BCVC_HOST.test(location.host), run: handleBcVc },
     { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
