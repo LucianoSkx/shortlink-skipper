@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.2.0
+// @version      1.3.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -384,21 +384,35 @@
   async function handleManualCaptcha() {
     if (!captchaPresent()) return false;
     log('captcha present, waiting for manual solve...');
-    const solved = await waitFor(captchaSolved, 180000, 1000);
-    if (!solved) return false;
-    log('captcha solved by user, submitting');
-    await sleep(800);
-    const btn =
-      findByText(/^(continue|verify|confirm|proceed|submit|get link)$/i) ||
+    const findActionable = () =>
+      findByText(/\b(continue|proceed|get\s+link|free\s+download)\b/i) ||
       document.querySelector('.get-link:not([disabled]), button[type="submit"]:not([disabled]), input[type="submit"]');
-    if (btn && visible(btn)) {
-      fireClick(btn);
-      return true;
-    }
-    const form = document.querySelector('form');
-    if (form && visible(form)) {
-      form.submit();
-      return true;
+    const deadline = Date.now() + 120000;
+    while (Date.now() < deadline) {
+      const ready = findActionable();
+      if (ready && visible(ready)) {
+        log('button already unlocked, clicking without waiting');
+        fireClick(ready);
+        return true;
+      }
+      if (captchaSolved()) {
+        log('captcha solved by user, submitting');
+        await sleep(800);
+        const btn =
+          findByText(/^(continue|verify|confirm|proceed|submit|get link)$/i) ||
+          document.querySelector('.get-link:not([disabled]), button[type="submit"]:not([disabled]), input[type="submit"]');
+        if (btn && visible(btn)) {
+          fireClick(btn);
+          return true;
+        }
+        const form = document.querySelector('form');
+        if (form && visible(form)) {
+          form.submit();
+          return true;
+        }
+        break;
+      }
+      await sleep(1000);
     }
     return false;
   }
