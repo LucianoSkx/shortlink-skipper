@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      0.5.0
+// @version      0.6.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @match        *://*/*
@@ -193,9 +193,24 @@
   }
 
   function looksLikeShortlink(doc = document) {
-    if (doc.querySelector(GO_LINK_FORM)) return true;
+    const structural = doc.querySelector(GO_LINK_FORM) ||
+      doc.querySelector('input[name="ad_form_data"], #invisibleCaptchaShortlink, #wpsafegenerate, .wpsafelink-button');
+    if (structural) return true;
     const text = (doc.body?.innerText || '').slice(0, 4000);
-    return SHORTLINK_HINTS.test(text);
+    let score = 0;
+    if (SHORTLINK_HINTS.test(text)) score += 1;
+    if (/wait\s+\d+\s+second|countdown|\d+\s*s(econd)?s?( left| remaining)/i.test(text)) score += 1;
+    try {
+      if (findByText(BUTTON_TEXTS)) score += 1;
+    } catch {}
+    if (/\/(go|out|link|r)\/|(^|\.)(short|safelink)[a-z0-9-]*\./i.test(`${location.pathname} ${location.host}`)) score += 1;
+    if (
+      doc.querySelector('meta[http-equiv="refresh"]') ||
+      doc.querySelector('.loader, .spinner, .loading, .countdown, [class*="timer" i], [id*="timer" i]')
+    ) {
+      score += 1;
+    }
+    return score >= 2;
   }
 
   function extractDestFromParams() {
@@ -228,28 +243,40 @@
         const u = new URL(raw);
         return /^https?:$/.test(u.protocol) &&
           u.host.toLowerCase() !== here &&
-          !EXCLUDE_HOSTS.some((re) => re.test(u.host.toLowerCase()));
+          !EXCLUDE_HOSTS.some((re) => re.test(u.host.toLowerCase())) &&
+          !INFRA_HOST.test(u.host.toLowerCase());
       } catch {
         return false;
       }
     };
-    const anchors = [...document.querySelectorAll('a[href^="http"]')]
-      .map((a) => a.getAttribute('href'))
-      .filter((href) => {
-        try {
-          return isExternal(href) && !INFRA_HOST.test(new URL(href).host);
-        } catch {
-          return false;
-        }
-      });
-    if (anchors.length === 1) return anchors[0];
+    const candidates = [];
+    for (const a of document.querySelectorAll('a[href^="http"]')) {
+      candidates.push(a.getAttribute('href'));
+    }
     const inlineScripts = [...document.querySelectorAll('script:not([src])')]
       .map((s) => s.textContent)
       .join('\n');
-    const assigned = [...inlineScripts.matchAll(/(?:location(?:\.href)?|window\.open)\s*=?\s*\(?\s*['"](https?:\/\/[^'"]+)['"]/gi)]
-      .map((m) => m[1])
-      .filter(isExternal);
-    return assigned.length === 1 ? assigned[0] : null;
+    const assignmentPatterns = [
+      /(?:window\.location(?:\.href)?|location(?:\.href)?)\s*=?\s*\(?\s*['"](https?:\/\/[^'"]+)['"]/gi,
+      /location\.replace\(\s*['"](https?:\/\/[^'"]+)['"]/gi,
+      /(?:url|link|destination|target|final_url|goto|next_url|continue_url)\s*[:=]\s*['"](https?:\/\/[^'"]+)['"]/gi,
+    ];
+    for (const pattern of assignmentPatterns) {
+      for (const match of inlineScripts.matchAll(pattern)) candidates.push(match[1]);
+    }
+    const meta = document.querySelector('meta[http-equiv="refresh"]');
+    if (meta) {
+      const target = meta.getAttribute('content')?.match(/url=(.+)/i)?.[1];
+      if (target) candidates.push(target.trim().replace(/^['"]|['"]$/g, ''));
+    }
+    for (const el of document.querySelectorAll('[data-url], [data-href], [data-link], [data-destination]')) {
+      candidates.push(el.dataset.url || el.dataset.href || el.dataset.link || el.dataset.destination);
+    }
+    for (const input of document.querySelectorAll('input[type="hidden"]')) {
+      if (/^https?:\/\//i.test(input.value)) candidates.push(input.value);
+    }
+    const external = [...new Set(candidates.filter(Boolean))].filter(isExternal);
+    return external.length === 1 ? external[0] : null;
   }
 
   async function handleGoLinkForm() {

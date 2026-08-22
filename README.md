@@ -29,17 +29,18 @@ Instead of keeping thousands of per-site rules, it relies on generic tools that 
 | `bstlar` | bstlar.com: intercepts the "tasks" XHR and marks the task as completed on the API to receive the destination |
 | `linkvertise-easy` | linkvertise.com with a base64 `?r=` param: decodes it and goes straight to the destination |
 | `external-service` | Sites without a known local bypass (Linkvertise hard case, loot-links, admaven): delegates to the public service [adbypass.org](https://adbypass.org) |
-| `url-destination` | Extracts `?url=`, `?u=`, `?go=` etc. from the address bar (with base64/hex decoding) and goes straight to the destination |
-| `adlinkfly` | The AdLinkFly template (used by ~20 shorteners: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializes the hidden fields and POSTs to `/links/go`, with retries |
+| `url-destination` | Extracts `?url=`, `?u=`, `?go=` etc. from the address bar (with base64/hex decoding) and goes straight to the destination || `adlinkfly` | The AdLinkFly template (used by ~20 shorteners: exey.io, fc-lc.com, shrinkme, stfly.me, pnd.*, urlcik...): serializes the hidden fields and POSTs to `/links/go`, with retries |
 | `adlinkfly-captcha` | Clicks the invisible captcha (`#invisibleCaptchaShortlink`) as soon as it becomes enabled |
 | `go-link-form` | Finds `form#go-link`, waits for the button to unlock and submits/clicks it on its own |
 | `wpsafelink` | The WordPress WPSafeLink template: clicks the landing button, waits for the timer to hit zero, calls `wpsafegenerate()` and extracts the final link |
 | `captcha-manual` | If hCaptcha/reCAPTCHA/Turnstile is present, waits for you to solve it manually (up to 3 min) then auto-submits the form/button — never touches the captcha itself |
 | `math-captcha` | Solves "12 + 7 = ?"-style captchas and fills in the field |
 | `final-button` | Automatically clicks "Get Link", "Continue", "Skip" etc. |
-| `single-external-link` | If the page has only one plausible external link, redirects to it |
+| `single-external-link` | If the page has only one plausible external link, redirects to it. Scans anchors, inline JS assignments (`location.href =`, `location.replace(`, `url =`...), `meta[http-equiv=refresh]`, `data-url/href/link/destination` attributes and hidden inputs |
 
 On top of the rules, global protections apply:
+
+- **Confidence-based detection** — a page counts as a shortener when strong structural markers are present (known forms/captchas) or when at least 2 soft indicators match: countdown text, action buttons, URL patterns (`/go/`, `/out/`, "short"/"safelink" hosts), meta refresh or loader/spinner/timer elements
 
 - **Boosted timers** — countdowns run up to 15x faster on pages that look like shorteners
 - **Popups blocked** — `window.open` becomes a no-op
