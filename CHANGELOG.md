@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.7 — 2026-08-22
+
+### Added
+- `// @license MIT` no cabeçalho (obrigatório pelo Greasy Fork)
+
 ## 1.9.6 — 2026-08-22
 
 ### Added
