@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.10 — 2026-08-22
+
+### Added
+- Cobertura ampliada de serviços atuais (pesquisa vs FastForward/Universal Bypass 2026): `linkvertise.net` adicionado à família Linkvertise; `link-to.net`, `paster.so` e `gplinks.in` roteados para as APIs externas de bypass
+
 ## 1.9.9 — 2026-08-22
 
 ### Added
