@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.9.16 — 2026-08-23
+
+Stability release — no new bypasses.
+
+### Changed
+- **`goto()` is now a redirect state machine** with three invariants: never navigate to the current destination (`sameAsCurrent`), never accept a cycle (any already-visited destination is rejected, including the entry URL — `A→B→C→A` dies), and never allow an endless chain (`MAX_HOPS = 10` hop budget). The entry page is seeded into the per-tab history so cycles back to it are caught; this subsumes and replaces the previous recent-window heuristics.
+- acortalink's spoofed `window.open` now funnels through `goto()` instead of a raw `location.assign` — popup-sourced URLs get destination validation and loop protection too. `goto()` is now the single navigation door in the codebase.
+
+### Tests
+- Redirect-chain matrix: `A→B→A`, `A→B→C→A`, `A→B→C→D→E→A`, non-consecutive duplicate (`A→B→C→B`), and a 12-hop chain hitting the budget.
+- `installEarlyHooks()` idempotency: calling it twice (and then `main()`) wraps `fetch` exactly once on loot-link hosts.
+
 ## 1.9.15 — 2026-08-23
 
 ### Fixed

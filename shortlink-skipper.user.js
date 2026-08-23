@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.15
+// @version      1.9.16
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -243,23 +243,35 @@
     if (!isPlausibleUrl(url)) return false;
     const target = new URL(url).href;
     if (sameAsCurrent(target)) return false;
+    // Redirect-chain state machine. Invariants:
+    //   1. never navigate to the current destination  (sameAsCurrent above)
+    //   2. never accept a cycle                       (target already visited)
+    //   3. never allow an endless chain               (hop budget)
+    // The entry URL is seeded once per tab so returning to it also counts as
+    // a cycle (A→B→C→A).
     const KEY = 'sl_skipper_nav';
+    const MAX_HOPS = 10;
     let history = [];
     try {
       history = JSON.parse(sessionStorage.getItem(KEY) || '[]');
     } catch {}
-    // Immediate bounce (A→B→A) or any target seen twice in the last 4 hops:
-    // with search now compared, 2-URL ping-pong loops are otherwise possible.
-    if (
-      history.slice(-2).includes(target) ||
-      history.slice(-4).filter((u) => u === target).length >= 2
-    ) {
+    if (history.length === 0) {
+      try {
+        history.push(new URL(location.href).href);
+      } catch {}
+    }
+    if (history.length > MAX_HOPS) {
+      log('redirect chain exceeded', MAX_HOPS, 'hops, aborting:', target);
+      return false;
+    }
+    if (history.includes(target)) {
       log('redirect loop detected, aborting:', target);
       return false;
     }
     history.push(target);
     try {
-      sessionStorage.setItem(KEY, JSON.stringify(history.slice(-8)));
+      // Keep one extra entry so the budget check can observe the overflow.
+      sessionStorage.setItem(KEY, JSON.stringify(history.slice(-(MAX_HOPS + 1))));
     } catch {}
     log('going to', target);
     location.href = target;
@@ -453,6 +465,10 @@
     return goto(`https://bypass.tools/bypass?url=${encodeURIComponent(location.href)}`);
   }
 
+  // ARCH DEBT (not a bug): the external cascade spans delegated pages
+  // (trw.lat → bypass.tools → adbypass.org), each level relying on main()
+  // re-running there. If more delegation hosts appear, collapse this into a
+  // single resolveExternal(url) tried inline before navigating.
   async function handleServiceLastResort() {
     if (!/^bypass\.tools$/.test(location.host) || !location.search.includes('url=')) return false;
     log('em bypass.tools, aguardando resolucao antes do ultimo recurso');
@@ -1001,7 +1017,11 @@
   async function handleAcortalink() {
     if (!ACORTALINK_HOST.test(location.host)) return false;
     log('acortalink.me detected');
-    PAGE.open = (url) => (location.assign(url), PAGE);
+    // Funnel through goto() so the spoofed open honors validation + anti-loop.
+    PAGE.open = (url) => {
+      goto(url);
+      return PAGE;
+    };
     PAGE.addEventListener(
       'message',
       (event) => {
@@ -1483,6 +1503,7 @@
       BYPASS_SERVICE_URL,
       handleServiceLastResort,
       resolveLootlabsViaApi,
+      installEarlyHooks,
       main,
     };
   }

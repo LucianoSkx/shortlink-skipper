@@ -232,13 +232,56 @@ test('main() reaches service-last-resort on bypass.tools even though the page is
   );
 });
 
-test('goto blocks an A->B->A bounce loop', () => {
+test('goto rejects returning to any visited destination (A->B->A)', () => {
   const h = load({ href: 'https://a.example/' });
   assert.strictEqual(h.api.goto('https://b.example/'), true);
-  h.loc.href = 'https://b.example/';
-  assert.strictEqual(h.api.goto('https://a.example/'), true);
-  h.loc.href = 'https://a.example/';
-  assert.strictEqual(h.api.goto('https://b.example/'), false, 'an immediate bounce back to B must be blocked');
+  assert.strictEqual(h.api.goto('https://a.example/'), false, 'the entry page counts as visited');
+  assert.strictEqual(h.navs.length, 1);
+});
+
+test('goto blocks a 3-hop cycle back to the entry page (A->B->C->A)', () => {
+  const h = load({ href: 'https://a.example/' });
+  assert.strictEqual(h.api.goto('https://b.example/'), true);
+  assert.strictEqual(h.api.goto('https://c.example/'), true);
+  assert.strictEqual(h.api.goto('https://a.example/'), false, 'returning to the origin must be blocked');
+  assert.strictEqual(h.navs.length, 2);
+});
+
+test('goto blocks a 5-hop cycle (A->B->C->D->E->A)', () => {
+  const h = load({ href: 'https://a.example/' });
+  for (const u of ['b', 'c', 'd', 'e']) {
+    assert.strictEqual(h.api.goto(`https://${u}.example/`), true);
+  }
+  assert.strictEqual(h.api.goto('https://a.example/'), false, 'long cycles must also die');
+  assert.strictEqual(h.navs.length, 4);
+});
+
+test('goto abandons the chain on a non-consecutive duplicate (A->B->C->B)', () => {
+  const h = load({ href: 'https://a.example/' });
+  assert.strictEqual(h.api.goto('https://b.example/'), true);
+  assert.strictEqual(h.api.goto('https://c.example/'), true);
+  assert.strictEqual(h.api.goto('https://b.example/'), false, 'revisiting B must abandon the chain');
+  assert.strictEqual(h.navs.length, 2);
+});
+
+test('goto enforces the hop budget (MAX_HOPS=10)', () => {
+  const h = load({ href: 'https://chain.example/0' });
+  for (let i = 1; i <= 10; i++) {
+    assert.strictEqual(h.api.goto(`https://chain.example/${i}`), true, `hop ${i} should pass`);
+  }
+  assert.strictEqual(h.api.goto('https://chain.example/11'), false, 'hop 11 must hit the budget');
+});
+
+test('installEarlyHooks wraps fetch exactly once across repeated calls and main()', async () => {
+  const h = load({ href: 'https://loot-link.com/s/x' });
+  const origFetch = h.sandbox.fetch;
+  h.api.installEarlyHooks();
+  const wrappedOnce = h.sandbox.fetch;
+  assert.notStrictEqual(wrappedOnce, origFetch, 'first install should wrap fetch');
+  h.api.installEarlyHooks();
+  assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'second install must be a no-op');
+  await h.api.main();
+  assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
 });
 
 test('sameAsCurrent distinguishes query strings but ignores the hash', () => {
