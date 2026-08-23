@@ -275,6 +275,7 @@ test('goto enforces the hop budget (MAX_HOPS=10)', () => {
 
 test('installEarlyHooks wraps fetch exactly once across repeated calls and main()', async () => {
   const h = load({ href: 'https://loot-link.com/s/x' });
+  h.setGmXhr((opts) => opts.onerror());
   const origFetch = h.sandbox.fetch;
   h.api.installEarlyHooks();
   const wrappedOnce = h.sandbox.fetch;
@@ -283,6 +284,24 @@ test('installEarlyHooks wraps fetch exactly once across repeated calls and main(
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'second install must be a no-op');
   await h.api.main();
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
+});
+
+test('a known-shortener host passes the gate even before its SPA renders', async () => {
+  const h = load({ href: 'https://linkvertise.com/514008/hydrogen-download', querySelector: () => null });
+  const apiCalls = [];
+  h.setGmXhr((opts) => {
+    apiCalls.push(opts.url);
+    opts.onload({ responseText: JSON.stringify({ success: false }) });
+  });
+  await h.api.main();
+  assert.ok(
+    apiCalls.some((u) => u.includes('trw.lat/api/bypass')),
+    'external-service must run for a known host with no structural indicators',
+  );
+  assert.ok(
+    h.navs.some((u) => u.startsWith('https://bypass.tools/bypass?url=')),
+    'cascade must fall back to bypass.tools when the API does not resolve',
+  );
 });
 
 test('a specific rule wins over external-service by declaration order', async () => {

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.9.17 — 2026-08-23
+
+### Fixed
+- **Linkvertise (and other SPAs) were dismissed as "not a shortlink"**: the generic gate ran before any dedicated rule and scored 0 on pages that had not hydrated yet (no `form#go-link`, no countdown text), so `main()` exited early and the `external-service` cascade never fired — caught live against a real link. New `knownShortener()` check lets hosts that own dedicated rules (`linkvertise`, loot family, `bstlar`, `ouo`, adfoc family, `aylink`, rekonise, mboost, bcvc, token/zafree/adlinkfly families and everything in `BYPASS_SERVICE_URL`) clear the gate regardless of rendering state.
+
+### Tests
+- Regression: a known host with zero structural indicators must still reach the trw.lat API and fall back to bypass.tools.
+- The early-hook idempotency test now answers the GM mock — with the gate open, `main()` actually reaches `external-service`, which exposed the never-resolving default mock.
+
 ## 1.9.16 — 2026-08-23
 
 Stability release — no new bypasses.

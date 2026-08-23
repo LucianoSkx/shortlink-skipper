@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.16
+// @version      1.9.17
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -301,6 +301,29 @@
     const result = score >= 2;
     if (doc === document) _shortishCache = result;
     return result;
+  }
+
+  // Hosts that own dedicated rules must clear the generic gate even when the
+  // page is an SPA that has not rendered any structural indicator yet —
+  // Linkvertise hydrates late and used to be dismissed as "not a shortlink".
+  function knownShortener() {
+    return (
+      LINKVERTISE_HOST.test(location.host) ||
+      LOOTLINK_HOST.test(location.host) ||
+      LOOTLABS_HOST.test(location.host) ||
+      BSTLAR_HOST.test(location.host) ||
+      ACORTALINK_HOST.test(location.host) ||
+      OUO_HOST.test(location.host) ||
+      ADFOC_FAMILY.test(location.host) ||
+      AYLINK_HOST.test(location.host) ||
+      REKONISE_HOST.test(location.host) ||
+      MBOOST_HOST.test(location.host) ||
+      BCVC_HOST.test(location.host) ||
+      TOKEN_HOST.test(location.host) ||
+      ZAFREE_HOST.test(location.host) ||
+      ADLINKFLY_HOSTS.test(location.host) ||
+      BYPASS_SERVICE_URL.test(location.href)
+    );
   }
 
   function looksLikeTaskWall(doc = document) {
@@ -1443,7 +1466,7 @@
     const delegated = /^bypass\.tools$/.test(location.host);
     const taskWall = shortish && looksLikeTaskWall();
 
-    if (!shortish && !delegated) {
+    if (!shortish && !delegated && !knownShortener()) {
       log('not a shortlink page — leaving the page untouched');
       return;
     }
