@@ -80,6 +80,11 @@
 ### Fixed
 - Task-wall hints now scanned in page source too (they only exist inside inline scripts on revlink gates)
 
+### Tests
+- `tests/shortlink-skipper.test.js` (node:test): carrega sem erro/registra menu e não interfere no desafio Cloudflare
+- `tests/handlers.test.js` (node:test): exercita o código real de `handleLinkvertiseEasy`, `handleAdLinkFly` e `handleBypassCity` com entradas representativas (sandbox vm, sem dependências)
+- Export guardado (`module.exports`) + `main()` só auto-roda fora de `module`: permite testar handlers no Node sem afetar o browser
+
 ## Earlier releases
 
 - **0.9.x** — LootLabs WebSocket hook; browser-tested fixes

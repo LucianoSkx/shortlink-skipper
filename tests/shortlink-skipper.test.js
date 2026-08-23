@@ -109,25 +109,27 @@ function load(opts = {}) {
   sandbox.window = sandbox;
   sandbox.location = loc;
   sandbox.document = makeDoc(opts);
+  sandbox.document.querySelector = (sel) => (sel.includes('setc') ? { action: opts.href || 'https://example.com/' } : null);
+  sandbox.module = { exports: {} };
   vm.createContext(sandbox);
   vm.runInContext(SRC, sandbox);
-  return { loc, logs, menuCalls };
+  return { loc, logs, menuCalls, api: sandbox.module.exports };
 }
 
 test('carrega sem erro e registra o menu', async () => {
-  const { loc, menuCalls } = load({ href: 'https://example.com/' });
-  await new Promise((r) => setTimeout(r, 5000));
+  const { loc, menuCalls, api } = load({ href: 'https://example.com/' });
+  await api.main();
   assert.ok(menuCalls.length >= 1, 'menu commands devem ser registrados');
   assert.strictEqual(loc.navs.length, 0, 'pagina comum nao deve redirecionar');
 });
 
 test('nao interfere no desafio Cloudflare', async () => {
-  const { loc, logs } = load({
+  const { loc, logs, api } = load({
     href: 'https://short.site.example/abc',
     cf: true,
     title: 'Just a moment...',
   });
-  await new Promise((r) => setTimeout(r, 200));
+  await api.main();
   assert.strictEqual(loc.navs.length, 0, 'nao deve navegar durante o desafio CF');
   assert.ok(
     logs.some((l) => /standing by/i.test(l)),

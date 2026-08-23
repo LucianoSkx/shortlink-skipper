@@ -1371,5 +1371,24 @@
     }
   }
 
-  main();
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      isPlausibleUrl,
+      decodeMaybe,
+      extractDestFromParams,
+      sameAsCurrent,
+      cloudflareChallenging,
+      captchaPresent,
+      looksLikeShortlink,
+      goto,
+      handleLinkvertiseEasy,
+      handleAdLinkFly,
+      handleBypassCity,
+      main,
+    };
+  }
+
+  if (typeof module === 'undefined') {
+    main();
+  }
 })();
