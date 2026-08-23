@@ -5,10 +5,9 @@
 **Skip link shorteners automatically — countdowns, captchas, popups and all.**
 
 A lean, extensible userscript that distills the best techniques from
-eight popular bypass projects into one clean rule engine.
+eight bypass projects into one clean rule engine.
 
 [![Validate](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml/badge.svg)](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/github/v/release/LucianoSkx/shortlink-skipper)](https://github.com/LucianoSkx/shortlink-skipper/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Userscript managers](https://img.shields.io/badge/Violentmonkey%20·%20Tampermonkey-compatible-blue)
 
@@ -152,9 +151,10 @@ node test-live/server.js     # start the mock shortlink servers
 node test-live/cdp-client.js  # drive the browser via CDP and assert the redirect
 ```
 
-**Releasing**: bump `@version` in the userscript and push to `main` — the
-[Auto Release workflow](.github/workflows/auto-release.yml) tags the commit
-and publishes a GitHub release with the script attached automatically.
+**Releasing**: bump `@version` in the userscript and push to `main` — there is
+no GitHub Releases pipeline (the old auto-release workflow was removed in
+`d80a521`). Installed users still update automatically: userscript managers
+poll the `@updateURL`/`@downloadURL`, which points at the raw file on `main`.
 
 Techniques are distilled from other projects, reimplemented in this codebase's
 rule format. See [Credits](#credits).
