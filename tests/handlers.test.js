@@ -76,7 +76,13 @@ function load(opts = {}) {
     decodeURIComponent,
     atob,
     btoa,
-    sessionStorage: { getItem: () => null, setItem: () => {} },
+    sessionStorage: (() => {
+      const store = {};
+      return {
+        getItem: (k) => (k in store ? store[k] : null),
+        setItem: (k, v) => { store[k] = String(v); },
+      };
+    })(),
     GM_getValue: (k, d) => d,
     GM_setValue: () => {},
     GM_registerMenuCommand: () => {},
@@ -214,4 +220,30 @@ test('resolveLootlabsViaApi does not navigate when the API fails', async () => {
   h.setGmXhr((opts) => opts.onerror());
   await h.api.resolveLootlabsViaApi('somepayload');
   assert.strictEqual(h.navs.length, 0, 'should not navigate when the API errors');
+});
+
+test('main() reaches service-last-resort on bypass.tools even though the page is not a shortlink', async () => {
+  const h = load({ href: 'https://bypass.tools/bypass?url=https://loot-link.com/x' });
+  h.sandbox.setTimeout = (fn) => { fn(); return 0; };
+  await h.api.main();
+  assert.ok(
+    h.navs.some((u) => u.startsWith('https://adbypass.org/bypass?bypass=')),
+    'the delegation rule must run despite !shortish',
+  );
+});
+
+test('goto blocks an A->B->A bounce loop', () => {
+  const h = load({ href: 'https://a.example/' });
+  assert.strictEqual(h.api.goto('https://b.example/'), true);
+  h.loc.href = 'https://b.example/';
+  assert.strictEqual(h.api.goto('https://a.example/'), true);
+  h.loc.href = 'https://a.example/';
+  assert.strictEqual(h.api.goto('https://b.example/'), false, 'an immediate bounce back to B must be blocked');
+});
+
+test('sameAsCurrent distinguishes query strings but ignores the hash', () => {
+  const h = load({ href: 'https://site.example/download?id=1' });
+  assert.strictEqual(h.api.sameAsCurrent('https://site.example/download?id=2'), false);
+  assert.strictEqual(h.api.sameAsCurrent('https://site.example/download?id=1#top'), true);
+  assert.strictEqual(h.api.sameAsCurrent('https://site.example/download?id=1'), true);
 });

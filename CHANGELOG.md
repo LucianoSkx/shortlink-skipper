@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.9.15 — 2026-08-23
+
+### Fixed
+- **`service-last-resort` was unreachable**: `main()` early-returned on `!shortish` before the rules loop, so when the cascade landed on `bypass.tools` (not a shortener page) the rule never ran and the adbypass.org fallback died at its second level. `main()` now treats delegation hosts as a gate exception; the protection suite (boost/popups/focus) still runs only on shortener pages.
+- **Lootlabs WebSocket hook was installed too late**: it waited for DOMContentLoaded + the shortish gate, missing any `r:` payload sent by the page's own scripts before that. New `installEarlyHooks()` runs right after the exclusion checks at document-start and installs host-gated interception immediately.
+- Same late-hook problem in `bstlar` (tasks XHR) and `lootlink-local` (`window.fetch`): both hooks are now installed early via `installEarlyHooks()`; lootlink snapshots pre-rule responses and replays them once the rule knows which URLs matter (CDN_DOMAIN/syncer from the `p` global).
+- **Anti-loop missed A→B→A cycles**: with `sameAsCurrent` now comparing the query string, a 2-URL ping-pong was possible. `goto()` now blocks an immediate bounce or any target seen twice in the last 4 hops.
+
+### Changed
+- `sameAsCurrent()` compares origin + pathname + search (hash ignored): destinations differing only in query params are no longer treated as the same page.
+
 ## 1.9.14 — 2026-08-23
 
 ### Added

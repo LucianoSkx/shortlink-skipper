@@ -71,7 +71,13 @@ function load(opts = {}) {
     decodeURIComponent,
     atob,
     btoa,
-    sessionStorage: { getItem: () => null, setItem: () => {} },
+    sessionStorage: (() => {
+      const store = {};
+      return {
+        getItem: (k) => (k in store ? store[k] : null),
+        setItem: (k, v) => { store[k] = String(v); },
+      };
+    })(),
     GM_getValue: (k, d) => d,
     GM_setValue: () => {},
     GM_registerMenuCommand: () => {},
@@ -99,7 +105,10 @@ function load(opts = {}) {
 test('normal page: main() does not interfere (no heavy hooks)', async () => {
   const h = load();
   const origSetTimeout = h.sandbox.setTimeout;
+  const origSetInterval = h.sandbox.setInterval;
   const origFetch = h.sandbox.fetch;
+  const origXHR = h.sandbox.XMLHttpRequest;
+  const origOpen = h.sandbox.window.open = function open() {};
 
   const start = Date.now();
   await h.api.main();
@@ -107,7 +116,10 @@ test('normal page: main() does not interfere (no heavy hooks)', async () => {
 
   assert.ok(elapsed < 1000, `main() took ${elapsed}ms on a normal page (should not wait)`);
   assert.strictEqual(h.sandbox.setTimeout, origSetTimeout, 'prepareBoost() should not run on a normal page');
+  assert.strictEqual(h.sandbox.setInterval, origSetInterval, 'timers must not be wrapped on a normal page');
   assert.strictEqual(h.sandbox.fetch, origFetch, 'installNetworkDestCapture() should not run on a normal page');
+  assert.strictEqual(h.sandbox.XMLHttpRequest, origXHR, 'XHR must not be wrapped on a normal page');
+  assert.strictEqual(h.sandbox.window.open, origOpen, 'window.open must not be patched on a normal page');
   assert.strictEqual(h.navs.length, 0, 'should not navigate on a normal page');
 });
 

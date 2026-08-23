@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.14
+// @version      1.9.15
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -224,7 +224,7 @@
     try {
       const a = new URL(url);
       const b = new URL(location.href);
-      return a.host === b.host && a.pathname === b.pathname;
+      return a.origin === b.origin && a.pathname === b.pathname && a.search === b.search;
     } catch {
       return true;
     }
@@ -248,7 +248,12 @@
     try {
       history = JSON.parse(sessionStorage.getItem(KEY) || '[]');
     } catch {}
-    if (history.slice(-3).filter((u) => u === target).length >= 2) {
+    // Immediate bounce (A→B→A) or any target seen twice in the last 4 hops:
+    // with search now compared, 2-URL ping-pong loops are otherwise possible.
+    if (
+      history.slice(-2).includes(target) ||
+      history.slice(-4).filter((u) => u === target).length >= 2
+    ) {
       log('redirect loop detected, aborting:', target);
       return false;
     }
@@ -1019,8 +1024,9 @@
     return Boolean(btn);
   }
 
-  async function handleBstlar() {
-    if (!BSTLAR_HOST.test(location.host)) return false;
+  function installBstlarXhrHook() {
+    if (PAGE.__slBstlarHooked) return;
+    PAGE.__slBstlarHooked = true;
     log('bstlar.com detected, intercepting tasks XHR');
     const originalOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (...args) {
@@ -1043,6 +1049,11 @@
       });
       return originalOpen.apply(this, args);
     };
+  }
+
+  async function handleBstlar() {
+    if (!BSTLAR_HOST.test(location.host)) return false;
+    installBstlarXhrHook();
     return false;
   }
 
@@ -1228,6 +1239,29 @@
     new MutationObserver(sweep).observe(document.documentElement, { childList: true, subtree: true });
   }
 
+  let lootInspect = null;
+
+  // Installed at document-start on loot-link hosts: snapshots every response
+  // until the rule runs and decides which URLs matter (CDN_DOMAIN/syncer come
+  // from the page's `p` global, unavailable before its inline scripts run).
+  function installLootLinkFetchCapture() {
+    if (PAGE.__slLootCapInstalled) return;
+    PAGE.__slLootCapInstalled = true;
+    const origFetch = window.fetch ? window.fetch.bind(window) : null;
+    if (!origFetch) return;
+    const pending = [];
+    PAGE.__slLootPending = pending;
+    window.fetch = async function (url, ...opts) {
+      const res = await origFetch(url, ...opts);
+      if (typeof url === 'string') {
+        const snapshot = { url, clone: () => res.clone() };
+        if (lootInspect) Promise.resolve().then(() => lootInspect(snapshot)).catch(() => {});
+        else if (pending.length < 24) pending.push(snapshot);
+      }
+      return res;
+    };
+  }
+
   async function handleLootLinkLocal() {
     if (!LOOTLINK_HOST.test(location.host)) return false;
     // Local bypass derived from d15c0rdh4ckr's "loot-link.com bypasser" (GreasyFork #483207, MIT).
@@ -1235,26 +1269,15 @@
     if (!p) { log('LootLink: global p unavailable, falling back'); return false; }
     log('LootLink: installing local bypass (MIT, d15c0rdh4ckr #483207)');
     let initData = null, syncer = null, sessionData = null, resolved = false;
-    const origFetch = window.fetch ? window.fetch.bind(window) : null;
-    if (origFetch) {
-      window.fetch = async function (url, ...opts) {
-        const res = await origFetch(url, ...opts);
-        try {
-          if (typeof url === 'string') {
-            if (url.includes(p.CDN_DOMAIN)) {
-              const t = await res.clone().text();
-              initData = JSON.parse('[' + t.slice(1, -2) + ']');
-              syncer = initData[10];
-            } else if (syncer && url.includes(syncer) && !sessionData) {
-              sessionData = await res.clone().json();
-              doBypass();
-            }
-          }
-        } catch (e) {
-          log('LootLink: fetch response parse failed:', e.message);
-        }
-        return res;
-      };
+    async function absorb(snapshot) {
+      const text = await snapshot.clone().text();
+      if (snapshot.url.includes(p.CDN_DOMAIN)) {
+        initData = JSON.parse('[' + text.slice(1, -2) + ']');
+        syncer = initData[10];
+      } else if (syncer && snapshot.url.includes(syncer) && !sessionData) {
+        sessionData = JSON.parse(text);
+        doBypass();
+      }
     }
     function doBypass() {
       try {
@@ -1278,6 +1301,19 @@
         };
       } catch (e) { log('LootLink bypass error: ' + e.message); }
     }
+    const pending = PAGE.__slLootPending;
+    if (pending) {
+      const queued = pending.splice(0);
+      for (const snapshot of queued) {
+        try {
+          await absorb(snapshot);
+        } catch (e) {
+          log('LootLink: buffered response parse failed:', e.message);
+        }
+      }
+    }
+    lootInspect = absorb;
+    if (resolved) return true;
     return await waitFor(() => (resolved ? true : null), 45000);
   }
 
@@ -1352,9 +1388,21 @@
     );
   }
 
+  function installEarlyHooks() {
+    // Host-gated interception that must beat the page's first network
+    // activity. Known-shortener hosts only, so the "quiet on normal pages"
+    // promise stays intact; hooks are idempotent (guarded by PAGE flags).
+    // Runs before the DOMContentLoaded wait because lootlabs/bstlar/lootlink
+    // open their WebSocket/XHR/fetch traffic as soon as their scripts run.
+    if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
+    else if (BSTLAR_HOST.test(location.host)) installBstlarXhrHook();
+    else if (LOOTLINK_HOST.test(location.host)) installLootLinkFetchCapture();
+  }
+
   async function main() {
     registerMenu();
     if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
+    installEarlyHooks();
 
     // Cloudflare challenge interstitial: never interfere — let it run so the
     // user can solve it and the real page loads afterward.
@@ -1369,9 +1417,13 @@
     if (excluded() || disabled()) return;
 
     const shortish = looksLikeShortlink();
+    // Delegation landing pages carry their own rules (service-last-resort on
+    // bypass.tools) that must run even though the page itself is not a
+    // shortener — otherwise the cascade dies at its second level.
+    const delegated = /^bypass\.tools$/.test(location.host);
     const taskWall = shortish && looksLikeTaskWall();
 
-    if (!shortish) {
+    if (!shortish && !delegated) {
       log('not a shortlink page — leaving the page untouched');
       return;
     }
@@ -1382,13 +1434,14 @@
       return;
     }
 
-    prepareBoost();
-    enableBoost();
-    blockPopups();
-    restoreFocus();
-    removeAdblockBanners();
+    if (shortish) {
+      prepareBoost();
+      enableBoost();
+      blockPopups();
+      restoreFocus();
+      removeAdblockBanners();
+    }
     enableInteractions();
-    if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
 
     // Rules run in declaration order; the first rule whose run() returns truthy
     // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout
