@@ -36,7 +36,7 @@ small engine of **generic techniques** that cover most shorteners — they all
 share the same templates.
 
 <details open>
-<summary><b>The 27 rules</b></summary>
+<summary><b>The 29 rules</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -63,6 +63,8 @@ share the same templates.
 | `math-captcha` | Solves "12 + 7 = ?"-style questions |
 | `final-button` | Clicks unlocked "Get Link" / "Continue" buttons |
 | `network-capture` | Hooks fetch/XHR; follows destination-shaped JSON responses |
+| `image-host` | Image hosters: strips overlays, follows the direct image link/anchor |
+| `file-host` | File hosters: waits out the timer, clicks the free-download control |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
 | `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat bypass API for an instant destination, falling back to the [bypass.tools](https://bypass.tools) resolver |
 | `service-last-resort` | If even bypass.tools fails on a delegated link, forwards the job to adbypass.org |
@@ -168,3 +170,4 @@ rule format. See [Credits](#credits).
 | [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | bypass.tools as second-level resolver for hardened links |
 | Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
+| [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported) |

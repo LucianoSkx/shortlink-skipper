@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.20
+// @version      1.10.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -88,6 +88,14 @@
     /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com)$/;
   const TOKEN_HOST = /(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
+  // Curated from adsbypasser's src/sites (BSD-2-Clause) — families our generic
+  // rules already handle once the gate lets them through.
+  const EXTRA_SHORTENER_HOSTS =
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|cpmlink\.net|cutpaid\.com|cuttty\.com|exeo\.app|fir3\.net|gplinks\.co|icutlink\.com|kingofshrink\.com|linkpoi\.me|linkshrink\.net|lnk2\.cc|network-loop\.com|thinfi\.com|tutwuri\.id)$/;
+  const IMAGE_HOSTS =
+    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cubeupload\.com|depic\.me|directupload\.eu|fastpic\.org|fotosik\.pl|hostpic\.org|im\.ge|imagebam\.com|imageban\.ru|imagenetz\.de|imageshack\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgpv\.com|imgtraffic\.com|imx\.to|keptarolo\.hu|pic-upload\.de|picstate\.com|pimpandhost\.com|pixhost\.to|postimages\.org|turboimagehost\.com|3xplanet\.com)$/;
+  const FILE_HOSTS =
+    /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com)$/;
   const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
     /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|gplinks\.in)\/.+)/;
@@ -324,6 +332,9 @@
       TOKEN_HOST.test(location.host) ||
       ZAFREE_HOST.test(location.host) ||
       ADLINKFLY_HOSTS.test(location.host) ||
+      EXTRA_SHORTENER_HOSTS.test(location.host) ||
+      IMAGE_HOSTS.test(location.host) ||
+      FILE_HOSTS.test(location.host) ||
       BYPASS_SERVICE_URL.test(location.href)
     );
   }
@@ -1375,7 +1386,70 @@
     return await waitFor(() => (resolved ? true : null), 45000);
   }
 
+  // Image hosts (adsbypasser families): strip common overlays, then follow
+  // the direct image link — either an anchor pointing at the file or the main
+  // <img> itself.
+  async function handleImageHost() {
+    if (!IMAGE_HOSTS.test(location.host)) return false;
+    for (const sel of ['.overlay', '#overlay', '.modal-backdrop', '[class*="overlay" i]', '#adblock-bg']) {
+      try {
+        document.querySelectorAll(sel).forEach((el) => el.remove());
+      } catch {}
+    }
+    const anchorSelectors = [
+      'a.direct-link',
+      'a.btn-download',
+      'a.download-button',
+      'a[download]',
+      'a[href$=".jpg"]',
+      'a[href$=".jpeg"]',
+      'a[href$=".png"]',
+      'a[href$=".gif"]',
+      'a[href$=".webp"]',
+    ];
+    for (const sel of anchorSelectors) {
+      const a = document.querySelector(sel);
+      if (a?.href && isPlausibleUrl(a.href) && !sameAsCurrent(a.href)) {
+        log('image-host: following direct link');
+        return goto(a.href);
+      }
+    }
+    for (const sel of ['#image', 'img.main-image', 'img.img-responsive', 'img[src*="/images/"]', 'meta[property="og:image"]']) {
+      const el = document.querySelector(sel);
+      const src = el?.content || el?.src;
+      if (src && isPlausibleUrl(src) && /\.(png|jpe?g|gif|webp|bmp)(\?|$)/i.test(src) && !sameAsCurrent(src)) {
+        log('image-host: navigating to the main image');
+        return goto(src);
+      }
+    }
+    return false;
+  }
+
+  // File hosts (adsbypasser families): wait out whatever timer the page uses,
+  // then click the free-download control.
+  async function handleFileHost() {
+    if (!FILE_HOSTS.test(location.host)) return false;
+    const findDownload = () =>
+      findByText(/^(free\s+)?(download|generate\s+link)(\s+now)?$/i) ||
+      document.querySelector('#downloadbtn, .btn-download, a[download], form[action*="download"] button[type="submit"]');
+    let target = findDownload();
+    if (!target) {
+      log('file-host: waiting for the download control');
+      await waitFor(() => (findDownload() ? true : null), 20000, 500);
+      target = findDownload();
+    }
+    if (!target) return false;
+    if (target.tagName === 'A' && target.href && isPlausibleUrl(target.href) && !sameAsCurrent(target.href)) {
+      return goto(target.href);
+    }
+    fireClick(target);
+    log('file-host: download control clicked');
+    return true;
+  }
+
   const GENERIC_RULES = [
+    { name: 'image-host', when: () => IMAGE_HOSTS.test(location.host), run: handleImageHost },
+    { name: 'file-host', when: () => FILE_HOSTS.test(location.host), run: handleFileHost },
     { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
     { name: 'adfoc', when: () => ADFOC_FAMILY.test(location.host), run: handleAdFoc },
     { name: 'close-interstitial', when: () => CLOSE_INTERSTITIAL_HOST.test(location.host), run: handleCloseInterstitial },
@@ -1504,7 +1578,7 @@
       return;
     }
 
-    if (shortish) {
+    if (shortish || knownShortener()) {
       prepareBoost();
       enableBoost();
       blockPopups();
@@ -1555,6 +1629,8 @@
       resolveLootlabsViaApi,
       installEarlyHooks,
       genericGate,
+      handleImageHost,
+      handleFileHost,
       main,
     };
   }

@@ -288,6 +288,48 @@ test('installEarlyHooks wraps fetch exactly once across repeated calls and main(
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
 });
 
+test('genericGate opens for the new adsbypasser families', () => {
+  for (const href of [
+    'https://1ink.cc/abc',
+    'https://imgbb.com/abc',
+    'https://uploadhaven.com/download/abc',
+  ]) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.genericGate(), true, `gate must open for ${href}`);
+  }
+});
+
+test('handleImageHost follows the direct image anchor', async () => {
+  const h = load({
+    href: 'https://imagetwist.com/abc/file.jpg',
+    querySelector: (sel) => (sel === 'a.direct-link' ? { href: 'https://img.imagetwist.com/i/abc.jpg' } : null),
+  });
+  const ok = await h.api.handleImageHost();
+  assert.ok(ok);
+  assert.strictEqual(h.navs[0], 'https://img.imagetwist.com/i/abc.jpg');
+});
+
+test('handleFileHost clicks the download control', async () => {
+  const clicked = [];
+  const target = {
+    tagName: 'BUTTON',
+    dispatchEvent: (ev) => {
+      clicked.push(ev?.type);
+      return true;
+    },
+  };
+  const h = load({
+    href: 'https://uploadhaven.com/download/abc',
+    querySelector: (sel) => (sel.includes('#downloadbtn') ? target : null),
+  });
+  h.sandbox.MouseEvent = function (type) {
+    this.type = type;
+  };
+  const ok = await h.api.handleFileHost();
+  assert.ok(ok);
+  assert.ok(clicked.length > 0, 'a click event must be dispatched');
+});
+
 test('menu registers the bypass.link manual fallback', async () => {
   const h = load({ href: 'https://example.com/' });
   const labels = [];

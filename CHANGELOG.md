@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.10.0 — 2026-08-23
+
+### Added — adsbypasser coverage absorption (BSD-2-Clause, credited)
+- **Small shorteners** (~21 hosts): `1ink.cc`, `1link.club`, `a2zapk.io`, `adshnk.com`, `anchoreth.com`, `bcvc.ink`, `binbox.io`, `cpmlink.net`, `cutpaid.com`, `cuttty.com`, `exeo.app`, `fir3.net`, `gplinks.co`, `icutlink.com`, `kingofshrink.com`, `linkpoi.me`, `linkshrink.net`, `lnk2.cc`, `network-loop.com`, `thinfi.com`, `tutwuri.id` — absorbed via `EXTRA_SHORTENER_HOSTS`: the gate opens and the existing generic rules (network-capture, final-button, single-external-link) act. No per-site code.
+- **Image hosters** (30 hosts: imgbb, imagetwist, pixhost.to, postimages.org, imagebam…) + new `image-host` rule — strips common overlays, then follows the direct image anchor or the main `<img>`/og:image.
+- **File hosters** (10 hosts: uploadhaven, uploadrar, mirrored.to, multiup.io, katfile.vip, keeplinks.org…) + new `file-host` rule — waits up to 20s for the free-download control, clicks it or follows its href.
+- Known-host pages now also receive the protection suite (timer boost, popup shield, focus lock) even when they show no structural markers.
+
+### Design note
+Instead of porting adsbypasser's ~97 handlers, their host lists were curated (platform giants like giphy/tenor/imgflip and out-of-scope blogs excluded) and absorbed into three lists plus two generic rules — keeping the engine small. Hard links and the API cascade remain untouched.
+
+### Tests
+33 total: gate opens for all three new families; `image-host` follows a mocked direct anchor; `file-host` dispatches the click on a mocked control.
+
 ## 1.9.20 — 2026-08-23
 
 ### Added
