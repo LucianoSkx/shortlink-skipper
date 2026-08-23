@@ -12,7 +12,7 @@
 Instead of porting adsbypasser's ~97 handlers, their host lists were curated (platform giants like giphy/tenor/imgflip and out-of-scope blogs excluded) and absorbed into three lists plus two generic rules — keeping the engine small. Hard links and the API cascade remain untouched.
 
 ### Tests
-33 total: gate opens for all three new families; `image-host` follows a mocked direct anchor; `file-host` dispatches the click on a mocked control.
+33 total: gate opens for all three new families; `image-host` follows a mocked direct anchor; `file-host` dispatches the click on a mocked control. 28 rules total (was 26 pre-1.10.0).
 
 ## 1.9.20 — 2026-08-23
 

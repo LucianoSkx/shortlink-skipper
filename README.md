@@ -36,7 +36,7 @@ small engine of **generic techniques** that cover most shorteners — they all
 share the same templates.
 
 <details open>
-<summary><b>The 29 rules</b></summary>
+<summary><b>The 33 rules</b></summary>
 
 | Rule | Technique |
 | --- | --- |
