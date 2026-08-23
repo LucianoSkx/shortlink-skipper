@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.11 — 2026-08-22
+
+### Added
+- `handleLinkvertiseEasy`: agora aceita `r` em hash (`#r=`) e base64url, além de `?r=` (Linkvertise .com/.net)
+- `ADLINKFLY_HOSTS`: lista curada de shorteners AdLinkFly (shortly.xyz, wadooo.com, lnk.news, uiz.io, tik.lat, skiplink.io, link-to.net, gplinks.in, paster.so, earnmm.com, cutwin.co, xslinks.com etc.) com regra `adlinkfly-hosts` que dispara o bypass mesmo sem os "hints" de shortlink
+- `handleBypassCity`: fallback que consulta `bypass.city` e extrai o destino do HTML retornado (última opção antes do CAPTCHA manual)
+
 ## 1.9.10 — 2026-08-22
 
 ### Added

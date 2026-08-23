@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.10
+// @version      1.9.11
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -82,6 +82,8 @@
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.(com|net)$/;
+  const ADLINKFLY_HOSTS =
+    /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com)$/;
   const TOKEN_HOST = /(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
   const SETC_FORM = 'form#setc';
@@ -407,6 +409,20 @@
     });
   }
 
+  function gmGetText(url) {
+    return new Promise((resolve) => {
+      if (typeof GM_xmlhttpRequest !== 'function') return resolve(null);
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url,
+        timeout: 20000,
+        onload: (res) => resolve(typeof res.responseText === 'string' ? res.responseText : ''),
+        onerror: () => resolve(null),
+        ontimeout: () => resolve(null),
+      });
+    });
+  }
+
   async function handleExternalService() {
     if (!BYPASS_SERVICE_URL.test(location.href)) return false;
     log('hard site detected, trying direct bypass APIs');
@@ -430,6 +446,30 @@
     if (!/^bypass\.tools$/.test(location.host) || !location.search.includes('url=')) return false;
     log('bypass.tools did not resolve either, last resort adbypass.org');
     return goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`);
+  }
+
+  async function handleBypassCity() {
+    const html = await gmGetText(`https://bypass.city/bypass?bypass=${encodeURIComponent(location.href)}`);
+    if (!html) return false;
+    const links = [...html.matchAll(/href="(https?:\/\/[^"]+)"/gi)].map((m) => m[1]);
+    const dest = links.find((u) => {
+      try {
+        const hu = new URL(u).host.toLowerCase();
+        return (
+          hu !== location.host.toLowerCase() &&
+          !/bypass\.city$/.test(hu) &&
+          !INFRA_HOST.test(hu) &&
+          !EXCLUDE_HOSTS.some((re) => re.test(hu))
+        );
+      } catch {
+        return false;
+      }
+    });
+    if (dest) {
+      log('bypass.city returned destination');
+      return goto(dest);
+    }
+    return false;
   }
 
   async function handleButtons() {
@@ -898,14 +938,18 @@
 
   async function handleLinkvertiseEasy() {
     if (!LINKVERTISE_HOST.test(location.host)) return false;
-    const r = new URLSearchParams(location.search).get('r');
-    if (!r) return false;
-    try {
-      const dest = atob(r);
-      return /^https?:\/\//.test(dest) ? goto(dest) : false;
-    } catch {
-      return false;
+    const params = new URLSearchParams(location.search);
+    let r = params.get('r');
+    if (!r && location.hash.includes('r=')) {
+      r = new URLSearchParams(location.hash.replace(/^#\??/, '')).get('r');
     }
+    if (!r) return false;
+    let dest = null;
+    try {
+      dest = atob(r);
+    } catch {}
+    if (!dest || !/^https?:\/\//.test(dest)) dest = decodeMaybe(r);
+    return /^https?:\/\//.test(dest) ? goto(dest) : false;
   }
 
   async function handleAcortalink() {
@@ -1216,6 +1260,11 @@
     { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
     {
+      name: 'adlinkfly-hosts',
+      when: () => ADLINKFLY_HOSTS.test(location.host),
+      run: handleAdLinkFly,
+    },
+    {
       name: 'external-service',
       when: () => BYPASS_SERVICE_URL.test(location.href),
       run: handleExternalService,
@@ -1231,6 +1280,7 @@
       } },
     { name: 'final-button', when: () => looksLikeShortlink(), run: handleButtons },
     { name: 'service-last-resort', when: () => /^bypass\.tools$/.test(location.host), run: handleServiceLastResort },
+    { name: 'bypass-city', when: () => looksLikeShortlink(), run: handleBypassCity },
     { name: 'captcha-manual', when: () => looksLikeShortlink(), run: handleManualCaptcha },
     { name: 'single-external-link', when: () => looksLikeShortlink(), run: async () => {
         await sleep(4000);
