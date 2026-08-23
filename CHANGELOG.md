@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.18 — 2026-08-23
+
+### Fixed
+- **LootLabs query-style gateways (`/s?XXXX`) never reached the API fallback**: `BYPASS_SERVICE_URL` only matched the path form `/s/...`, so links like `loot-link.com/s?fJTD` (Arceus X / Delta key gateways) ran the local decoders and, when they found nothing, ended silently — no trw.lat attempt, while the site cycled domain variants and reloaded. The regex now accepts both `/s/...` and `/s?...`.
+
+### Tests
+- Regex regression for query-style loot gateways on both `loot-link.com` and canonical `links.lootlabs.gg`.
+
 ## 1.9.17 — 2026-08-23
 
 ### Fixed

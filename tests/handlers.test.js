@@ -166,6 +166,8 @@ test('BYPASS_SERVICE_URL matches linkvertise.com and linkvertise.net', () => {
 
 test('BYPASS_SERVICE_URL matches other known services', () => {
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://loot-link.com/s/abc'));
+  assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://loot-link.com/s?fJTD'), 'query-style /s? gateway');
+  assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://links.lootlabs.gg/s?2j2wXWWH'), 'canonical lootlabs host, query style');
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://work.ink/something'));
 });
 
