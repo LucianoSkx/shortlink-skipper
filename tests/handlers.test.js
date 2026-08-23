@@ -288,6 +288,17 @@ test('installEarlyHooks wraps fetch exactly once across repeated calls and main(
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
 });
 
+test('menu registers the bypass.link manual fallback', async () => {
+  const h = load({ href: 'https://example.com/' });
+  const labels = [];
+  h.sandbox.GM_registerMenuCommand = (label) => labels.push(label);
+  await h.api.main();
+  assert.ok(
+    labels.some((l) => l.includes('bypass.link')),
+    'the manual fallback menu entry must always be registered',
+  );
+});
+
 test('genericGate opens on known hosts without structural markers', () => {
   const h = load({ href: 'https://ouo.io/4taT4', querySelector: () => null });
   assert.strictEqual(

@@ -102,6 +102,7 @@ Right-click the userscript icon (or open the manager's script menu) to access:
 | --- | --- |
 | **Disable on this site** / **Enable on this site** | Toggles the script for the current domain only |
 | **Debug logs: ON/OFF** | Toggles verbose console logging (on by default) |
+| **Open in bypass.link (manual fallback)** | Copies the current URL and opens [bypass.link](https://bypass.link) — it requires its own hCaptcha, so this is a manual escape hatch when every automatic level failed |
 
 The `external-service` rule queries the built-in free **trw.lat** bypass API for
 hardened links (Linkvertise hard case, loot-links, admaven), falling back to

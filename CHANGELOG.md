@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.20 — 2026-08-23
+
+### Added
+- Menu command **"Open in bypass.link (manual fallback)"**: copies the current URL to the clipboard and opens [bypass.link](https://bypass.link). Evaluated for the automatic cascade and rejected — it requires an interactive hCaptcha per request (no programmatic API, no deep-link), so it ships as a manual escape hatch only. New grants: `GM_setClipboard`, `GM_openInTab` (with `window.open` fallback).
+
+### Tests
+- Menu registration regression: the fallback entry is always present.
+
 ## 1.9.19 — 2026-08-23
 
 ### Fixed

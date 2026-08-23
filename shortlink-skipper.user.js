@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.19
+// @version      1.9.20
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -28,6 +28,8 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_xmlhttpRequest
+// @grant        GM_setClipboard
+// @grant        GM_openInTab
 // @downloadURL  https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
 // @updateURL    https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
 // ==/UserScript==
@@ -1442,6 +1444,18 @@
         location.reload();
       },
     );
+    // Manual escape hatch: bypass.link requires an hCaptcha per request, so it
+    // cannot join the automatic cascade — this just hands the current URL to
+    // the user for a one-off manual bypass there.
+    GM_registerMenuCommand('Open in bypass.link (manual fallback)', () => {
+      const url = location.href;
+      try {
+        if (typeof GM_setClipboard === 'function') GM_setClipboard(url);
+      } catch {}
+      if (typeof GM_openInTab === 'function') GM_openInTab('https://bypass.link/', { active: true });
+      else PAGE.open('https://bypass.link/');
+      log('current URL copied — paste it on bypass.link and solve its captcha');
+    });
   }
 
   function installEarlyHooks() {
