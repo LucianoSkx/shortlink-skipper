@@ -96,7 +96,7 @@ function load(opts = {}) {
   return { sandbox, loc, doc, navs: loc.navs, api: sandbox.module.exports };
 }
 
-test('página normal: main() não interfere (sem hooks pesados)', async () => {
+test('normal page: main() does not interfere (no heavy hooks)', async () => {
   const h = load();
   const origSetTimeout = h.sandbox.setTimeout;
   const origFetch = h.sandbox.fetch;
@@ -105,23 +105,23 @@ test('página normal: main() não interfere (sem hooks pesados)', async () => {
   await h.api.main();
   const elapsed = Date.now() - start;
 
-  assert.ok(elapsed < 1000, `main() demorou ${elapsed}ms numa página normal (não deveria esperar)`);
-  assert.strictEqual(h.sandbox.setTimeout, origSetTimeout, 'prepareBoost() não deveria ter rodado em página normal');
-  assert.strictEqual(h.sandbox.fetch, origFetch, 'installNetworkDestCapture() não deveria ter rodado em página normal');
-  assert.strictEqual(h.navs.length, 0, 'não deveria ter navegado em página normal');
+  assert.ok(elapsed < 1000, `main() took ${elapsed}ms on a normal page (should not wait)`);
+  assert.strictEqual(h.sandbox.setTimeout, origSetTimeout, 'prepareBoost() should not run on a normal page');
+  assert.strictEqual(h.sandbox.fetch, origFetch, 'installNetworkDestCapture() should not run on a normal page');
+  assert.strictEqual(h.navs.length, 0, 'should not navigate on a normal page');
 });
 
-test('página normal: setc-form não dispara espera de 4s', async () => {
+test('normal page: setc-form does not trigger a 4s wait', async () => {
   const h = load();
   const origSetTimeout = h.sandbox.setTimeout;
   await h.api.main();
-  assert.strictEqual(h.sandbox.setTimeout, origSetTimeout, 'setc-form com when:()=>true causaria espera de 4s');
+  assert.strictEqual(h.sandbox.setTimeout, origSetTimeout, 'setc-form with when:()=>true would cause a 4s wait');
 });
 
-test('classificação shortish: página com cara de shortlink é detectada', () => {
+test('shortish classification: a shortlink-looking page is detected', () => {
   const normal = load();
-  assert.strictEqual(normal.api.looksLikeShortlink(), false, 'página normal não deveria ser shortish');
+  assert.strictEqual(normal.api.looksLikeShortlink(), false, 'a normal page should not be shortish');
 
   const short = load({ querySelector: (sel) => (sel.includes('go-link') ? {} : null) });
-  assert.strictEqual(short.api.looksLikeShortlink(), true, 'página com form go-link deveria ser shortish');
+  assert.strictEqual(short.api.looksLikeShortlink(), true, 'a page with a go-link form should be shortish');
 });

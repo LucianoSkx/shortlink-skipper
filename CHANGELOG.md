@@ -2,47 +2,47 @@
 
 ## 1.9.13 — 2026-08-23
 
-### Performance / Segurança (menos intrusão em páginas normais)
-- `main()`: `prepareBoost()`, `installNetworkDestCapture()` e `enableInteractions()` só rodam quando a página é detectada como shortlink (`if (!shortish) return` cedo); antes rodavam em TODA página, sobrescrevendo `setTimeout`/`setInterval`, `fetch` e `XMLHttpRequest` globalmente em sites comuns
-- `installNetworkDestCapture()`: instalado de forma preguiçosa, logo antes da regra `network-capture`, em vez de no carregamento — reduz interceptação de rede em páginas normais
-- `setc-form`: `when: () => true` trocado por `document.querySelector('form#setc, form#landing [name="go"]') !== null`, eliminando espera de 4s em páginas sem esse formulário
-- `looksLikeShortlink()`: memoizado para o `document` corrente, calculado uma vez e reutilizado pelas regras (antes repetia a varredura pesada a cada `when`)
-- `goto()`: passa a validar com `isPlausibleUrl()` (protocolo http/https + host com `.`) como barreira universal — regras não precisam validar manualmente; também normaliza a URL (`new URL(url).href`) antes do histórico de loop
+### Performance / Security (less intrusion on normal pages)
+- `main()`: `prepareBoost()`, `installNetworkDestCapture()` and `enableInteractions()` now only run when the page is detected as a shortlink (`if (!shortish) return` early); previously they ran on EVERY page, overriding `setTimeout`/`setInterval`, `fetch` and `XMLHttpRequest` globally on ordinary sites
+- `installNetworkDestCapture()`: installed lazily, right before the `network-capture` rule, instead of at load — reduces network interception on normal pages
+- `setc-form`: `when: () => true` replaced by `document.querySelector('form#setc, form#landing [name="go"]') !== null`, eliminating the 4s wait on pages without that form
+- `looksLikeShortlink()`: memoized for the current `document`, computed once and reused by the rules (previously repeated the heavy scan on every `when`)
+- `goto()`: now validates with `isPlausibleUrl()` (http/https protocol + host containing a dot) as a universal guard — rules no longer need to validate manually; also normalizes the URL (`new URL(url).href`) before the loop history
 
 ## 1.9.12 — 2026-08-23
 
 ### Fixed
-- `BYPASS_SERVICE_URL`: removidos espaços literais antes de `linkvertise\.(?:com|net)` — o alternativa estava morta (URLs normais do Linkvertise não casavam na regra `external-service`); coberto por teste
-- `readGlobal`: valida `name` contra `^[A-Za-z0-9_$]+$` para evitar que um valor da página vire sink de code injection no futuro
-- `handleServiceLastResort`: aguarda 5s antes de repassar ao adbypass.org, e só repassa se o `bypass.tools` não redirecionou (antes pulava na hora em `@run-at document-start`, anulando a delegação de 2º nível)
+- `BYPASS_SERVICE_URL`: removed literal spaces before `linkvertise\.(?:com|net)` — the alternative was dead (normal Linkvertise URLs didn't match the `external-service` rule); covered by a test
+- `readGlobal`: validates `name` against `^[A-Za-z0-9_$]+$` to prevent a page value from becoming a code-injection sink in the future
+- `handleServiceLastResort`: waits 5s before forwarding to adbypass.org, and only forwards if `bypass.tools` didn't redirect (previously jumped immediately at `@run-at document-start`, nullifying the 2nd-level delegation)
 
 ## 1.9.11 — 2026-08-22
 
 ### Added
-- `handleLinkvertiseEasy`: agora aceita `r` em hash (`#r=`) e base64url, além de `?r=` (Linkvertise .com/.net)
-- `ADLINKFLY_HOSTS`: lista curada de shorteners AdLinkFly (shortly.xyz, wadooo.com, lnk.news, uiz.io, tik.lat, skiplink.io, link-to.net, gplinks.in, paster.so, earnmm.com, cutwin.co, xslinks.com etc.) com regra `adlinkfly-hosts` que dispara o bypass mesmo sem os "hints" de shortlink
-- `handleBypassCity`: fallback que consulta `bypass.city` e extrai o destino do HTML retornado (última opção antes do CAPTCHA manual)
+- `handleLinkvertiseEasy`: now accepts `r` in hash (`#r=`) and base64url, in addition to `?r=` (Linkvertise .com/.net)
+- `ADLINKFLY_HOSTS`: curated list of AdLinkFly shorteners (shortly.xyz, wadooo.com, lnk.news, uiz.io, tik.lat, skiplink.io, link-to.net, gplinks.in, paster.so, earnmm.com, cutwin.co, xslinks.com etc.) with an `adlinkfly-hosts` rule that triggers the bypass even without the shortlink "hints"
+- `handleBypassCity`: fallback that queries `bypass.city` and extracts the destination from the returned HTML (last option before the manual CAPTCHA)
 
 ## 1.9.10 — 2026-08-22
 
 ### Added
-- Cobertura ampliada de serviços atuais (pesquisa vs FastForward/Universal Bypass 2026): `linkvertise.net` adicionado à família Linkvertise; `link-to.net`, `paster.so` e `gplinks.in` roteados para as APIs externas de bypass
+- Broader coverage of current services (research vs FastForward/Universal Bypass 2026): `linkvertise.net` added to the Linkvertise family; `link-to.net`, `paster.so` and `gplinks.in` routed to the external bypass APIs
 
 ## 1.9.9 — 2026-08-22
 
 ### Added
-- `cloudflareChallenging()`: detecta o interstitial de desafio do Cloudflare (`#cf-challenge-running`, classe `cf-challenge-running`, título "Just a moment...", iframe/script de `challenges.cloudflare.com`)
-- `main()` agora pausa antes de instalar hooks (fetch/XHR/WebSocket/boost de timers) quando um desafio Cloudflare está ativo, evitando atrapalhar o CAPTCHA e o redirecionamento do CF
+- `cloudflareChallenging()`: detects the Cloudflare challenge interstitial (`#cf-challenge-running`, `cf-challenge-running` class, "Just a moment..." title, `challenges.cloudflare.com` iframe/script)
+- `main()` now pauses before installing hooks (fetch/XHR/WebSocket/timer boost) when a Cloudflare challenge is active, avoiding interference with the CF CAPTCHA and redirect
 
 ## 1.9.8 — 2026-08-22
 
 ### Fixed
-- `extractDestFromParams`: o trecho de path segments (`/goto/<b64>`) agora usa `isPlausibleUrl()` em vez do cheque antigo `/^https?:\/\//`, igualando query params e hash (reduz falso positivo de destino)
+- `extractDestFromParams`: the path-segment chunk (`/goto/<b64>`) now uses `isPlausibleUrl()` instead of the old `/^https?:\/\//` check, matching query params and hash (reduces false-positive destinations)
 
 ## 1.9.7 — 2026-08-22
 
 ### Added
-- `// @license MIT` no cabeçalho (obrigatório pelo Greasy Fork)
+- `// @license MIT` in the header (required by Greasy Fork)
 
 ## 1.9.6 — 2026-08-22
 
@@ -97,10 +97,10 @@
 - Task-wall hints now scanned in page source too (they only exist inside inline scripts on revlink gates)
 
 ### Tests
-- `tests/shortlink-skipper.test.js` (node:test): carrega sem erro/registra menu e não interfere no desafio Cloudflare
-- `tests/handlers.test.js` (node:test): exercita o código real de `handleLinkvertiseEasy`, `handleAdLinkFly` e `handleBypassCity` com entradas representativas (sandbox vm, sem dependências)
-- Export guardado (`module.exports`) + `main()` só auto-roda fora de `module`: permite testar handlers no Node sem afetar o browser
-- Teste ao vivo validado ponta a ponta no Helium + Violentmonkey: AdLinkFly (`skiplink.io`) redirecionou para o destino real; Linkvertise e bypass.city cobertos por testes unitários. Harness em `test-live/` (mock server + cliente CDP)
+- `tests/shortlink-skipper.test.js` (node:test): loads without error / registers the menu and doesn't interfere with the Cloudflare challenge
+- `tests/handlers.test.js` (node:test): exercises the real code of `handleLinkvertiseEasy`, `handleAdLinkFly` and `handleBypassCity` with representative inputs (vm sandbox, no dependencies)
+- Export guard (`module.exports`) + `main()` only auto-runs outside `module`: allows testing handlers in Node without affecting the browser
+- Live test validated end-to-end in Helium + Violentmonkey: AdLinkFly (`skiplink.io`) redirected to the real destination; Linkvertise and bypass.city covered by unit tests. Harness in `test-live/` (mock server + CDP client)
 
 ## Earlier releases
 

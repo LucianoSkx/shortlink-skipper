@@ -37,7 +37,7 @@ const server = http.createServer((req, res) => {
   if (host === 'linkvertise.com') {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(`<!doctype html><html><head><title>linkvertise mock</title></head>
-<body><p>carregando...</p></body></html>`);
+ <body><p>loading...</p></body></html>`);
     return;
   }
 

@@ -114,21 +114,21 @@ const b64 = (s) => btoa(s);
 
 const h2 = load({ href: 'https://linkvertise.com/abc' });
 
-test('handleLinkvertiseEasy extrai destino de ?r= (base64)', async () => {
+test('handleLinkvertiseEasy extracts destination from ?r= (base64)', async () => {
   const h = load({ href: `https://linkvertise.com/x?r=${b64('https://lv.example/dest')}` });
   const ok = await h.api.handleLinkvertiseEasy();
   assert.ok(ok);
   assert.ok(h.navs.includes('https://lv.example/dest'));
 });
 
-test('handleLinkvertiseEasy extrai destino de #r= (hash, base64url)', async () => {
+test('handleLinkvertiseEasy extracts destination from #r= (hash, base64url)', async () => {
   const h = load({ href: `https://linkvertise.net/x#r=${b64('https://lv.example/dest2')}` });
   const ok = await h.api.handleLinkvertiseEasy();
   assert.ok(ok);
   assert.ok(h.navs.includes('https://lv.example/dest2'));
 });
 
-test('handleAdLinkFly extrai destino da API /links/go', async () => {
+test('handleAdLinkFly extracts destination from the /links/go API', async () => {
   const h = load({ href: 'https://short.site.example/abc' });
   const form = { querySelectorAll: () => [] };
   const field = { value: 'x', closest: () => form, parentElement: form };
@@ -142,7 +142,7 @@ test('handleAdLinkFly extrai destino da API /links/go', async () => {
   assert.ok(h.navs.includes('https://dest.example/final'));
 });
 
-test('handleBypassCity extrai destino do HTML retornado', async () => {
+test('handleBypassCity extracts destination from returned HTML', async () => {
   const h = load({ href: 'https://short.site.example/abc' });
   h.setGmXhr((opts) =>
     opts.onload({ responseText: '<html><body><a href="https://real-dest.example/x">go</a></body></html>' }),
@@ -152,22 +152,22 @@ test('handleBypassCity extrai destino do HTML retornado', async () => {
   assert.ok(h.navs.includes('https://real-dest.example/x'));
 });
 
-test('BYPASS_SERVICE_URL casa linkvertise.com e linkvertise.net', () => {
+test('BYPASS_SERVICE_URL matches linkvertise.com and linkvertise.net', () => {
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.com/abc'));
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.net/x/y'));
 });
 
-test('BYPASS_SERVICE_URL casa demais servicos conhecidos', () => {
+test('BYPASS_SERVICE_URL matches other known services', () => {
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://loot-link.com/s/abc'));
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://work.ink/something'));
 });
 
-test('BYPASS_SERVICE_URL rejeita hosts nao relacionados', () => {
+test('BYPASS_SERVICE_URL rejects unrelated hosts', () => {
   assert.ok(!h2.api.BYPASS_SERVICE_URL.test('https://example.com/anything'));
   assert.ok(!h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.com.evil.test/x'));
 });
 
-test('handleServiceLastResort repassa ao adbypass.org quando bypass.tools nao resolve', async () => {
+test('handleServiceLastResort forwards to adbypass.org when bypass.tools does not resolve', async () => {
   const h = load({ href: 'https://bypass.tools/bypass?url=https://loot-link.com/x' });
   h.sandbox.setTimeout = (fn) => { fn(); return 0; };
   const ok = await h.api.handleServiceLastResort();
@@ -175,7 +175,7 @@ test('handleServiceLastResort repassa ao adbypass.org quando bypass.tools nao re
   assert.ok(h.navs.some((u) => u.startsWith('https://adbypass.org/bypass?bypass=')));
 });
 
-test('handleServiceLastResort nao repassa se bypass.tools redirecionou', async () => {
+test('handleServiceLastResort does not forward if bypass.tools redirected', async () => {
   const h = load({ href: 'https://bypass.tools/bypass?url=https://loot-link.com/x' });
   h.sandbox.setTimeout = (fn) => { fn(); return 0; };
   const p = h.api.handleServiceLastResort();
@@ -185,7 +185,7 @@ test('handleServiceLastResort nao repassa se bypass.tools redirecionou', async (
   assert.ok(!h.navs.some((u) => u.startsWith('https://adbypass.org')));
 });
 
-test('handleServiceLastResort nao age fora de bypass.tools', async () => {
+test('handleServiceLastResort does not act outside bypass.tools', async () => {
   const h = load({ href: 'https://example.com/' });
   const ok = await h.api.handleServiceLastResort();
   assert.ok(!ok);

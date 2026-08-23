@@ -116,21 +116,21 @@ function load(opts = {}) {
   return { loc, logs, menuCalls, api: sandbox.module.exports };
 }
 
-test('carrega sem erro e registra o menu', async () => {
+test('loads without error and registers the menu', async () => {
   const { loc, menuCalls, api } = load({ href: 'https://example.com/' });
   await api.main();
   assert.ok(menuCalls.length >= 1, 'menu commands devem ser registrados');
-  assert.strictEqual(loc.navs.length, 0, 'pagina comum nao deve redirecionar');
+  assert.strictEqual(loc.navs.length, 0, 'a common page should not redirect');
 });
 
-test('nao interfere no desafio Cloudflare', async () => {
+test('does not interfere with the Cloudflare challenge', async () => {
   const { loc, logs, api } = load({
     href: 'https://short.site.example/abc',
     cf: true,
     title: 'Just a moment...',
   });
   await api.main();
-  assert.strictEqual(loc.navs.length, 0, 'nao deve navegar durante o desafio CF');
+  assert.strictEqual(loc.navs.length, 0, 'should not navigate during the CF challenge');
   assert.ok(
     logs.some((l) => /standing by/i.test(l)),
     'deve registrar que esta aguardando o desafio',
