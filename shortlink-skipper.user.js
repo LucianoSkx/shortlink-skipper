@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.8
+// @version      1.9.9
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -503,6 +503,16 @@
       typeof PAGE.hcaptcha !== 'undefined' ||
       document.querySelector("iframe[src*='recaptcha'], iframe[src^='https://newassets.hcaptcha.com'], .cf-turnstile"),
     );
+  }
+
+  function cloudflareChallenging() {
+    if (document.getElementById('cf-challenge-running')) return true;
+    const cls = (document.documentElement.className + ' ' + (document.body?.className || '')).toLowerCase();
+    if (/(^| )cf-challenge-running( |$)/.test(cls)) return true;
+    if (/just a moment/i.test(document.title)) return true;
+    if (document.querySelector('iframe[src*="challenges.cloudflare.com"]')) return true;
+    if (document.querySelector('script[src*="challenges.cloudflare.com"], script[src*="cf-assets"]')) return true;
+    return false;
   }
 
   async function handleManualCaptcha() {
@@ -1254,13 +1264,20 @@
   async function main() {
     registerMenu();
     if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
-    prepareBoost();
-    installNetworkDestCapture();
-    if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
 
+    // Cloudflare challenge interstitial: never interfere — let it run so the
+    // user can solve it and the real page loads afterward.
     if (document.readyState === 'loading') {
       await new Promise((resolve) => PAGE.addEventListener('DOMContentLoaded', resolve, { once: true }));
     }
+    if (cloudflareChallenging()) {
+      log('Cloudflare challenge detected — standing by, not interfering');
+      return;
+    }
+
+    prepareBoost();
+    installNetworkDestCapture();
+    if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
 
     if (excluded() || disabled()) return;
 

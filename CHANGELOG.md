@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.9 — 2026-08-22
+
+### Added
+- `cloudflareChallenging()`: detecta o interstitial de desafio do Cloudflare (`#cf-challenge-running`, classe `cf-challenge-running`, título "Just a moment...", iframe/script de `challenges.cloudflare.com`)
+- `main()` agora pausa antes de instalar hooks (fetch/XHR/WebSocket/boost de timers) quando um desafio Cloudflare está ativo, evitando atrapalhar o CAPTCHA e o redirecionamento do CF
+
 ## 1.9.8 — 2026-08-22
 
 ### Fixed
