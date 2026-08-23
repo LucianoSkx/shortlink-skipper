@@ -91,9 +91,9 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) — families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|cpmlink\.net|cutpaid\.com|cuttty\.com|exeo\.app|fir3\.net|gplinks\.co|icutlink\.com|kingofshrink\.com|linkpoi\.me|linkshrink\.net|lnk2\.cc|network-loop\.com|thinfi\.com|tutwuri\.id)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|cpmlink\.net|cutpaid\.com|cuttty\.com|exeo\.app|fir3\.net|gplinks\.co|icutlink\.com|kingofshrink\.com|linkpoi\.me|linkshrink\.net|lnk2\.cc|network-loop\.com|spaste\.com|stfly\.me|thinfi\.com|tutwuri\.id)$/;
   const IMAGE_HOSTS =
-    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cubeupload\.com|depic\.me|directupload\.eu|fastpic\.org|fotosik\.pl|hostpic\.org|im\.ge|imagebam\.com|imageban\.ru|imagenetz\.de|imageshack\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgpv\.com|imgtraffic\.com|imx\.to|keptarolo\.hu|pic-upload\.de|picstate\.com|pimpandhost\.com|pixhost\.to|postimages\.org|turboimagehost\.com|3xplanet\.com)$/;
+    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cubeupload\.com|depic\.me|directupload\.eu|fastpic\.org|fotosik\.pl|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagenetz\.de|imageshack\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgpv\.com|imgtraffic\.com|imx\.to|keptarolo\.hu|pic-upload\.de|picstate\.com|pimpandhost\.com|pixhost\.to|postimages\.org|turboimagehost\.com|3xplanet\.com)$/;
   const FILE_HOSTS =
     /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com)$/;
   const SETC_FORM = 'form#setc';
