@@ -84,6 +84,7 @@
 - `tests/shortlink-skipper.test.js` (node:test): carrega sem erro/registra menu e não interfere no desafio Cloudflare
 - `tests/handlers.test.js` (node:test): exercita o código real de `handleLinkvertiseEasy`, `handleAdLinkFly` e `handleBypassCity` com entradas representativas (sandbox vm, sem dependências)
 - Export guardado (`module.exports`) + `main()` só auto-roda fora de `module`: permite testar handlers no Node sem afetar o browser
+- Teste ao vivo validado ponta a ponta no Helium + Violentmonkey: AdLinkFly (`skiplink.io`) redirecionou para o destino real; Linkvertise e bypass.city cobertos por testes unitários. Harness em `test-live/` (mock server + cliente CDP)
 
 ## Earlier releases
 
