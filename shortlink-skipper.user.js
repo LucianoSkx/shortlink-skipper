@@ -88,7 +88,7 @@
     /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com)$/;
   const TOKEN_HOST = /(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
-  // Curated from adsbypasser's src/sites (BSD-2-Clause) — families our generic
+  // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
     /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|cpmlink\.net|cutpaid\.com|cuttty\.com|exeo\.app|fir3\.net|gplinks\.co|icutlink\.com|kingofshrink\.com|linkpoi\.me|linkshrink\.net|lnk2\.cc|network-loop\.com|spaste\.com|stfly\.me|thinfi\.com|tutwuri\.id)$/;
@@ -126,7 +126,7 @@
 
   // Reads a global variable from the page context. SECURITY: `name` MUST be a
   // fixed string literal supplied by our own code (e.g. readGlobal('p', ...)).
-  // Never pass external/page-derived data as `name` — it is interpolated into an
+  // Never pass external/page-derived data as `name` -- it is interpolated into an
   // injected <script>, so a tainted value would become arbitrary code execution.
   async function readGlobal(name, valid) {
     if (typeof name !== 'string' || !/^[A-Za-z0-9_$]+$/.test(name)) return null;
@@ -258,7 +258,7 @@
     //   2. never accept a cycle                       (target already visited)
     //   3. never allow an endless chain               (hop budget)
     // The entry URL is seeded once per tab so returning to it also counts as
-    // a cycle (A→B→C→A).
+    // a cycle (A->B->C->A).
     const KEY = 'sl_skipper_nav';
     const MAX_HOPS = 10;
     let history = [];
@@ -314,7 +314,7 @@
   }
 
   // Hosts that own dedicated rules must clear the generic gate even when the
-  // page is an SPA that has not rendered any structural indicator yet —
+  // page is an SPA that has not rendered any structural indicator yet --
   // Linkvertise hydrates late and used to be dismissed as "not a shortlink".
   function knownShortener() {
     return (
@@ -342,7 +342,7 @@
   }
 
   // Generic follow-up rules (manual captcha, single external link, bypass.city)
-  // must also run on hosts that own dedicated rules — e.g. ouo's Turnstile
+  // must also run on hosts that own dedicated rules -- e.g. ouo's Turnstile
   // phase shows no structural marker until the human check is solved.
   function genericGate() {
     return looksLikeShortlink() || knownShortener();
@@ -511,7 +511,7 @@
   }
 
   // ARCH DEBT (not a bug): the external cascade spans delegated pages
-  // (trw.lat → bypass.tools → adbypass.org), each level relying on main()
+  // (trw.lat -> bypass.tools -> adbypass.org), each level relying on main()
   // re-running there. If more delegation hosts appear, collapse this into a
   // single resolveExternal(url) tried inline before navigating.
   async function handleServiceLastResort() {
@@ -757,8 +757,8 @@
     let form = await waitFor(formId, 8000);
     if (!form && captchaPresent()) {
       // New ouo flow: an interactive Turnstile gate precedes the form. Tell
-      // the user, then keep waiting — captcha-manual auto-submits on solve.
-      log('human check first — solve it and the bypass continues automatically');
+      // the user, then keep waiting -- captcha-manual auto-submits on solve.
+      log('human check first -- solve it and the bypass continues automatically');
       form = await waitFor(formId, 60000);
     }
     if (!form) return false;
@@ -1389,7 +1389,7 @@
   }
 
   // Image hosts (adsbypasser families): strip common overlays, then follow
-  // the direct image link — either an anchor pointing at the file or the main
+  // the direct image link -- either an anchor pointing at the file or the main
   // <img> itself.
   async function handleImageHost() {
     if (!IMAGE_HOSTS.test(location.host)) return false;
@@ -1521,7 +1521,7 @@
       },
     );
     // Manual escape hatch: bypass.link requires an hCaptcha per request, so it
-    // cannot join the automatic cascade — this just hands the current URL to
+    // cannot join the automatic cascade -- this just hands the current URL to
     // the user for a one-off manual bypass there.
     GM_registerMenuCommand('Open in bypass.link (manual fallback)', () => {
       const url = location.href;
@@ -1530,7 +1530,7 @@
       } catch {}
       if (typeof GM_openInTab === 'function') GM_openInTab('https://bypass.link/', { active: true });
       else PAGE.open('https://bypass.link/');
-      log('current URL copied — paste it on bypass.link and solve its captcha');
+      log('current URL copied -- paste it on bypass.link and solve its captcha');
     });
   }
 
@@ -1550,13 +1550,13 @@
     if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
     installEarlyHooks();
 
-    // Cloudflare challenge interstitial: never interfere — let it run so the
+    // Cloudflare challenge interstitial: never interfere -- let it run so the
     // user can solve it and the real page loads afterward.
     if (document.readyState === 'loading') {
       await new Promise((resolve) => PAGE.addEventListener('DOMContentLoaded', resolve, { once: true }));
     }
     if (cloudflareChallenging()) {
-      log('Cloudflare challenge detected — standing by, not interfering');
+      log('Cloudflare challenge detected -- standing by, not interfering');
       return;
     }
 
@@ -1565,14 +1565,14 @@
     const shortish = looksLikeShortlink();
     // Delegation landing pages carry their own rules (service-last-resort on
     // bypass.tools) that must run even though the page itself is not a
-    // shortener — otherwise the cascade dies at its second level.
+    // shortener -- otherwise the cascade dies at its second level.
     const delegated = /^bypass\.tools$/.test(location.host);
     const taskWall = shortish && looksLikeTaskWall();
     const knownShort = knownShortener();
     const media = knownMediaHost();
 
     if (!shortish && !delegated && !knownShort && !media) {
-      log('not a shortlink page — leaving the page untouched');
+      log('not a shortlink page -- leaving the page untouched');
       return;
     }
 
@@ -1594,7 +1594,7 @@
     // Rules run in declaration order; the first rule whose run() returns truthy
     // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout
     // (e.g. captcha-manual waits up to 120s) blocks every later rule until it
-    // resolves — keep fast/early rules before slow ones when ordering matters.
+    // resolves -- keep fast/early rules before slow ones when ordering matters.
     for (const rule of GENERIC_RULES) {
       if (disabled()) break;
       let shouldRun = false;

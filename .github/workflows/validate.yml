@@ -20,6 +20,6 @@ jobs:
           grep -q "@name         Shortlink Skipper" shortlink-skipper.user.js
           grep -q "@version" shortlink-skipper.user.js
           grep -q "@downloadURL" shortlink-skipper.user.js
-          ! grep -P "[\x{00C0}-\x{017F}]" <(tail -n +15 shortlink-skipper.user.js) || (echo "non-ASCII found in code" && exit 1)
+          node -e "const s=require('fs').readFileSync('shortlink-skipper.user.js','utf8').split('\n').slice(14).join('\n'); if(/[^\x00-\x7F]/.test(s)){console.error('non-ASCII found in code');process.exit(1)}"
       - name: Run tests
         run: npm test
