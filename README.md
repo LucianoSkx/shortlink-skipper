@@ -125,7 +125,28 @@ The first rule that acts wins — order specific rules first.
 ## Development
 
 ```bash
-node --check shortlink-skipper.user.js   # what CI runs
+npm test                          # run the unit tests (node --test tests/*.test.js)
+node --check shortlink-skipper.user.js   # syntax check (also run by CI)
+```
+
+The unit tests load the userscript in a `vm` sandbox with mocked
+`location`/`document` (no headless browser needed for most cases):
+
+- `tests/shortlink-skipper.test.js` — loads without error, registers the menu, does not interfere with Cloudflare challenges
+- `tests/handlers.test.js` — exercises `handleLinkvertiseEasy`, `handleAdLinkFly`, `handleBypassCity` and `BYPASS_SERVICE_URL`
+- `tests/lean.test.js` — confirms `main()` does not install heavy hooks on normal pages and that `setc-form` no longer triggers a 4s wait
+
+CI runs the syntax check, the metadata check and `npm test` on every push to
+`main` and on every pull request.
+
+### Live integration harness
+
+`test-live/` ships a mock server (AdLinkFly / Linkvertise) plus a CDP client
+for end-to-end validation in a real browser with Violentmonkey:
+
+```bash
+node test-live/server.js     # start the mock shortlink servers
+node test-live/cdp-client.js  # drive the browser via CDP and assert the redirect
 ```
 
 **Releasing**: bump `@version` in the userscript and push to `main` — the

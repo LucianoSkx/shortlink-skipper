@@ -21,3 +21,5 @@ jobs:
           grep -q "@version" shortlink-skipper.user.js
           grep -q "@downloadURL" shortlink-skipper.user.js
           ! grep -P "[\x{00C0}-\x{017F}]" <(tail -n +15 shortlink-skipper.user.js) || (echo "non-ASCII found in code" && exit 1)
+      - name: Run tests
+        run: npm test
