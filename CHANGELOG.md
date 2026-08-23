@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.9.13 — 2026-08-23
+
+### Performance / Segurança (menos intrusão em páginas normais)
+- `main()`: `prepareBoost()`, `installNetworkDestCapture()` e `enableInteractions()` só rodam quando a página é detectada como shortlink (`if (!shortish) return` cedo); antes rodavam em TODA página, sobrescrevendo `setTimeout`/`setInterval`, `fetch` e `XMLHttpRequest` globalmente em sites comuns
+- `installNetworkDestCapture()`: instalado de forma preguiçosa, logo antes da regra `network-capture`, em vez de no carregamento — reduz interceptação de rede em páginas normais
+- `setc-form`: `when: () => true` trocado por `document.querySelector('form#setc, form#landing [name="go"]') !== null`, eliminando espera de 4s em páginas sem esse formulário
+- `looksLikeShortlink()`: memoizado para o `document` corrente, calculado uma vez e reutilizado pelas regras (antes repetia a varredura pesada a cada `when`)
+- `goto()`: passa a validar com `isPlausibleUrl()` (protocolo http/https + host com `.`) como barreira universal — regras não precisam validar manualmente; também normaliza a URL (`new URL(url).href`) antes do histórico de loop
+
 ## 1.9.12 — 2026-08-23
 
 ### Fixed

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.11
+// @version      1.9.13
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -240,27 +240,30 @@
   }
 
   function goto(url) {
-    if (!url || !/^https?:\/\//i.test(url)) return false;
-    if (sameAsCurrent(url)) return false;
+    if (!isPlausibleUrl(url)) return false;
+    const target = new URL(url).href;
+    if (sameAsCurrent(target)) return false;
     const KEY = 'sl_skipper_nav';
     let history = [];
     try {
       history = JSON.parse(sessionStorage.getItem(KEY) || '[]');
     } catch {}
-    if (history.slice(-3).filter((u) => u === url).length >= 2) {
-      log('redirect loop detected, aborting:', url);
+    if (history.slice(-3).filter((u) => u === target).length >= 2) {
+      log('redirect loop detected, aborting:', target);
       return false;
     }
-    history.push(url);
+    history.push(target);
     try {
       sessionStorage.setItem(KEY, JSON.stringify(history.slice(-8)));
     } catch {}
-    log('going to', url);
-    location.href = url;
+    log('going to', target);
+    location.href = target;
     return true;
   }
 
+  let _shortishCache = null;
   function looksLikeShortlink(doc = document) {
+    if (doc === document && _shortishCache !== null) return _shortishCache;
     const structural = doc.querySelector(GO_LINK_FORM) ||
       doc.querySelector('input[name="ad_form_data"], #invisibleCaptchaShortlink, #wpsafegenerate, .wpsafelink-button');
     if (structural) return true;
@@ -278,7 +281,9 @@
     ) {
       score += 1;
     }
-    return score >= 2;
+    const result = score >= 2;
+    if (doc === document) _shortishCache = result;
+    return result;
   }
 
   function looksLikeTaskWall(doc = document) {
@@ -1263,7 +1268,7 @@
     { name: 'bstlar', when: () => BSTLAR_HOST.test(location.host), run: handleBstlar },
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
-    { name: 'setc-form', when: () => true, run: handleSetcForm },
+    { name: 'setc-form', when: () => document.querySelector('form#setc, form#landing [name="go"]') !== null, run: handleSetcForm },
     { name: 'boost-ink', when: () => /(^|\.)boost\.ink$/.test(location.host), run: handleBoostInk },
     { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
@@ -1333,14 +1338,15 @@
       return;
     }
 
-    prepareBoost();
-    installNetworkDestCapture();
-    if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
-
     if (excluded() || disabled()) return;
 
     const shortish = looksLikeShortlink();
     const taskWall = shortish && looksLikeTaskWall();
+
+    if (!shortish) {
+      log('not a shortlink page — leaving the page untouched');
+      return;
+    }
 
     if (taskWall) {
       log('engagement task-wall detected: stepping back, complete the steps manually');
@@ -1348,13 +1354,13 @@
       return;
     }
 
-    if (shortish) {
-      enableBoost();
-      blockPopups();
-      restoreFocus();
-      removeAdblockBanners();
-    }
+    prepareBoost();
+    enableBoost();
+    blockPopups();
+    restoreFocus();
+    removeAdblockBanners();
     enableInteractions();
+    if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
 
     // Rules run in declaration order; the first rule whose run() returns truthy
     // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout
@@ -1369,6 +1375,7 @@
         log(`rule ${rule.name}: when error:`, error.message);
       }
       if (!shouldRun) continue;
+      if (rule.name === 'network-capture') installNetworkDestCapture();
       try {
         const acted = await rule.run();
         log(`rule ${rule.name}: ${acted ? 'acted' : 'no action'}`);
