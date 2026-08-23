@@ -288,15 +288,13 @@ test('installEarlyHooks wraps fetch exactly once across repeated calls and main(
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
 });
 
-test('genericGate opens for the new adsbypasser families', () => {
-  for (const href of [
-    'https://1ink.cc/abc',
-    'https://imgbb.com/abc',
-    'https://uploadhaven.com/download/abc',
-  ]) {
-    const h = load({ href, querySelector: () => null });
-    assert.strictEqual(h.api.genericGate(), true, `gate must open for ${href}`);
-  }
+test('genericGate opens for shortener families, not for media hosts', () => {
+  const h1 = load({ href: 'https://1ink.cc/abc', querySelector: () => null });
+  assert.strictEqual(h1.api.genericGate(), true, 'gate must open for shortener 1ink.cc');
+  const h2 = load({ href: 'https://imgbb.com/abc', querySelector: () => null });
+  assert.strictEqual(h2.api.genericGate(), false, 'gate must NOT open for image host imgbb.com');
+  const h3 = load({ href: 'https://uploadhaven.com/download/abc', querySelector: () => null });
+  assert.strictEqual(h3.api.genericGate(), false, 'gate must NOT open for file host uploadhaven.com');
 });
 
 test('handleImageHost follows the direct image anchor', async () => {

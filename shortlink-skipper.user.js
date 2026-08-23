@@ -333,10 +333,12 @@
       ZAFREE_HOST.test(location.host) ||
       ADLINKFLY_HOSTS.test(location.host) ||
       EXTRA_SHORTENER_HOSTS.test(location.host) ||
-      IMAGE_HOSTS.test(location.host) ||
-      FILE_HOSTS.test(location.host) ||
       BYPASS_SERVICE_URL.test(location.href)
     );
+  }
+
+  function knownMediaHost() {
+    return IMAGE_HOSTS.test(location.host) || FILE_HOSTS.test(location.host);
   }
 
   // Generic follow-up rules (manual captcha, single external link, bypass.city)
@@ -1466,7 +1468,6 @@
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
     { name: 'setc-form', when: () => document.querySelector('form#setc, form#landing [name="go"]') !== null, run: handleSetcForm },
     { name: 'boost-ink', when: () => /(^|\.)boost\.ink$/.test(location.host), run: handleBoostInk },
-    { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'linkvertise-easy', when: () => LINKVERTISE_HOST.test(location.host), run: handleLinkvertiseEasy },
     {
       name: 'adlinkfly-hosts',
@@ -1478,6 +1479,7 @@
       when: () => BYPASS_SERVICE_URL.test(location.href),
       run: handleExternalService,
     },
+    { name: 'network-capture', when: () => looksLikeShortlink(), run: handleNetworkCapture },
     { name: 'url-destination', when: () => looksLikeShortlink(), run: async () => goto(extractDestFromParams()) },
     { name: 'adlinkfly', when: () => looksLikeShortlink(), run: handleAdLinkFly },
     { name: 'adlinkfly-captcha', when: () => looksLikeShortlink(), run: handleInvisibleCaptcha },
@@ -1578,14 +1580,14 @@
       return;
     }
 
-    if (shortish || knownShortener()) {
+    if (shortish || knownShortener() || knownMediaHost()) {
       prepareBoost();
       enableBoost();
       blockPopups();
       restoreFocus();
       removeAdblockBanners();
+      enableInteractions();
     }
-    enableInteractions();
 
     // Rules run in declaration order; the first rule whose run() returns truthy
     // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout

@@ -1,8 +1,8 @@
 {
   "name": "shortlink-skipper",
-  "version": "1.9.11",
+  "version": "1.10.0",
   "private": true,
-  "description": "Userscript que pula encurtadores de link; testes de fumaça sem dependências externas.",
+  "description": "Userscript that skips link shorteners; smoke tests with no external dependencies.",
   "scripts": {
     "test": "node --test tests/*.test.js"
   }
