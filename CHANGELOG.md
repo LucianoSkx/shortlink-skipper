@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.1 — 2026-08-23
+
+### Fixed
+- **Media hosts were inert**: after isolating `IMAGE_HOSTS`/`FILE_HOSTS` out of `knownShortener()`, the early return in `main()` fired before the media gate was ever reached — dedicated `image-host`/`file-host` rules could no longer run on their own hosts. The gate now evaluates `knownMediaHost()` up front (evaluated once, reused by both checks).
+- Added end-to-end tests: `main()` must drive a media host to its dedicated rule (imagetwist → direct image), and a failed image-host lookup must leave the page untouched instead of falling through to shortlink fallbacks.
+
 ## 1.10.0 — 2026-08-23
 
 ### Added — adsbypasser coverage absorption (BSD-2-Clause, credited)

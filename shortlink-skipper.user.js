@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.0
+// @version      1.10.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -1568,8 +1568,10 @@
     // shortener — otherwise the cascade dies at its second level.
     const delegated = /^bypass\.tools$/.test(location.host);
     const taskWall = shortish && looksLikeTaskWall();
+    const knownShort = knownShortener();
+    const media = knownMediaHost();
 
-    if (!shortish && !delegated && !knownShortener()) {
+    if (!shortish && !delegated && !knownShort && !media) {
       log('not a shortlink page — leaving the page untouched');
       return;
     }
@@ -1580,7 +1582,7 @@
       return;
     }
 
-    if (shortish || knownShortener() || knownMediaHost()) {
+    if (shortish || knownShort || media) {
       prepareBoost();
       enableBoost();
       blockPopups();

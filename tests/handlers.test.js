@@ -297,6 +297,25 @@ test('genericGate opens for shortener families, not for media hosts', () => {
   assert.strictEqual(h3.api.genericGate(), false, 'gate must NOT open for file host uploadhaven.com');
 });
 
+test('main() lets media hosts reach their dedicated rules', async () => {
+  const h = load({
+    href: 'https://imagetwist.com/abc/file.jpg',
+    querySelector: (sel) => (sel === 'a.direct-link' ? { href: 'https://img.imagetwist.com/i/abc.jpg' } : null),
+  });
+  await h.api.main();
+  assert.ok(
+    h.navs.includes('https://img.imagetwist.com/i/abc.jpg'),
+    'image-host rule must run via main() on a media host',
+  );
+});
+
+test('main() on failed image-host does not fall through to shortlink fallbacks', async () => {
+  const h = load({ href: 'https://imgbb.com/abc', querySelector: () => null });
+  h.sandbox.GM_xmlhttpRequest = () => {};
+  await h.api.main();
+  assert.strictEqual(h.navs.length, 0, 'no destination found → page stays untouched, no bypass.city/captcha fallback');
+});
+
 test('handleImageHost follows the direct image anchor', async () => {
   const h = load({
     href: 'https://imagetwist.com/abc/file.jpg',
