@@ -31,7 +31,7 @@ function makeLocation(href) {
 function baseDoc() {
   return {
     readyState: 'complete',
-    documentElement: { className: '' },
+    documentElement: { className: '', outerHTML: '' },
     body: { className: '', innerText: '' },
     title: '',
     getElementById: () => null,
@@ -88,6 +88,7 @@ function load(opts = {}) {
     MouseEvent: function () {},
     PointerEvent: function () {},
     Event: function () {},
+    MutationObserver: function () { this.observe = () => {}; this.disconnect = () => {}; },
     addEventListener: () => {},
     removeEventListener: () => {},
     module: { exports: {} },

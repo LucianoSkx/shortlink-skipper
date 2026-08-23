@@ -31,7 +31,7 @@ function makeLocation(href) {
 function baseDoc() {
   return {
     readyState: 'complete',
-    documentElement: { className: '' },
+    documentElement: { className: '', outerHTML: '' },
     body: { className: '', innerText: '' },
     title: '',
     getElementById: () => null,
@@ -93,6 +93,7 @@ function load(opts = {}) {
     MouseEvent: function () {},
     PointerEvent: function () {},
     Event: function () {},
+    MutationObserver: function () { this.observe = () => {}; this.disconnect = () => {}; },
     addEventListener: () => {},
     removeEventListener: () => {},
     module: { exports: {} },
@@ -101,7 +102,7 @@ function load(opts = {}) {
   sandbox.window = sandbox;
   sandbox.location = loc;
   sandbox.document = doc;
-  doc.querySelector = (sel) => (sel.includes('setc') ? { action: opts.href || 'https://example.com/' } : null);
+  doc.querySelector = opts.querySelector || ((sel) => (sel.includes('setc') ? { action: opts.href || 'https://example.com/' } : null));
   vm.createContext(sandbox);
   vm.runInContext(SRC, sandbox);
 
@@ -282,6 +283,26 @@ test('installEarlyHooks wraps fetch exactly once across repeated calls and main(
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'second install must be a no-op');
   await h.api.main();
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
+});
+
+test('a specific rule wins over external-service by declaration order', async () => {
+  const dest = 'https://final.example/out';
+  const h = load({
+    href: `https://linkvertise.com/123?r=${btoa(dest)}`,
+    querySelector: (sel) => (sel.includes('go-link') ? {} : null),
+  });
+  const apiCalls = [];
+  h.setGmXhr((opts) => {
+    apiCalls.push(opts.url);
+    opts.onload({ responseText: 'null' });
+  });
+  await h.api.main();
+  assert.strictEqual(h.navs[0], dest, 'the local easy path must win');
+  assert.strictEqual(
+    apiCalls.filter((u) => u.includes('trw.lat')).length,
+    0,
+    'external-service must not be consulted when a specific rule already acted',
+  );
 });
 
 test('sameAsCurrent distinguishes query strings but ignores the hash', () => {
