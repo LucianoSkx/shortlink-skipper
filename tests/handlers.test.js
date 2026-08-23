@@ -288,6 +288,17 @@ test('installEarlyHooks wraps fetch exactly once across repeated calls and main(
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
 });
 
+test('genericGate opens on known hosts without structural markers', () => {
+  const h = load({ href: 'https://ouo.io/4taT4', querySelector: () => null });
+  assert.strictEqual(
+    h.api.genericGate(),
+    true,
+    'ouo host must let generic follow-up rules run during the Turnstile phase',
+  );
+  const plain = load({ href: 'https://example.com/' });
+  assert.strictEqual(plain.api.genericGate(), false, 'ordinary pages stay closed');
+});
+
 test('a known-shortener host passes the gate even before its SPA renders', async () => {
   const h = load({ href: 'https://linkvertise.com/514008/hydrogen-download', querySelector: () => null });
   const apiCalls = [];

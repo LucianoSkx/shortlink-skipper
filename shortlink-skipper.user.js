@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.9.18
+// @version      1.9.19
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -324,6 +324,13 @@
       ADLINKFLY_HOSTS.test(location.host) ||
       BYPASS_SERVICE_URL.test(location.href)
     );
+  }
+
+  // Generic follow-up rules (manual captcha, single external link, bypass.city)
+  // must also run on hosts that own dedicated rules — e.g. ouo's Turnstile
+  // phase shows no structural marker until the human check is solved.
+  function genericGate() {
+    return looksLikeShortlink() || knownShortener();
   }
 
   function looksLikeTaskWall(doc = document) {
@@ -732,7 +739,13 @@
       return typeof PAGE.nextUrl === 'string' ? goto(PAGE.nextUrl) : false;
     }
     const formId = location.pathname.startsWith('/go') ? '#form-go' : '#form-captcha';
-    const form = await waitFor(formId, 8000);
+    let form = await waitFor(formId, 8000);
+    if (!form && captchaPresent()) {
+      // New ouo flow: an interactive Turnstile gate precedes the form. Tell
+      // the user, then keep waiting — captcha-manual auto-submits on solve.
+      log('human check first — solve it and the bypass continues automatically');
+      form = await waitFor(formId, 60000);
+    }
     if (!form) return false;
     log('ouo.io detected, submitting in a loop:', formId);
     return submitFormLoop(form);
@@ -1400,9 +1413,9 @@
       } },
     { name: 'final-button', when: () => looksLikeShortlink(), run: handleButtons },
     { name: 'service-last-resort', when: () => /^bypass\.tools$/.test(location.host), run: handleServiceLastResort },
-    { name: 'bypass-city', when: () => looksLikeShortlink(), run: handleBypassCity },
-    { name: 'captcha-manual', when: () => looksLikeShortlink(), run: handleManualCaptcha },
-    { name: 'single-external-link', when: () => looksLikeShortlink(), run: async () => {
+    { name: 'bypass-city', when: genericGate, run: handleBypassCity },
+    { name: 'captcha-manual', when: genericGate, run: handleManualCaptcha },
+    { name: 'single-external-link', when: genericGate, run: async () => {
         await sleep(4000);
         const dest = findExternalExit();
         if (dest) return goto(dest);
@@ -1527,6 +1540,7 @@
       handleServiceLastResort,
       resolveLootlabsViaApi,
       installEarlyHooks,
+      genericGate,
       main,
     };
   }

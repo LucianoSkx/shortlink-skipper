@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.19 — 2026-08-23
+
+### Fixed
+- **ouo.io's new Turnstile phase stalled the bypass**: the site now shows an interactive "I'm a human" gate *before* `#form-captcha`/`#form-go` exist, and the generic follow-up rules (`captcha-manual`, `single-external-link`, `bypass-city`) were gated behind `looksLikeShortlink()` — which scores 0 while no form has rendered, so nothing observed the captcha after a manual solve. New `genericGate()` (shortish **or** known host) opens those rules on dedicated hosts; `handleOuo` now detects the human check, tells the user, and waits up to 60s for the form instead of giving up in 8s.
+
+### Tests
+- `genericGate` regression: open on `ouo.io` with zero structural markers; closed on ordinary pages.
+
 ## 1.9.18 — 2026-08-23
 
 ### Fixed
