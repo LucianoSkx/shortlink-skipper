@@ -88,7 +88,7 @@
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
   const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
-    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)\/s\/.+|      linkvertise\.(?:com|net)\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|gplinks\.in)\/.+)/;
+    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)\/s\/.+|linkvertise\.(?:com|net)\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|gplinks\.in)\/.+)/;
   const INFRA_HOST =
     /googleapis|gstatic|jsdelivr|unpkg|cdnjs|cloudflare|fontawesome|jquery|bootstrapcdn|w3\.org|schema\.org|gravatar|recaptcha|hcaptcha|youtube|youtu\.be|vimeo|dailymotion|twitch|spotify|soundcloud|doubleclick|googlesyndication|googletagmanager|google-analytics|adservice|adsystem|amazon-adsystem|facebook|fbcdn|instagram|cdninstagram|twitter|x\.com|twimg|tiktok|pinterest|reddit|telegram|t\.me|discord|whatsapp|github|gitlab|codepen|stackexchange|wikipedia/i;
 
@@ -119,6 +119,7 @@
   // Never pass external/page-derived data as `name` — it is interpolated into an
   // injected <script>, so a tainted value would become arbitrary code execution.
   async function readGlobal(name, valid) {
+    if (typeof name !== 'string' || !/^[A-Za-z0-9_$]+$/.test(name)) return null;
     for (let i = 0; i < 40; i++) {
       try {
         const s = document.createElement('script');
@@ -1384,6 +1385,7 @@
       handleLinkvertiseEasy,
       handleAdLinkFly,
       handleBypassCity,
+      BYPASS_SERVICE_URL,
       main,
     };
   }

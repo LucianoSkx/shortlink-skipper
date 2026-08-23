@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.12 — 2026-08-23
+
+### Fixed
+- `BYPASS_SERVICE_URL`: removidos espaços literais antes de `linkvertise\.(?:com|net)` — o alternativa estava morta (URLs normais do Linkvertise não casavam na regra `external-service`); coberto por teste
+- `readGlobal`: valida `name` contra `^[A-Za-z0-9_$]+$` para evitar que um valor da página vire sink de code injection no futuro
+
 ## 1.9.11 — 2026-08-22
 
 ### Added

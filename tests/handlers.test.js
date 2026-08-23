@@ -112,6 +112,8 @@ function load(opts = {}) {
 
 const b64 = (s) => btoa(s);
 
+const h2 = load({ href: 'https://linkvertise.com/abc' });
+
 test('handleLinkvertiseEasy extrai destino de ?r= (base64)', async () => {
   const h = load({ href: `https://linkvertise.com/x?r=${b64('https://lv.example/dest')}` });
   const ok = await h.api.handleLinkvertiseEasy();
@@ -148,4 +150,19 @@ test('handleBypassCity extrai destino do HTML retornado', async () => {
   const ok = await h.api.handleBypassCity();
   assert.ok(ok);
   assert.ok(h.navs.includes('https://real-dest.example/x'));
+});
+
+test('BYPASS_SERVICE_URL casa linkvertise.com e linkvertise.net', () => {
+  assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.com/abc'));
+  assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.net/x/y'));
+});
+
+test('BYPASS_SERVICE_URL casa demais servicos conhecidos', () => {
+  assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://loot-link.com/s/abc'));
+  assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://work.ink/something'));
+});
+
+test('BYPASS_SERVICE_URL rejeita hosts nao relacionados', () => {
+  assert.ok(!h2.api.BYPASS_SERVICE_URL.test('https://example.com/anything'));
+  assert.ok(!h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.com.evil.test/x'));
 });
