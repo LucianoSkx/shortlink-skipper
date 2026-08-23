@@ -5,6 +5,7 @@
 ### Fixed
 - `BYPASS_SERVICE_URL`: removidos espaços literais antes de `linkvertise\.(?:com|net)` — o alternativa estava morta (URLs normais do Linkvertise não casavam na regra `external-service`); coberto por teste
 - `readGlobal`: valida `name` contra `^[A-Za-z0-9_$]+$` para evitar que um valor da página vire sink de code injection no futuro
+- `handleServiceLastResort`: aguarda 5s antes de repassar ao adbypass.org, e só repassa se o `bypass.tools` não redirecionou (antes pulava na hora em `@run-at document-start`, anulando a delegação de 2º nível)
 
 ## 1.9.11 — 2026-08-22
 

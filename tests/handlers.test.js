@@ -166,3 +166,27 @@ test('BYPASS_SERVICE_URL rejeita hosts nao relacionados', () => {
   assert.ok(!h2.api.BYPASS_SERVICE_URL.test('https://example.com/anything'));
   assert.ok(!h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.com.evil.test/x'));
 });
+
+test('handleServiceLastResort repassa ao adbypass.org quando bypass.tools nao resolve', async () => {
+  const h = load({ href: 'https://bypass.tools/bypass?url=https://loot-link.com/x' });
+  h.sandbox.setTimeout = (fn) => { fn(); return 0; };
+  const ok = await h.api.handleServiceLastResort();
+  assert.ok(ok);
+  assert.ok(h.navs.some((u) => u.startsWith('https://adbypass.org/bypass?bypass=')));
+});
+
+test('handleServiceLastResort nao repassa se bypass.tools redirecionou', async () => {
+  const h = load({ href: 'https://bypass.tools/bypass?url=https://loot-link.com/x' });
+  h.sandbox.setTimeout = (fn) => { fn(); return 0; };
+  const p = h.api.handleServiceLastResort();
+  h.loc.host = 'example.com';
+  const ok = await p;
+  assert.ok(!ok);
+  assert.ok(!h.navs.some((u) => u.startsWith('https://adbypass.org')));
+});
+
+test('handleServiceLastResort nao age fora de bypass.tools', async () => {
+  const h = load({ href: 'https://example.com/' });
+  const ok = await h.api.handleServiceLastResort();
+  assert.ok(!ok);
+});

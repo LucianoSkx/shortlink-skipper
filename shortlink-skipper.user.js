@@ -445,7 +445,14 @@
 
   async function handleServiceLastResort() {
     if (!/^bypass\.tools$/.test(location.host) || !location.search.includes('url=')) return false;
-    log('bypass.tools did not resolve either, last resort adbypass.org');
+    log('em bypass.tools, aguardando resolucao antes do ultimo recurso');
+    await sleep(5000);
+    // Se o bypass.tools resolveu e redirecionou, o host (ou a query) muda e nao repassamos.
+    if (!/^bypass\.tools$/.test(location.host) || !location.search.includes('url=')) {
+      log('bypass.tools resolveu, nada a fazer');
+      return false;
+    }
+    log('bypass.tools nao resolveu, ultimo recurso adbypass.org');
     return goto(`https://adbypass.org/bypass?bypass=${encodeURIComponent(location.href)}`);
   }
 
@@ -1386,6 +1393,7 @@
       handleAdLinkFly,
       handleBypassCity,
       BYPASS_SERVICE_URL,
+      handleServiceLastResort,
       main,
     };
   }
