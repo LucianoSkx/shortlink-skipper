@@ -190,3 +190,28 @@ test('handleServiceLastResort does not act outside bypass.tools', async () => {
   const ok = await h.api.handleServiceLastResort();
   assert.ok(!ok);
 });
+
+test('resolveLootlabsViaApi navigates to the destination returned by the API', async () => {
+  const h = load({ href: 'https://links.lootlabs.gg/s/abc' });
+  h.setGmXhr((opts) => {
+    assert.ok(opts.url.includes('trw.lat/api/clientSides/lootlabs'));
+    opts.onload({ responseText: JSON.stringify({ pyl: 'https://dest.example/final' }) });
+  });
+  await h.api.resolveLootlabsViaApi('somepayload');
+  assert.strictEqual(h.navs.length, 1, 'should navigate to the API destination');
+  assert.strictEqual(h.navs[0], 'https://dest.example/final');
+});
+
+test('resolveLootlabsViaApi ignores a non-URL destination (no navigation)', async () => {
+  const h = load({ href: 'https://links.lootlabs.gg/s/abc' });
+  h.setGmXhr((opts) => opts.onload({ responseText: JSON.stringify({ pyl: 'not-a-url' }) }));
+  await h.api.resolveLootlabsViaApi('somepayload');
+  assert.strictEqual(h.navs.length, 0, 'should not navigate on a non-URL destination');
+});
+
+test('resolveLootlabsViaApi does not navigate when the API fails', async () => {
+  const h = load({ href: 'https://links.lootlabs.gg/s/abc' });
+  h.setGmXhr((opts) => opts.onerror());
+  await h.api.resolveLootlabsViaApi('somepayload');
+  assert.strictEqual(h.navs.length, 0, 'should not navigate when the API errors');
+});

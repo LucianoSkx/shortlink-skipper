@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.14 — 2026-08-23
+
+### Added
+- Lootlabs API fallback: when the local XOR decode of the `r:` WebSocket payload yields no plausible URL, the raw payload is sent to `https://trw.lat/api/clientSides/lootlabs` and the returned `pyl` destination is used (validated by `isPlausibleUrl`). This mirrors F.E.A.R's lootlabs resolution **without** its `USC:eval(...)` server-command model — only a destination string is ever consumed, never remote code.
+- `links.lootlabs.gg` added to `BYPASS_SERVICE_URL` so the page-level `external-service` rule provides an API fallback when the WebSocket interception does not fire.
+- `resolveLootlabsViaApi` exported for unit testing.
+
 ## 1.9.13 — 2026-08-23
 
 ### Performance / Security (less intrusion on normal pages)
