@@ -138,3 +138,36 @@ test('shortish classification: a shortlink-looking page is detected', () => {
   const short = load({ querySelector: (sel) => (sel.includes('go-link') ? {} : null) });
   assert.strictEqual(short.api.looksLikeShortlink(), true, 'a page with a go-link form should be shortish');
 });
+
+// --- C8: explicit guarantees for ordinary pages ---
+
+test('normal page: zero heavy observers and sub-50ms main()', async () => {
+  const h = load();
+  let observersCreated = 0;
+  const OrigMO = h.sandbox.MutationObserver;
+  h.sandbox.MutationObserver = function (...args) {
+    observersCreated += 1;
+    return new OrigMO(...args);
+  };
+  let timersWrapped = 0;
+  const origSetTimeout = h.sandbox.setTimeout;
+  h.sandbox.setTimeout = (...args) => { timersWrapped += 1; return origSetTimeout(...args); };
+
+  const start = Date.now();
+  await h.api.main();
+  const elapsed = Date.now() - start;
+
+  assert.ok(elapsed < 50, `main() took ${elapsed}ms on a normal page — must be near-zero`);
+  assert.strictEqual(observersCreated, 0, 'no MutationObserver may be created on a normal page');
+  assert.strictEqual(timersWrapped, 0, 'setTimeout must never be called or wrapped on a normal page');
+});
+
+test('normal page: local telemetry stays untouched', async () => {
+  const store = {};
+  const h = load();
+  h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
+  h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
+  await h.api.main();
+  assert.deepStrictEqual(store.sl_stats, undefined, 'no rule stats on a normal page');
+  assert.deepStrictEqual(store.sl_fp_reports, undefined, 'no reports without user action');
+});

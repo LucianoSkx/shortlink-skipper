@@ -365,6 +365,34 @@ test('circuit breaker skips a resolver after repeated failures', async () => {
   assert.strictEqual(calls, before, 'open circuit must not hit the API again');
 });
 
+// --- C9: local telemetry + false-positive reports ---
+
+test('rule outcomes are counted locally when a rule acts', async () => {
+  const h = load({
+    href: 'https://imagetwist.com/abc/file.jpg',
+    querySelector: (sel) => (sel === 'a.direct-link' ? { href: 'https://img.imagetwist.com/i/abc.jpg' } : null),
+  });
+  const store = {};
+  h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
+  h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
+  await h.api.main();
+  assert.strictEqual(store.sl_stats.rules['image-host'].ok, 1, 'successful rule counted');
+});
+
+test('reportFalsePositive stores host/rule/candidates locally', () => {
+  const h = load({ href: 'https://weird.example/page', querySelector: () => null });
+  const store = {};
+  h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
+  h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
+  h.api.trace.rule = 'single-external-link';
+  const report = h.api.reportFalsePositive();
+  assert.strictEqual(report.host, 'weird.example');
+  assert.strictEqual(report.rule, 'single-external-link');
+  const saved = store.sl_fp_reports;
+  assert.ok(Array.isArray(saved) && saved.length === 1, 'report persisted');
+  assert.strictEqual(saved[0].rule, 'single-external-link');
+});
+
 test('findExternalExit still returns a genuine lone destination', () => {
   const h = load({
     href: 'https://short.site.example/abc',

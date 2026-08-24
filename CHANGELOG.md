@@ -3,6 +3,8 @@
 ## 1.10.6-dev (branch `dev`, unreleased)
 
 ### Added
+- **Local telemetry** (`sl_stats` in GM storage): per-rule outcome counts (ok/fail) written by the rule loop — shows exactly where investment pays off. Menu gains "Report false positive on this page" (stores host/url/rule/candidates/refusals locally, capped at 200) and "Show local statistics". Nothing leaves the device.
+- **Ordinary-page guarantees locked by tests**: `main()` under 50ms on a normal page, zero MutationObserver instances, zero timer wrapping, no telemetry writes.
 - **External resolver architecture** (`resolveExternal` + `externalResolvers`): the trw.lat API is now an inline resolver returning a candidate (`{url, source}`) instead of ad-hoc code inside the handler — new resolvers plug into the array without touching the engine. Timeout dropped 20s → 5s. A per-resolver **circuit breaker** (persisted via GM storage, survives the navigation cascade) opens after 10 consecutive failures and cools down for 5 minutes; delegation to bypass.tools remains as the navigation fallback.
 - **Decision trace** (`TRACE`): structured record of the engine's decisions per page load — detection hits/score, winning rule, every navigation attempt with hop counter, and every refusal with reason. Dumped to console when verbose logging is on.
 - **`validateDestination()`**: centralized destination validation inside `goto()`. Rejects non-http(s) protocols, excluded services, and infrastructure/tracking/social domains as *targets* — the exact class of the three live bugs (trustpilot, gmail, wordpress.org). Every current and future caller inherits the same bar; refusals carry a reason and land on the trace.

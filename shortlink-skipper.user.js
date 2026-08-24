@@ -1686,6 +1686,15 @@
         location.reload();
       },
     );
+    GM_registerMenuCommand('Report false positive on this page', () => {
+      reportFalsePositive();
+    });
+    GM_registerMenuCommand('Show local statistics', () => {
+      const stats = GM_getValue('sl_stats', {});
+      const reports = GM_getValue('sl_fp_reports', []);
+      log('local statistics:', JSON.stringify(stats));
+      log(`false-positive reports stored: ${reports.length}`);
+    });
     // Manual escape hatch: bypass.link requires an hCaptcha per request, so it
     // cannot join the automatic cascade -- this just hands the current URL to
     // the user for a one-off manual bypass there.
@@ -1709,6 +1718,38 @@
     if (LOOTLABS_HOST.test(location.host)) installLootlabsWsHook();
     else if (BSTLAR_HOST.test(location.host)) installBstlarXhrHook();
     else if (LOOTLINK_HOST.test(location.host)) installLootLinkFetchCapture();
+  }
+
+  // --- local telemetry ----------------------------------------------------
+  // Everything stays on-device (GM storage): per-rule outcome counts and the
+  // false-positive reports filed from the menu. Nothing is ever sent anywhere.
+  function bumpStat(name, field) {
+    try {
+      const stats = GM_getValue('sl_stats', {});
+      stats.rules = stats.rules || {};
+      stats.rules[name] = stats.rules[name] || { ok: 0, fail: 0 };
+      stats.rules[name][field] += 1;
+      GM_setValue('sl_stats', stats);
+    } catch {}
+  }
+
+  function reportFalsePositive() {
+    const report = {
+      at: new Date().toISOString(),
+      host: location.host,
+      url: location.href,
+      rule: TRACE.rule,
+      detected: TRACE.detected,
+      candidates: TRACE.candidates,
+      refusals: TRACE.refusals,
+    };
+    try {
+      const reports = GM_getValue('sl_fp_reports', []);
+      reports.push(report);
+      GM_setValue('sl_fp_reports', reports.slice(-200));
+    } catch {}
+    log('false positive report stored:', JSON.stringify(report));
+    return report;
   }
 
   async function main() {
@@ -1776,6 +1817,7 @@
       try {
         const acted = await rule.run();
         log(`rule ${rule.name}: ${acted ? 'acted' : 'no action'}`);
+        bumpStat(rule.name, acted ? 'ok' : 'fail');
         if (acted) {
           log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
           return;
@@ -1812,6 +1854,7 @@
       runSingleExternalLink,
       resolveExternal,
       handleExternalService,
+      reportFalsePositive,
       handleImageHost,
       handleFileHost,
       trace: TRACE,
