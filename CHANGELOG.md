@@ -9,6 +9,12 @@
 ### Validated live (CDP)
 - stfly.me home reproduced the bug on 1.10.3; guard verified by regression tests.
 
+### Validated live (CDP, Violentmonkey 1.10.4)
+- Image-host end-to-end: `pixhost.to/show/…` → direct image ✅
+- Full shortlink chain with human captcha: `mirrored.to` → `lnk2.cc/0sj5u` → captcha solved manually → `/go/` phase → destination; timers boosted, popunders blocked, captcha never touched ✅
+- `multiup.io` mirror page and `/download/…`: `file-host` clicked the download control, popunders blocked ✅
+- Passive correctness on homes of imagetwist, postimages.org, pixhost.to, uploadhaven, lnk2.cc, mirrored.to ✅
+
 ## 1.10.3 — 2026-08-24
 
 ### Fixed
