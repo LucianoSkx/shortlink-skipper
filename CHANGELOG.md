@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.10.5 — 2026-08-24
+
+### Fixed
+- **`stly.link` added** to `EXTRA_SHORTENER_HOSTS`: live testing showed the stfly network migrated domains (`stfly.xyz/69HJM` now redirects to `stly.link/69HJM`), leaving the new domain invisible to the gate.
+- **`boost.ink` added to `knownShortener()`**: it owns a dedicated handler (`handleBoostInk`, embedded base64 payload) but the early gate dismissed its pages before the rule loop ever ran — live ouo.io chain confirmed the gap.
+
+### Validated live (real shortlink URLs, CDP)
+- `ouo.io/qAUuNG` (2019, alive): Cloudflare challenge respected → dedicated handler looped `#form-go` → chained to a boost.ink social task wall (correctly untouched).
+- `cpmlink.net/rfOGAQ200`: gate opened, all fallbacks safely inert.
+- `stfly.me/6HSlNqW`: dead link → 404, script correctly inert.
+
 ## 1.10.4 — 2026-08-24
 
 ### Fixed

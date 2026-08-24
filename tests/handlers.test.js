@@ -203,6 +203,16 @@ test('EXTRA_SHORTENER_HOSTS no longer gates spaste.com (source of two live false
   assert.strictEqual(h.api.genericGate(), false, 'pastebin home must not open the shortlink gate');
 });
 
+test('stly.link (new stfly network domain) opens the gate — live finding', () => {
+  const h = load({ href: 'https://stly.link/69HJM', querySelector: () => null });
+  assert.strictEqual(h.api.genericGate(), true, 'stfly migrated to stly.link; it must be a known shortener');
+});
+
+test('boost.ink passes knownShortener so its dedicated handler can reach embedded payloads', () => {
+  const h = load({ href: 'https://boost.ink/xq4yof', querySelector: () => null });
+  assert.strictEqual(h.api.genericGate(), true, 'boost.ink owns handleBoostInk; the gate must open for it');
+});
+
 test('findExternalExit still returns a genuine lone destination', () => {
   const h = load({
     href: 'https://short.site.example/abc',

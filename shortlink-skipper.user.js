@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.4
+// @version      1.10.5
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -93,7 +93,7 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|cpmlink\.net|cutpaid\.com|cuttty\.com|exeo\.app|fir3\.net|gplinks\.co|icutlink\.com|kingofshrink\.com|linkpoi\.me|linkshrink\.net|lnk2\.cc|network-loop\.com|stfly\.me|thinfi\.com|tutwuri\.id)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|cpmlink\.net|cutpaid\.com|cuttty\.com|exeo\.app|fir3\.net|gplinks\.co|icutlink\.com|kingofshrink\.com|linkpoi\.me|linkshrink\.net|lnk2\.cc|network-loop\.com|stfly\.me|stly\.link|thinfi\.com|tutwuri\.id)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cubeupload\.com|depic\.me|directupload\.eu|fastpic\.org|fotosik\.pl|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagenetz\.de|imageshack\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgpv\.com|imgtraffic\.com|imx\.to|keptarolo\.hu|pic-upload\.de|picstate\.com|pimpandhost\.com|pixhost\.to|postimages\.org|turboimagehost\.com|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -327,6 +327,7 @@
       ACORTALINK_HOST.test(location.host) ||
       OUO_HOST.test(location.host) ||
       ADFOC_FAMILY.test(location.host) ||
+      /(^|\.)boost\.ink$/.test(location.host) ||
       AYLINK_HOST.test(location.host) ||
       REKONISE_HOST.test(location.host) ||
       MBOOST_HOST.test(location.host) ||
