@@ -159,6 +159,36 @@ test('handleBypassCity extracts destination from returned HTML', async () => {
   assert.ok(h.navs.includes('https://real-dest.example/x'));
 });
 
+test('handleBypassCity ignores footer/review links (live bug: trustpilot on spaste.com)', async () => {
+  const h = load({ href: 'https://spaste.com/' });
+  h.setGmXhr((opts) =>
+    opts.onload({
+      responseText:
+        '<html><body><a href="https://www.trustpilot.com/review/bypass.city">review us</a>' +
+        '<a href="https://ko-fi.com/someone">donate</a></body></html>',
+    }),
+  );
+  const ok = await h.api.handleBypassCity();
+  assert.strictEqual(ok, false, 'no real destination → must not navigate');
+  assert.strictEqual(h.navs.length, 0);
+});
+
+test('handleBypassCity picks the real destination even when footer links come first', async () => {
+  const h = load({ href: 'https://short.site.example/abc' });
+  h.setGmXhr((opts) =>
+    opts.onload({
+      responseText:
+        '<html><body>' +
+        '<a href="https://www.trustpilot.com/review/bypass.city">review us</a>' +
+        '<a href="https://real-dest.example/final">go</a>' +
+        '</body></html>',
+    }),
+  );
+  const ok = await h.api.handleBypassCity();
+  assert.ok(ok);
+  assert.ok(h.navs.includes('https://real-dest.example/final'));
+});
+
 test('BYPASS_SERVICE_URL matches linkvertise.com and linkvertise.net', () => {
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.com/abc'));
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.net/x/y'));

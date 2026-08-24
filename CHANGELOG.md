@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.10.2 — 2026-08-24
+
+### Fixed
+- **Live bug (spaste.com)**: the `bypass-city` fallback scraped the first external href from its response and followed a Trustpilot review link from the page footer as if it were the destination — navigating away from an unrelated page. The destination filter now also rejects social/review/funding hosts (`SOCIAL_HOST` + `trustpilot`, `patreon`, `ko-fi`, `buymeacoffee`, `opencollective`, `gumroad` added to `INFRA_HOST`), and prefers real destinations even when footer links come first.
+- Regression tests: footer-only response must not navigate; real destination is picked when mixed with footer links.
+
+### Validated live (CDP, Violentmonkey)
+- Image-host rule end-to-end: `pixhost.to/show/…` → direct image on `img100.pixhost.to` ✅
+- Passive behavior correct on homes of imagetwist, postimages.org, pixhost.to, uploadhaven ✅
+
 ## 1.10.1 — 2026-08-23
 
 ### Fixed
