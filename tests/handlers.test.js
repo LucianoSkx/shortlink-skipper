@@ -319,6 +319,52 @@ test('single-external-link acts with recorded low confidence', async () => {
   assert.strictEqual(cand.confidence, 0.55, 'weakest evidence in the cascade');
 });
 
+// --- external resolvers (inline resolution + circuit breaker) ---
+
+test('resolveExternal returns the trw destination inline when the API succeeds', async () => {
+  const h = load({ href: 'https://work.ink/something', querySelector: () => null });
+  h.setGmXhr((opts) =>
+    opts.onload({ responseText: JSON.stringify({ success: true, result: 'https://final.example/file' }) }),
+  );
+  const r = await h.api.resolveExternal(h.loc.href);
+  assert.ok(r);
+  assert.strictEqual(r.url, 'https://final.example/file');
+  assert.strictEqual(r.source, 'trw');
+  const cand = h.api.trace.candidates.find((c) => c.source === 'trw');
+  assert.ok(cand, 'resolver candidate on trace');
+});
+
+test('resolveExternal falls through to null when the API fails, and delegation still happens', async () => {
+  const h = load({ href: 'https://work.ink/something', querySelector: () => null });
+  const store = {};
+  h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
+  h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
+  h.setGmXhr((opts) => opts.onerror());
+  const r = await h.api.resolveExternal(h.loc.href);
+  assert.strictEqual(r, null, 'failed resolver yields null');
+  const ok = await h.api.handleExternalService();
+  assert.ok(ok, 'handleExternalService delegates to bypass.tools after resolver failure');
+  assert.ok(h.navs.some((u) => u.startsWith('https://bypass.tools/bypass?url=')));
+});
+
+test('circuit breaker skips a resolver after repeated failures', async () => {
+  const h = load({ href: 'https://work.ink/something', querySelector: () => null });
+  const store = {};
+  h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
+  h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
+  let calls = 0;
+  h.setGmXhr((opts) => {
+    calls += 1;
+    opts.onerror();
+  });
+  for (let i = 0; i < 10; i += 1) await h.api.resolveExternal(h.loc.href);
+  assert.ok(calls >= 10, 'failures recorded via real requests first');
+  const before = calls;
+  const r = await h.api.resolveExternal(h.loc.href);
+  assert.strictEqual(r, null);
+  assert.strictEqual(calls, before, 'open circuit must not hit the API again');
+});
+
 test('findExternalExit still returns a genuine lone destination', () => {
   const h = load({
     href: 'https://short.site.example/abc',

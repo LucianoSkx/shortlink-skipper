@@ -526,13 +526,13 @@
     return false;
   }
 
-  function gmGetJson(url) {
+  function gmGetJson(url, timeout = 20000) {
     return new Promise((resolve) => {
       if (typeof GM_xmlhttpRequest !== 'function') return resolve(null);
       GM_xmlhttpRequest({
         method: 'GET',
         url,
-        timeout: 20000,
+        timeout,
         onload: (res) => {
           try {
             resolve(JSON.parse(res.responseText));
@@ -560,20 +560,90 @@
     });
   }
 
+  // --- External resolvers -------------------------------------------------
+  // Resolution strategies that answer inline (no page delegation). Each
+  // resolver returns {url, source} on success, null otherwise. A per-resolver
+  // circuit breaker (persisted via GM storage so it survives the navigation
+  // cascade) stops hammering an API that is down.
+  const RESOLVER_TIMEOUT_MS = 5000;
+  const RESOLVER_BREAKER_KEY = 'sl_resolver_breakers';
+  const BREAKER_THRESHOLD = 10;
+  const BREAKER_COOLDOWN_MS = 5 * 60 * 1000;
+
+  function breakerState() {
+    try {
+      return GM_getValue(RESOLVER_BREAKER_KEY, {}) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function resolverOpen(name) {
+    const b = breakerState()[name];
+    return Boolean(b && b.fails >= BREAKER_THRESHOLD && Date.now() - b.lastFail < BREAKER_COOLDOWN_MS);
+  }
+
+  function resolverRecordFailure(name) {
+    try {
+      const all = breakerState();
+      const b = all[name] || { fails: 0, lastFail: 0 };
+      b.fails += 1;
+      b.lastFail = Date.now();
+      all[name] = b;
+      GM_setValue(RESOLVER_BREAKER_KEY, all);
+    } catch {}
+  }
+
+  function resolverRecordSuccess(name) {
+    try {
+      const all = breakerState();
+      if (all[name]) {
+        delete all[name];
+        GM_setValue(RESOLVER_BREAKER_KEY, all);
+      }
+    } catch {}
+  }
+
+  async function trwResolver(url) {
+    const data = await gmGetJson(
+      'https://trw.lat/api/bypass?apikey=TRW_FREE-GAY-15a92945-9b04-4c75-8337-f2a6007281e9&url=' +
+        encodeURIComponent(url),
+      RESOLVER_TIMEOUT_MS,
+    );
+    if (data?.success && typeof data.result === 'string' && /^https?:\/\//i.test(data.result)) {
+      return { url: data.result, source: 'trw' };
+    }
+    return null;
+  }
+
+  const externalResolvers = [trwResolver];
+
+  async function resolveExternal(url) {
+    for (const resolver of externalResolvers) {
+      const name = resolver.name.replace(/Resolver$/, '');
+      if (resolverOpen(name)) {
+        log(`resolver ${name}: circuit open, skipping`);
+        continue;
+      }
+      const result = await resolver(url);
+      if (result && validateDestination(result.url).valid) {
+        resolverRecordSuccess(name);
+        TRACE.candidates.push({ url: result.url, source: name, confidence: 0.9 });
+        return result;
+      }
+      resolverRecordFailure(name);
+      TRACE.refusals.push({ url: String(result?.url || url), rule: `resolver:${name}`, reason: 'no valid destination' });
+    }
+    return null;
+  }
+
   async function handleExternalService() {
     if (!BYPASS_SERVICE_URL.test(location.href)) return false;
     log('hard site detected, trying direct bypass APIs');
-    const data = await gmGetJson(
-      'https://trw.lat/api/bypass?apikey=TRW_FREE-GAY-15a92945-9b04-4c75-8337-f2a6007281e9&url=' +
-        encodeURIComponent(location.href),
-    );
-    if (
-      data?.success &&
-      typeof data.result === 'string' &&
-      /^https?:\/\//i.test(data.result)
-    ) {
-      log('direct destination from bypass API');
-      return goto(data.result);
+    const resolved = await resolveExternal(location.href);
+    if (resolved) {
+      log(`direct destination from bypass API (${resolved.source})`);
+      return goto(resolved.url);
     }
     log('API unavailable, delegating to bypass.tools');
     return goto(`https://bypass.tools/bypass?url=${encodeURIComponent(location.href)}`);
@@ -1740,6 +1810,8 @@
       installNetworkDestCapture,
       handleNetworkCapture,
       runSingleExternalLink,
+      resolveExternal,
+      handleExternalService,
       handleImageHost,
       handleFileHost,
       trace: TRACE,
