@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.10.6-dev (branch `dev`, unreleased)
+
+### Added
+- **Decision trace** (`TRACE`): structured record of the engine's decisions per page load — detection hits/score, winning rule, every navigation attempt with hop counter, and every refusal with reason. Dumped to console when verbose logging is on.
+- **`validateDestination()`**: centralized destination validation inside `goto()`. Rejects non-http(s) protocols, excluded services, and infrastructure/tracking/social domains as *targets* — the exact class of the three live bugs (trustpilot, gmail, wordpress.org). Every current and future caller inherits the same bar; refusals carry a reason and land on the trace.
+- **Debug logging now defaults OFF** (toggle remains in the userscript menu).
+
+### Tests
+- Destination validation matrix: plausible destinations accepted; dangerous protocols, junk and live-bug targets rejected with reasons.
+- Trace assertions: host/detection/winning-rule/navigation recorded end-to-end.
+
 ## 1.10.5 — 2026-08-24
 
 ### Fixed

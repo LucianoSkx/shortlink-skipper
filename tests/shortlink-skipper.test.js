@@ -84,7 +84,7 @@ function load(opts = {}) {
     atob,
     btoa,
     sessionStorage: { getItem: () => null, setItem: () => {} },
-    GM_getValue: (k, d) => d,
+    GM_getValue: (k, d) => (k === 'verbose' && opts.verbose !== undefined ? opts.verbose : d),
     GM_setValue: () => {},
     GM_registerMenuCommand: (label) => menuCalls.push(label),
     GM_xmlhttpRequest: () => {},
@@ -128,6 +128,7 @@ test('does not interfere with the Cloudflare challenge', async () => {
     href: 'https://short.site.example/abc',
     cf: true,
     title: 'Just a moment...',
+    verbose: true,
   });
   await api.main();
   assert.strictEqual(loc.navs.length, 0, 'should not navigate during the CF challenge');

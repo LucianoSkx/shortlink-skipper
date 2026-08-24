@@ -1,6 +1,6 @@
 {
   "name": "shortlink-skipper",
-  "version": "1.10.5",
+  "version": "1.10.6-dev",
   "private": true,
   "description": "Userscript that skips link shorteners; smoke tests with no external dependencies.",
   "scripts": {

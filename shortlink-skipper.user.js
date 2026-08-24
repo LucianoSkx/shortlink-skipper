@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.5
+// @version      1.10.6-dev
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -38,7 +38,20 @@
   'use strict';
 
   const PAGE = unsafeWindow;
-  let VERBOSE = GM_getValue('verbose', true);
+  let VERBOSE = GM_getValue('verbose', false);
+
+  // Decision trace: one structured record of what the engine saw and did on
+  // this page load. Detection writes markers, the rule loop stamps the winning
+  // rule, goto() records navigations and refusals with reasons. Dumped by
+  // main(); makes "why did it act / why didn't it" answerable from logs.
+  const TRACE = {
+    host: null,
+    detected: false,
+    detectionHits: [],
+    rule: null,
+    navigations: [],
+    refusals: [],
+  };
 
   const EXCLUDE_HOSTS = [
     /(^|\.)google\./,
@@ -251,10 +264,39 @@
     }
   }
 
+  // A well-formed URL can still be a terrible destination. Live incidents
+  // (trustpilot, gmail, wordpress.org followed as "destinations") all came
+  // from caller-side filters with holes — validation is centralized here so
+  // every current and future caller inherits the same bar for navigation.
+  function validateDestination(v) {
+    if (!isPlausibleUrl(v)) return { valid: false, confidence: 0, reason: 'not a plausible http(s) URL' };
+    let host;
+    try {
+      host = new URL(v).host.toLowerCase();
+    } catch {
+      return { valid: false, confidence: 0, reason: 'unparseable URL' };
+    }
+    if (EXCLUDE_HOSTS.some((re) => re.test(host))) return { valid: false, confidence: 0, reason: 'excluded service as destination' };
+    if (INFRA_HOST.test(host)) return { valid: false, confidence: 0, reason: 'infrastructure/tracking domain' };
+    if (SOCIAL_HOST.test(host)) return { valid: false, confidence: 0, reason: 'social/review domain' };
+    return { valid: true, confidence: 0.9, reason: 'plausible external destination' };
+  }
+
   function goto(url) {
-    if (!isPlausibleUrl(url)) return false;
+    const candidate = { url: String(url), rule: TRACE.rule };
+    const verdict = validateDestination(url);
+    candidate.reason = verdict.reason;
+    if (!verdict.valid) {
+      TRACE.refusals.push(candidate);
+      log('navigation refused:', verdict.reason, '-', url);
+      return false;
+    }
     const target = new URL(url).href;
-    if (sameAsCurrent(target)) return false;
+    if (sameAsCurrent(target)) {
+      candidate.reason = 'same as current page';
+      TRACE.refusals.push(candidate);
+      return false;
+    }
     // Redirect-chain state machine. Invariants:
     //   1. never navigate to the current destination  (sameAsCurrent above)
     //   2. never accept a cycle                       (target already visited)
@@ -273,10 +315,14 @@
       } catch {}
     }
     if (history.length > MAX_HOPS) {
+      candidate.reason = `redirect chain exceeded ${MAX_HOPS} hops`;
+      TRACE.refusals.push(candidate);
       log('redirect chain exceeded', MAX_HOPS, 'hops, aborting:', target);
       return false;
     }
     if (history.includes(target)) {
+      candidate.reason = 'redirect loop (already visited)';
+      TRACE.refusals.push(candidate);
       log('redirect loop detected, aborting:', target);
       return false;
     }
@@ -285,7 +331,9 @@
       // Keep one extra entry so the budget check can observe the overflow.
       sessionStorage.setItem(KEY, JSON.stringify(history.slice(-(MAX_HOPS + 1))));
     } catch {}
-    log('going to', target);
+    candidate.hop = history.length;
+    TRACE.navigations.push(candidate);
+    log('going to', target, `(hop ${candidate.hop}/${MAX_HOPS})`);
     location.href = target;
     return true;
   }
@@ -293,25 +341,36 @@
   let _shortishCache = null;
   function looksLikeShortlink(doc = document) {
     if (doc === document && _shortishCache !== null) return _shortishCache;
+    const hits = [];
     const structural = doc.querySelector(GO_LINK_FORM) ||
       doc.querySelector('input[name="ad_form_data"], #invisibleCaptchaShortlink, #wpsafegenerate, .wpsafelink-button');
-    if (structural) return true;
-    const text = (doc.body?.innerText || '').slice(0, 4000);
-    let score = 0;
-    if (SHORTLINK_HINTS.test(text)) score += 1;
-    if (/wait\s+\d+\s+second|countdown|\d+\s*s(econd)?s?( left| remaining)/i.test(text)) score += 1;
-    try {
-      if (findByText(BUTTON_TEXTS)) score += 1;
-    } catch {}
-    if (/\/(go|out|link|r)\/|(^|\.)(short|safelink)[a-z0-9-]*\./i.test(`${location.pathname} ${location.host}`)) score += 1;
-    if (
-      doc.querySelector('meta[http-equiv="refresh"]') ||
-      doc.querySelector('.loader, .spinner, .loading, .countdown, [class*="timer" i], [id*="timer" i]')
-    ) {
-      score += 1;
+    let result;
+    if (structural) {
+      hits.push(`structural: ${structural.id || structural.name || 'marker element'}`);
+      result = true;
+    } else {
+      const text = (doc.body?.innerText || '').slice(0, 4000);
+      let score = 0;
+      if (SHORTLINK_HINTS.test(text)) { score += 1; hits.push('shortlink text hints'); }
+      if (/wait\s+\d+\s+second|countdown|\d+\s*s(econd)?s?( left| remaining)/i.test(text)) { score += 1; hits.push('countdown text'); }
+      try {
+        if (findByText(BUTTON_TEXTS)) { score += 1; hits.push('action button text'); }
+      } catch {}
+      if (/\/(go|out|link|r)\/|(^|\.)(short|safelink)[a-z0-9-]*\./i.test(`${location.pathname} ${location.host}`)) { score += 1; hits.push('url shape'); }
+      if (
+        doc.querySelector('meta[http-equiv="refresh"]') ||
+        doc.querySelector('.loader, .spinner, .loading, .countdown, [class*="timer" i], [id*="timer" i]')
+      ) {
+        score += 1; hits.push('refresh/loader/timer element');
+      }
+      result = score >= 2;
+      if (doc === document) TRACE.score = score;
     }
-    const result = score >= 2;
-    if (doc === document) _shortishCache = result;
+    if (doc === document) {
+      _shortishCache = result;
+      TRACE.detected = result;
+      TRACE.detectionHits = hits;
+    }
     return result;
   }
 
@@ -1515,8 +1574,7 @@
       disabled() ? 'Enable on this site' : 'Disable on this site',
       () => {
         const off = GM_getValue('disabled_hosts', {});
-        if (off[location.host]) delete off[location.host];
-        else off[location.host] = true;
+        if (off[location.host]) delete off[location.host];        else off[location.host] = true;
         GM_setValue('disabled_hosts', off);
         location.reload();
       },
@@ -1556,6 +1614,7 @@
 
   async function main() {
     registerMenu();
+    TRACE.host = location.host;
     if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
     installEarlyHooks();
 
@@ -1614,19 +1673,25 @@
       }
       if (!shouldRun) continue;
       if (rule.name === 'network-capture') installNetworkDestCapture();
+      TRACE.rule = rule.name;
       try {
         const acted = await rule.run();
         log(`rule ${rule.name}: ${acted ? 'acted' : 'no action'}`);
-        if (acted) return;
+        if (acted) {
+          log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
+          return;
+        }
       } catch (error) {
         log(`rule ${rule.name}: run error:`, error.message);
       }
     }
+    log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
   }
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       isPlausibleUrl,
+      validateDestination,
       decodeMaybe,
       extractDestFromParams,
       sameAsCurrent,
@@ -1645,6 +1710,7 @@
       findExternalExit,
       handleImageHost,
       handleFileHost,
+      trace: TRACE,
       main,
     };
   }

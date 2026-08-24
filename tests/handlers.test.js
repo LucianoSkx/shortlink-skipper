@@ -213,6 +213,67 @@ test('boost.ink passes knownShortener so its dedicated handler can reach embedde
   assert.strictEqual(h.api.genericGate(), true, 'boost.ink owns handleBoostInk; the gate must open for it');
 });
 
+// --- destination validation matrix (centralized in goto via validateDestination) ---
+
+test('validateDestination accepts plausible external destinations', () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  for (const url of [
+    'https://real-dest.example/final',
+    'https://download.host.example/file.zip?token=x',
+  ]) {
+    const v = h.api.validateDestination(url);
+    assert.ok(v.valid, `${url} must be valid`);
+    assert.ok(v.confidence > 0, 'valid verdict carries confidence');
+  }
+});
+
+test('validateDestination rejects dangerous protocols and junk', () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  for (const url of ['javascript:alert(1)', 'data:text/html,x', 'blob:https://x/y', 'not a url', '', undefined]) {
+    const v = h.api.validateDestination(url);
+    assert.strictEqual(v.valid, false, `${String(url)} must be rejected`);
+    assert.ok(v.reason, 'rejection carries a reason');
+  }
+});
+
+test('validateDestination rejects infrastructure/social/excluded targets (live bug class)', () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  const cases = {
+    'https://www.trustpilot.com/review/bypass.city': 'infrastructure/tracking domain',
+    'https://mail.google.com/mail/u/0/': 'excluded service as destination',
+    'https://wordpress.org/': 'infrastructure/tracking domain',
+    'https://cdn.jsdelivr.net/npm/x': 'infrastructure/tracking domain',
+  };
+  for (const [url, expected] of Object.entries(cases)) {
+    const v = h.api.validateDestination(url);
+    assert.strictEqual(v.valid, false, `${url} must be rejected`);
+    assert.match(v.reason, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `reason for ${url}`);
+  }
+});
+
+test('goto() refuses excluded destinations and records them on the trace', () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  const ok = h.api.goto('https://mail.google.com/mail/u/0/');
+  assert.strictEqual(ok, false, 'must not navigate to an excluded destination');
+  assert.strictEqual(h.navs.length, 0);
+  assert.strictEqual(h.api.trace.refusals.length, 1, 'refusal recorded on trace');
+  assert.match(h.api.trace.refusals[0].reason, /excluded service/);
+});
+
+test('decision trace records detection, winning rule and navigation', async () => {
+  const h = load({
+    href: 'https://imagetwist.com/abc/file.jpg',
+    querySelector: (sel) => (sel === 'a.direct-link' ? { href: 'https://img.imagetwist.com/i/abc.jpg' } : null),
+  });
+  await h.api.main();
+  const t = h.api.trace;
+  assert.strictEqual(t.host, 'imagetwist.com');
+  assert.ok(t.rule === 'image-host', `winning rule recorded, got ${t.rule}`);
+  assert.strictEqual(t.navigations.length, 1, 'navigation recorded on trace');
+  assert.strictEqual(t.navigations[0].url, 'https://img.imagetwist.com/i/abc.jpg');
+  assert.ok(t.navigations[0].hop >= 1, 'hop counter present');
+});
+
 test('findExternalExit still returns a genuine lone destination', () => {
   const h = load({
     href: 'https://short.site.example/abc',
