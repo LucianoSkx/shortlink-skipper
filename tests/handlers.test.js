@@ -274,6 +274,51 @@ test('decision trace records detection, winning rule and navigation', async () =
   assert.ok(t.navigations[0].hop >= 1, 'hop counter present');
 });
 
+// --- candidate confidence (network-capture + single-external-link) ---
+
+test('network-capture navigates on strong fields and records the candidate', async () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  h.sandbox.fetch = () =>
+    Promise.resolve({
+      clone: () => ({ text: () => Promise.resolve('{"destination":"https://dest.example/final"}') }),
+      json: () => Promise.resolve(null),
+    });
+  h.api.installNetworkDestCapture();
+  await h.sandbox.fetch("https://page.example/api");
+  await new Promise((r) => setTimeout(r, 10));
+  assert.ok(await h.api.handleNetworkCapture(), 'strong field must navigate');
+  assert.ok(h.navs.includes('https://dest.example/final'));
+  assert.strictEqual(h.api.trace.candidates[0].confidence, 0.85);
+});
+
+test('network-capture records weak candidates but never navigates on them', async () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  h.sandbox.fetch = () =>
+    Promise.resolve({
+      clone: () => ({ text: () => Promise.resolve('{"url":"https://weak.example/avatar.png"}') }),
+      json: () => Promise.resolve(null),
+    });
+  h.api.installNetworkDestCapture();
+  await h.sandbox.fetch("https://page.example/api");
+  await new Promise((r) => setTimeout(r, 10));
+  assert.strictEqual(await h.api.handleNetworkCapture(), false, 'weak field must not navigate alone');
+  assert.strictEqual(h.navs.length, 0);
+  assert.strictEqual(h.api.trace.candidates[0].confidence, 0.55, 'weak candidate kept for diagnosis');
+});
+
+test('single-external-link acts with recorded low confidence', async () => {
+  const h = load({
+    href: 'https://short.site.example/abc',
+    querySelectorAllOverride: [{ getAttribute: () => 'https://real-dest.example/final', dataset: {} }],
+  });
+  const ok = await h.api.runSingleExternalLink();
+  assert.ok(ok);
+  assert.ok(h.navs.includes('https://real-dest.example/final'));
+  const cand = h.api.trace.candidates.find((c) => c.source === 'single-external-link');
+  assert.ok(cand, 'candidate recorded');
+  assert.strictEqual(cand.confidence, 0.55, 'weakest evidence in the cascade');
+});
+
 test('findExternalExit still returns a genuine lone destination', () => {
   const h = load({
     href: 'https://short.site.example/abc',

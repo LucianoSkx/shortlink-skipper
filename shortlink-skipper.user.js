@@ -48,7 +48,9 @@
     host: null,
     detected: false,
     detectionHits: [],
+    score: 0,
     rule: null,
+    candidates: [],
     navigations: [],
     refusals: [],
   };
@@ -1222,18 +1224,30 @@
   let boostEnabled = false;
 
   let capturedDestUrl = null;
+  let capturedDestConfidence = 0;
+
+  // Network JSON is full of fields named url/link/avatar/api — only strong
+  // destination-ish fields earn enough confidence to navigate on their own.
+  // Weak candidates are recorded on the trace for diagnosis but never act.
+  const NET_FIELD_CONFIDENCE = {
+    destination: 0.85, final: 0.85, final_url: 0.85,
+    redirect: 0.8, redirect_url: 0.8, redirect_uri: 0.8,
+    target: 0.6, go: 0.6,
+    url: 0.55, link: 0.55,
+  };
+  const NET_NAVIGATE_MIN_CONFIDENCE = 0.7;
 
   function installNetworkDestCapture() {
     if (PAGE.__slNetCapturing) return;
     PAGE.__slNetCapturing = true;
     const scan = (text) => {
-      if (capturedDestUrl || typeof text !== 'string' || text.length > 500000) return;
+      if (typeof text !== 'string' || text.length > 500000) return;
       const pattern =
-        /"(?:url|link|redirect(?:_url|_uri)?|final(?:_url)?|destination|target|go)"\s*:\s*"(https?:\/\/[^"\\]+)"/gi;
+        /"(url|link|redirect(?:_url|_uri)?|final(?:_url)?|destination|target|go)"\s*:\s*"(https?:\/\/[^"\\]+)"/gi;
       let match;
       while ((match = pattern.exec(text))) {
         try {
-          const u = new URL(match[1].replace(/\\u002F/gi, '/'));
+          const u = new URL(match[2].replace(/\\u002F/gi, '/'));
           const host = u.host.toLowerCase();
           if (
             u.host &&
@@ -1241,9 +1255,13 @@
             !EXCLUDE_HOSTS.some((re) => re.test(host)) &&
             !INFRA_HOST.test(host)
           ) {
-            capturedDestUrl = u.href;
-            log('destination captured from network:', u.href);
-            return;
+            const confidence = NET_FIELD_CONFIDENCE[match[1].toLowerCase()] || 0.5;
+            TRACE.candidates.push({ url: u.href, source: 'network-capture', field: match[1], confidence });
+            if (confidence > capturedDestConfidence) {
+              capturedDestUrl = u.href;
+              capturedDestConfidence = confidence;
+              log(`destination candidate from network (${match[1]}, ${confidence}):`, u.href);
+            }
           }
         } catch {}
       }
@@ -1275,6 +1293,10 @@
 
   async function handleNetworkCapture() {
     if (!capturedDestUrl) return false;
+    if (capturedDestConfidence < NET_NAVIGATE_MIN_CONFIDENCE) {
+      log(`network candidate below confidence threshold (${capturedDestConfidence}) — not navigating`);
+      return false;
+    }
     log('using network-captured destination');
     return goto(capturedDestUrl);
   }
@@ -1517,6 +1539,18 @@
     return true;
   }
 
+  // Weakest evidence in the cascade (0.55): a lone external exit may well be
+  // the destination, but only when nothing stronger appeared. Declared last on
+  // purpose; the confidence is recorded so the trace shows why it acted.
+  const SINGLE_EXTERNAL_CONFIDENCE = 0.55;
+  async function runSingleExternalLink() {
+    await sleep(4000);
+    const dest = findExternalExit();
+    if (!dest) return false;
+    TRACE.candidates.push({ url: dest, source: 'single-external-link', confidence: SINGLE_EXTERNAL_CONFIDENCE });
+    return goto(dest);
+  }
+
   const GENERIC_RULES = [
     { name: 'image-host', when: () => IMAGE_HOSTS.test(location.host), run: handleImageHost },
     { name: 'file-host', when: () => FILE_HOSTS.test(location.host), run: handleFileHost },
@@ -1561,12 +1595,7 @@
     { name: 'service-last-resort', when: () => /^bypass\.tools$/.test(location.host), run: handleServiceLastResort },
     { name: 'bypass-city', when: genericGate, run: handleBypassCity },
     { name: 'captcha-manual', when: genericGate, run: handleManualCaptcha },
-    { name: 'single-external-link', when: genericGate, run: async () => {
-        await sleep(4000);
-        const dest = findExternalExit();
-        if (dest) return goto(dest);
-        return false;
-      } },
+    { name: 'single-external-link', when: genericGate, run: runSingleExternalLink },
   ];
 
   function registerMenu() {
@@ -1708,6 +1737,9 @@
       installEarlyHooks,
       genericGate,
       findExternalExit,
+      installNetworkDestCapture,
+      handleNetworkCapture,
+      runSingleExternalLink,
       handleImageHost,
       handleFileHost,
       trace: TRACE,
