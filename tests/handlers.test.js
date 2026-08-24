@@ -211,6 +211,27 @@ test('findExternalExit still returns a genuine lone destination', () => {
   assert.strictEqual(h.api.findExternalExit(), 'https://real-dest.example/final');
 });
 
+test('findExternalExit refuses site roots (live bug: stfly.me → wordpress.org)', () => {
+  const h = load({
+    href: 'https://stfly.me/',
+    querySelectorAllOverride: [{ getAttribute: () => 'https://wordpress.org/', dataset: {} }],
+  });
+  assert.strictEqual(h.api.findExternalExit(), null, 'bare / has no trustworthy lone exit');
+});
+
+test('findExternalExit works on shortlink-shaped URLs even with the root guard', () => {
+  for (const href of [
+    'https://short.site.example/abc123',
+    'https://example.com/?token=x9',
+  ]) {
+    const h = load({
+      href,
+      querySelectorAllOverride: [{ getAttribute: () => 'https://real-dest.example/final', dataset: {} }],
+    });
+    assert.strictEqual(h.api.findExternalExit(), 'https://real-dest.example/final', `must resolve on ${href}`);
+  }
+});
+
 test('BYPASS_SERVICE_URL matches linkvertise.com and linkvertise.net', () => {
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.com/abc'));
   assert.ok(h2.api.BYPASS_SERVICE_URL.test('https://linkvertise.net/x/y'));

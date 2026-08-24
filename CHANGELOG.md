@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.10.4 — 2026-08-24
+
+### Fixed
+- **Live bug (stfly.me)**: `single-external-link` followed the site's lone WordPress footer link (`wordpress.org`) as if it were a destination — same failure shape as spaste.com → gmail.com. Root fix instead of host whack-a-mole: `findExternalExit()` now refuses site roots entirely (bare `/` with no query string) — a homepage never carries a shortener's destination, so its lone external link is always footer noise. Shortlink-shaped URLs (`/abc123`, `?token=…`) still resolve normally.
+- `wordpress` added to `INFRA_HOST`.
+
+### Validated live (CDP)
+- stfly.me home reproduced the bug on 1.10.3; guard verified by regression tests.
+
 ## 1.10.3 — 2026-08-24
 
 ### Fixed
