@@ -103,6 +103,7 @@ function load(opts = {}) {
   sandbox.location = loc;
   sandbox.document = doc;
   doc.querySelector = opts.querySelector || ((sel) => (sel.includes('setc') ? { action: opts.href || 'https://example.com/' } : null));
+  if (opts.querySelectorAllOverride) doc.querySelectorAll = () => opts.querySelectorAllOverride;
   vm.createContext(sandbox);
   vm.runInContext(SRC, sandbox);
 
@@ -187,6 +188,27 @@ test('handleBypassCity picks the real destination even when footer links come fi
   const ok = await h.api.handleBypassCity();
   assert.ok(ok);
   assert.ok(h.navs.includes('https://real-dest.example/final'));
+});
+
+test('findExternalExit ignores a lone gmail link (live bug: spaste.com → gmail.com)', () => {
+  const h = load({
+    href: 'https://spaste.com/',
+    querySelectorAllOverride: [{ getAttribute: () => 'https://mail.google.com/mail/u/0/', dataset: {} }],
+  });
+  assert.strictEqual(h.api.findExternalExit(), null, 'gmail must never count as the single external exit');
+});
+
+test('EXTRA_SHORTENER_HOSTS no longer gates spaste.com (source of two live false positives)', () => {
+  const h = load({ href: 'https://spaste.com/', querySelector: () => null });
+  assert.strictEqual(h.api.genericGate(), false, 'pastebin home must not open the shortlink gate');
+});
+
+test('findExternalExit still returns a genuine lone destination', () => {
+  const h = load({
+    href: 'https://short.site.example/abc',
+    querySelectorAllOverride: [{ getAttribute: () => 'https://real-dest.example/final', dataset: {} }],
+  });
+  assert.strictEqual(h.api.findExternalExit(), 'https://real-dest.example/final');
 });
 
 test('BYPASS_SERVICE_URL matches linkvertise.com and linkvertise.net', () => {

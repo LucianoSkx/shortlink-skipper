@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.10.3 — 2026-08-24
+
+### Fixed
+- **Live bug (spaste.com, second one)**: with the bypass-city fix in place, `single-external-link` then found a lone footer link to `gmail.com` and navigated to it — Gmail escaped every exclusion list (`(^|\.)google\.` does not match `gmail.com`). `EXCLUDE_HOSTS` now covers `gmail.com` and `googlemail.com`.
+- **Root cause removed**: `spaste.com` dropped from `EXTRA_SHORTENER_HOSTS` — a pastebin home has no destination, and it produced both live false positives of this session (Trustpilot, Gmail). The generic gate must not open where nothing can be resolved.
+- `findExternalExit` exported for testing; regression tests cover the lone-gmail case and confirm genuine single destinations still resolve.
+
 ## 1.10.2 — 2026-08-24
 
 ### Fixed
