@@ -170,7 +170,7 @@ test('handleBypassCity ignores footer/review links (live bug: trustpilot on spas
     }),
   );
   const ok = await h.api.handleBypassCity();
-  assert.strictEqual(ok, false, 'no real destination → must not navigate');
+  assert.strictEqual(ok, false, 'no real destination -> must not navigate');
   assert.strictEqual(h.navs.length, 0);
 });
 
@@ -190,7 +190,7 @@ test('handleBypassCity picks the real destination even when footer links come fi
   assert.ok(h.navs.includes('https://real-dest.example/final'));
 });
 
-test('findExternalExit ignores a lone gmail link (live bug: spaste.com → gmail.com)', () => {
+test('findExternalExit ignores a lone gmail link (live bug: spaste.com -> gmail.com)', () => {
   const h = load({
     href: 'https://spaste.com/',
     querySelectorAllOverride: [{ getAttribute: () => 'https://mail.google.com/mail/u/0/', dataset: {} }],
@@ -203,7 +203,7 @@ test('EXTRA_SHORTENER_HOSTS no longer gates spaste.com (source of two live false
   assert.strictEqual(h.api.genericGate(), false, 'pastebin home must not open the shortlink gate');
 });
 
-test('stly.link (new stfly network domain) opens the gate — live finding', () => {
+test('stly.link (new stfly network domain) opens the gate  -  live finding', () => {
   const h = load({ href: 'https://stly.link/69HJM', querySelector: () => null });
   assert.strictEqual(h.api.genericGate(), true, 'stfly migrated to stly.link; it must be a known shortener');
 });
@@ -401,7 +401,7 @@ test('findExternalExit still returns a genuine lone destination', () => {
   assert.strictEqual(h.api.findExternalExit(), 'https://real-dest.example/final');
 });
 
-test('findExternalExit refuses site roots (live bug: stfly.me → wordpress.org)', () => {
+test('findExternalExit refuses site roots (live bug: stfly.me -> wordpress.org)', () => {
   const h = load({
     href: 'https://stfly.me/',
     querySelectorAllOverride: [{ getAttribute: () => 'https://wordpress.org/', dataset: {} }],
@@ -580,7 +580,7 @@ test('main() on failed image-host does not fall through to shortlink fallbacks',
   const h = load({ href: 'https://imgbb.com/abc', querySelector: () => null });
   h.sandbox.GM_xmlhttpRequest = () => {};
   await h.api.main();
-  assert.strictEqual(h.navs.length, 0, 'no destination found → page stays untouched, no bypass.city/captcha fallback');
+  assert.strictEqual(h.navs.length, 0, 'no destination found -> page stays untouched, no bypass.city/captcha fallback');
 });
 
 test('handleImageHost follows the direct image anchor', async () => {

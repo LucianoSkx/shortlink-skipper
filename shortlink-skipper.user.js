@@ -270,7 +270,7 @@
 
   // A well-formed URL can still be a terrible destination. Live incidents
   // (trustpilot, gmail, wordpress.org followed as "destinations") all came
-  // from caller-side filters with holes — validation is centralized here so
+  // from caller-side filters with holes  -  validation is centralized here so
   // every current and future caller inherits the same bar for navigation.
   function validateDestination(v) {
     if (!isPlausibleUrl(v)) return { valid: false, confidence: 0, reason: 'not a plausible http(s) URL' };
@@ -452,8 +452,8 @@
 
   function findExternalExit() {
     // A site root (bare `/`, no query) never carries the destination of a
-    // shortener — its lone external link is a footer/about/contact link.
-    // Live evidence: spaste.com → gmail.com, stfly.me → wordpress.org.
+    // shortener  -  its lone external link is a footer/about/contact link.
+    // Live evidence: spaste.com -> gmail.com, stfly.me -> wordpress.org.
     const barePath = location.pathname.replace(/\/+$/, '') === '';
     if (barePath && !location.search) return null;
     const here = location.host.toLowerCase();
@@ -1299,7 +1299,7 @@
   let capturedDestUrl = null;
   let capturedDestConfidence = 0;
 
-  // Network JSON is full of fields named url/link/avatar/api — only strong
+  // Network JSON is full of fields named url/link/avatar/api  -  only strong
   // destination-ish fields earn enough confidence to navigate on their own.
   // Weak candidates are recorded on the trace for diagnosis but never act.
   const NET_FIELD_CONFIDENCE = {
@@ -1367,7 +1367,7 @@
   async function handleNetworkCapture() {
     if (!capturedDestUrl) return false;
     if (capturedDestConfidence < NET_NAVIGATE_MIN_CONFIDENCE) {
-      log(`network candidate below confidence threshold (${capturedDestConfidence}) — not navigating`);
+      log(`network candidate below confidence threshold (${capturedDestConfidence})  -  not navigating`);
       return false;
     }
     log('using network-captured destination');

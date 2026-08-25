@@ -64,8 +64,8 @@ async function main() {
     process.stdout.write(`  ${c.family.padEnd(22)} ${c.id.padEnd(14)} `);
     const r = await runCase(c);
     results.push(r);
-    const icon = r.ok ? '✅' : (r.hardTimeout ? '⏰' : '❌');
-    console.log(`${icon}  ${r.elapsed}s  →  ${r.finalUrl || '(no redirect)'}`);
+    const icon = r.ok ? '[PASS]' : (r.hardTimeout ? '[TIME]' : '[FAIL]');
+    console.log(`${icon}  ${r.elapsed}s  ->  ${r.finalUrl || '(no redirect)'}`);
   }
 
   const pass = results.filter(r => r.ok).length;

@@ -157,7 +157,7 @@ test('normal page: zero heavy observers and sub-50ms main()', async () => {
   await h.api.main();
   const elapsed = Date.now() - start;
 
-  assert.ok(elapsed < 50, `main() took ${elapsed}ms on a normal page — must be near-zero`);
+  assert.ok(elapsed < 50, `main() took ${elapsed}ms on a normal page  -  must be near-zero`);
   assert.strictEqual(observersCreated, 0, 'no MutationObserver may be created on a normal page');
   assert.strictEqual(timersWrapped, 0, 'setTimeout must never be called or wrapped on a normal page');
 });
