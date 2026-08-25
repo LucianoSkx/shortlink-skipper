@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.7
+// @version      1.10.8
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -774,6 +774,11 @@
     if (/just a moment/i.test(document.title)) return true;
     if (document.querySelector('iframe[src*="challenges.cloudflare.com"]')) return true;
     if (document.querySelector('script[src*="challenges.cloudflare.com"], script[src*="cf-assets"]')) return true;
+    // Turnstile widget (tpi.li and friends): its challenge is timing-sensitive,
+    // so never let prepareBoost's timer speed-up run underneath it.
+    if (document.querySelector('.cf-turnstile')) return true;
+    if (document.querySelector('script[src*="turnstile"]')) return true;
+    if (typeof PAGE.turnstile !== 'undefined') return true;
     return false;
   }
 
@@ -1784,7 +1789,9 @@
     // resolving request before DOMContentLoaded, which the late rule-loop
     // install would miss entirely. The hook is idempotent and only stores
     // candidates -- the rule loop still decides whether to act on them.
-    if (knownShortener()) installNetworkDestCapture();
+    // Skip on a challenge/captcha page so we never wrap the request layer that
+    // the widget (e.g. Turnstile) relies on.
+    if (knownShortener() && !cloudflareChallenging()) installNetworkDestCapture();
 
     // Cloudflare challenge interstitial: never interfere -- let it run so the
     // user can solve it and the real page loads afterward.
