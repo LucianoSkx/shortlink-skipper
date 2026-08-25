@@ -1,38 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 
-const { execFile, fork } = require('child_process');
+const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const CASES_FILE  = path.join(__dirname, 'cases.json');
-const LIVE_JS     = path.join(__dirname, 'live.js');
-const SERVER_JS   = path.join(__dirname, 'test-server.js');
-const TIMEOUT_S   = parseInt(process.env.LIVE_TIMEOUT || '25', 10);
-const PORT        = parseInt(process.env.TEST_PORT || '18999', 10);
+const CASES_FILE = path.join(__dirname, 'cases.json');
+const LIVE_JS    = path.join(__dirname, 'live.js');
+const TIMEOUT_S  = parseInt(process.env.LIVE_TIMEOUT || '25', 10);
 
 const cases = JSON.parse(fs.readFileSync(CASES_FILE, 'utf8'));
 
-function startServer() {
-  return new Promise((resolve, reject) => {
-    const child = fork(SERVER_JS, { env: { ...process.env, TEST_PORT: String(PORT) }, stdio: ['pipe', 'pipe', 'pipe', 'ipc'] });
-    let started = false;
-    child.stdout.on('data', (d) => {
-      const msg = d.toString();
-      if (!started && msg.includes('listening')) { started = true; resolve(child); }
-    });
-    child.stderr.on('data', (d) => console.error('[server]', d.toString().trim()));
-    child.on('error', reject);
-    child.on('exit', (code) => { if (!started) reject(new Error(`server exited ${code}`)); });
-    setTimeout(() => { if (!started) { child.kill(); reject(new Error('server timeout')); } }, 5000);
-  });
-}
-
 function runCase(c) {
-  const targetUrl = `http://127.0.0.1:${PORT}${c.path}`;
   return new Promise((resolve) => {
     const start = Date.now();
-    execFile(process.execPath, [LIVE_JS, targetUrl, c.expect], {
+    execFile(process.execPath, [LIVE_JS, c.html, c.expect], {
       timeout: (TIMEOUT_S + 5) * 1000,
       maxBuffer: 1024 * 1024,
       env: { ...process.env, CDP_URL: process.env.CDP_URL || 'http://127.0.0.1:9222' },
@@ -50,7 +32,6 @@ function runCase(c) {
       resolve({
         id:      c.id,
         family:  c.family,
-        path:    c.path,
         expect:  c.expect,
         finalUrl,
         match,
@@ -68,7 +49,6 @@ async function main() {
   const queue  = filter ? cases.filter(c => c.family.includes(filter)) : cases;
   if (!queue.length) { console.log(`No cases matched: ${filter}`); process.exit(1); }
 
-  // Check CDP is reachable
   const http = require('http');
   const cdpUp = await new Promise((resolve) => {
     http.get(process.env.CDP_URL || 'http://127.0.0.1:9222/json/version', (r) => {
@@ -77,12 +57,7 @@ async function main() {
   });
   if (!cdpUp) { console.error('CDP not reachable at', process.env.CDP_URL || 'http://127.0.0.1:9222'); process.exit(1); }
 
-  // Start test server
-  console.log('Starting test server...');
-  const server = await startServer();
-  console.log(`Test server on http://127.0.0.1:${PORT}\n`);
-
-  console.log(`Running ${queue.length} local test(s)...\n`);
+  console.log(`Running ${queue.length} live test(s)...\n`);
   const results = [];
 
   for (const c of queue) {
@@ -104,7 +79,6 @@ async function main() {
     });
   }
 
-  server.kill();
   process.exit(fail ? 1 : 0);
 }
 

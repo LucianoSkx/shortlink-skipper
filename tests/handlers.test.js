@@ -680,3 +680,21 @@ test('sameAsCurrent distinguishes query strings but ignores the hash', () => {
   assert.strictEqual(h.api.sameAsCurrent('https://site.example/download?id=1#top'), true);
   assert.strictEqual(h.api.sameAsCurrent('https://site.example/download?id=1'), true);
 });
+
+test('wp-content-lock rule matches ssdhostting.com and similar hosts', () => {
+  const hosts = ['ssdhostting.com', 'rvpaste.com', 'shrinkbixby.com'];
+  for (const host of hosts) {
+    const h = load({ href: `https://${host}/some-article/` });
+    assert.strictEqual(
+      h.api.knownShortener(),
+      true,
+      `knownShortener must match ${host} (wp-content-lock host)`,
+    );
+  }
+  const normal = load({ href: 'https://example.com/' });
+  assert.strictEqual(
+    normal.api.knownShortener(),
+    false,
+    'knownShortener must not match normal sites',
+  );
+});

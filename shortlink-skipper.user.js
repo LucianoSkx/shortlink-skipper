@@ -102,7 +102,7 @@
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.(com|net)$/;
   const ADLINKFLY_HOSTS =
-    /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com)$/;
+    /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com|shrinkbixby\.com)$/;
   const TOKEN_HOST = /(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
@@ -113,6 +113,8 @@
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cubeupload\.com|depic\.me|directupload\.eu|fastpic\.org|fotosik\.pl|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagenetz\.de|imageshack\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgpv\.com|imgtraffic\.com|imx\.to|keptarolo\.hu|pic-upload\.de|picstate\.com|pimpandhost\.com|pixhost\.to|postimages\.org|turboimagehost\.com|3xplanet\.com)$/;
   const FILE_HOSTS =
     /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com)$/;
+  const WP_CONTENT_LOCK_HOST =
+    /(^|\.)(ssdhostting\.com|rvpaste\.com|shrinkbixby\.com)$/;
   const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
     /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|gplinks\.in)\/.+)/;
@@ -397,6 +399,7 @@
       ZAFREE_HOST.test(location.host) ||
       ADLINKFLY_HOSTS.test(location.host) ||
       EXTRA_SHORTENER_HOSTS.test(location.host) ||
+      WP_CONTENT_LOCK_HOST.test(location.host) ||
       BYPASS_SERVICE_URL.test(location.href)
     );
   }
@@ -1621,6 +1624,25 @@
     return goto(dest);
   }
 
+  async function handleWpContentLock() {
+    log('WordPress content-lock pattern detected');
+    const btn = await waitFor(() => {
+      const candidates = document.querySelectorAll('a.btn, button.btn, .getmylink, .wp2continuelink, #wp2continue, #getmylink, #getnewlink');
+      for (const el of candidates) {
+        if (visible(el) && el.href && !el.href.includes(location.hostname)) return el;
+      }
+      const generic = findByText(/\b(get\s+link|continue|proceed|download\s+now)\b/i);
+      if (generic && visible(generic) && generic.href && !generic.href.includes(location.hostname)) return generic;
+      return null;
+    }, 25000, 500);
+    if (!btn) {
+      log('content-lock: no external button found after wait');
+      return false;
+    }
+    log('content-lock: navigating to', btn.href);
+    return goto(btn.href);
+  }
+
   const GENERIC_RULES = [
     { name: 'image-host', when: () => IMAGE_HOSTS.test(location.host), run: handleImageHost },
     { name: 'file-host', when: () => FILE_HOSTS.test(location.host), run: handleFileHost },
@@ -1637,6 +1659,7 @@
     { name: 'acortalink', when: () => ACORTALINK_HOST.test(location.host), run: handleAcortalink },
     { name: 'bstlar', when: () => BSTLAR_HOST.test(location.host), run: handleBstlar },
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
+    { name: 'wp-content-lock', when: () => WP_CONTENT_LOCK_HOST.test(location.host), run: handleWpContentLock },
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
     { name: 'setc-form', when: () => document.querySelector('form#setc, form#landing [name="go"]') !== null, run: handleSetcForm },
     { name: 'boost-ink', when: () => /(^|\.)boost\.ink$/.test(location.host), run: handleBoostInk },
@@ -1844,6 +1867,7 @@
       cloudflareChallenging,
       captchaPresent,
       looksLikeShortlink,
+      knownShortener,
       goto,
       handleLinkvertiseEasy,
       handleAdLinkFly,
