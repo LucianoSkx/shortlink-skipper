@@ -93,6 +93,7 @@ function load(opts = {}) {
     MouseEvent: function () {},
     PointerEvent: function () {},
     Event: function () {},
+    getComputedStyle: () => ({ visibility: 'visible', display: 'block', opacity: '1' }),
     MutationObserver: function () { this.observe = () => {}; this.disconnect = () => {}; },
     addEventListener: () => {},
     removeEventListener: () => {},
@@ -697,4 +698,60 @@ test('wp-content-lock rule matches ssdhostting.com and similar hosts', () => {
     false,
     'knownShortener must not match normal sites',
   );
+});
+
+test('wp-content-lock: navigates to next page on same host (different path)', async () => {
+  const nextPage = 'https://ssdhostting.com/key-web-hosting-control-panel/';
+  const linkEl = {
+    href: nextPage,
+    disabled: false,
+    hidden: false,
+    getBoundingClientRect: () => ({ width: 100, height: 20 }),
+  };
+  const h = load({
+    href: 'https://ssdhostting.com/what-is-cloud-computing/',
+    querySelectorAllOverride: [linkEl],
+  });
+  const acted = await h.api.handleWpContentLock();
+  assert.strictEqual(acted, true, 'handleWpContentLock must navigate to next page');
+  assert.ok(
+    h.navs.includes(nextPage),
+    `should navigate to next page on same host, got: ${JSON.stringify(h.navs)}`,
+  );
+});
+
+test('wp-content-lock: navigates to external final destination (mediafire)', async () => {
+  const finalUrl = 'https://www.mediafire.com/file/12b3yy74wasb4ym/Spider-Man+v1.2.3e+Fix.apk/file';
+  const linkEl = {
+    href: finalUrl,
+    disabled: false,
+    hidden: false,
+    getBoundingClientRect: () => ({ width: 100, height: 20 }),
+  };
+  const h = load({
+    href: 'https://ssdhostting.com/key-web-hosting-control-panel/',
+    querySelectorAllOverride: [linkEl],
+  });
+  const acted = await h.api.handleWpContentLock();
+  assert.strictEqual(acted, true, 'handleWpContentLock must navigate to final destination');
+  assert.ok(
+    h.navs.includes(finalUrl),
+    `should navigate to mediafire final, got: ${JSON.stringify(h.navs)}`,
+  );
+});
+
+test('wp-content-lock: refuses to loop back to the same page', async () => {
+  const samePage = 'https://ssdhostting.com/what-is-cloud-computing/';
+  const linkEl = {
+    href: samePage,
+    disabled: false,
+    hidden: false,
+    getBoundingClientRect: () => ({ width: 100, height: 20 }),
+  };
+  const h = load({
+    href: 'https://ssdhostting.com/what-is-cloud-computing/',
+    querySelectorAllOverride: [linkEl],
+  });
+  const acted = await h.api.handleWpContentLock(1000);
+  assert.strictEqual(acted, false, 'handleWpContentLock must not navigate to the same page');
 });

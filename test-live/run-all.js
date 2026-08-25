@@ -14,10 +14,12 @@ const cases = JSON.parse(fs.readFileSync(CASES_FILE, 'utf8'));
 function runCase(c) {
   return new Promise((resolve) => {
     const start = Date.now();
-    execFile(process.execPath, [LIVE_JS, c.html, c.expect], {
-      timeout: (TIMEOUT_S + 5) * 1000,
+    const hostArg = c.host || '';
+    const caseTimeout = c.timeout || TIMEOUT_S;
+    execFile(process.execPath, [LIVE_JS, c.html, c.expect, hostArg], {
+      timeout: (caseTimeout + 10) * 1000,
       maxBuffer: 1024 * 1024,
-      env: { ...process.env, CDP_URL: process.env.CDP_URL || 'http://127.0.0.1:9222' },
+      env: { ...process.env, LIVE_TIMEOUT_MS: String(caseTimeout * 1000), CDP_URL: process.env.CDP_URL || 'http://127.0.0.1:9222' },
     }, (err, stdout, stderr) => {
       const elapsed = ((Date.now() - start) / 1000).toFixed(1);
       const lines = (stdout || '').split('\n').filter(Boolean);
@@ -34,6 +36,8 @@ function runCase(c) {
         family:  c.family,
         expect:  c.expect,
         finalUrl,
+        logs:    logLine,
+        rawOut:  stdout || '',
         match,
         hardTimeout,
         exitCode,
@@ -72,10 +76,15 @@ async function main() {
   const fail = results.length - pass;
 
   console.log(`\n${pass}/${results.length} passed`);
+  results.forEach(r => {
+    console.log(`  ${r.id} raw: ${(r.rawOut || '').split('\n').filter(Boolean).join(' | ')}`);
+    console.log(`  ${r.id} logs: ${r.logs.slice(0, 600)}`);
+  });
   if (fail) {
     console.log('\nFailed:');
     results.filter(r => !r.ok).forEach(r => {
       console.log(`  ${r.id} (${r.family}): expected=${r.expect} got=${r.finalUrl || '(none)'}`);
+      console.log(`    raw: ${(r.rawOut || '').split('\n').filter(Boolean).join(' | ')}`);
     });
   }
 

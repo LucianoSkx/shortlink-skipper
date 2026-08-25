@@ -20,7 +20,7 @@ function getJSON(url) {
   });
 }
 
-const GM_MOCKS = `
+const GM_MOCKS = (testHost) => `
 'use strict';
 if (typeof unsafeWindow === 'undefined') var unsafeWindow = globalThis;
 if (typeof GM_getValue === 'undefined')  var GM_getValue  = (k, d) => { if (k === 'verbose') return true; return d ?? false; };
@@ -29,11 +29,34 @@ if (typeof GM_registerMenuCommand === 'undefined') var GM_registerMenuCommand = 
 if (typeof GM_openInTab === 'undefined')  var GM_openInTab  = () => {};
 if (typeof GM_setClipboard === 'undefined') var GM_setClipboard = () => {};
 if (typeof GM_xmlhttpRequest === 'undefined') var GM_xmlhttpRequest = (o) => { try { o.onerror?.({}); } catch(_){} };
+${testHost ? `
+// Test host override for host-gated rules (about:blank has empty host).
+// Shadow the global 'location' with a local var inside this IIFE so the
+// injected userscript reads the fake host without depending on
+// window.location being redefinable (it is non-configurable in some CDP
+// contexts, which made Object.defineProperty flaky).
+var __sl_host = ${JSON.stringify(testHost)};
+var __sl_href = 'https://' + __sl_host + '/test/';
+try { Object.defineProperty(window, '__SL_FINAL_HREF', { configurable: true, writable: true, value: __sl_href }); } catch (_) {}
+var location = {
+  get href() { return __sl_href; },
+  set href(v) { __sl_href = String(v); try { window.__SL_FINAL_HREF = __sl_href; } catch (_) {} },
+  host: __sl_host,
+  hostname: __sl_host,
+  pathname: '/test/',
+  search: '',
+  hash: '',
+  origin: 'https://' + __sl_host,
+  toString() { return __sl_href; },
+};
+console.log('SKIPPER_HOST: ' + __sl_host);
+` : ''}
 `;
 
 async function main() {
   const html      = process.argv[2];  // raw HTML string
   const expect    = process.argv[3] || 'example.com';
+  const testHost  = process.argv[4] || '';  // optional fake host for host-gated rules
   const timeoutMs = parseInt(process.env.LIVE_TIMEOUT_MS || '25000', 10);
   const hardKill  = setTimeout(() => { console.error('HARD_TIMEOUT'); process.exit(3); }, timeoutMs);
 
@@ -73,7 +96,7 @@ async function main() {
 
   // Inject GM mocks + userscript via Runtime.evaluate
   const userscriptCode = fs.readFileSync(SCRIPT_PATH, 'utf8');
-  const wrappedCode = `(function(){\ntry{\n${GM_MOCKS}\n${userscriptCode}\n}catch(e){console.log('INJECT_ERR:'+e.message);}\n})();`;
+  const wrappedCode = `(function(){\ntry{\n${GM_MOCKS(testHost)}\n${userscriptCode}\n}catch(e){console.log('INJECT_ERR:'+e.message);}\n})();`;
   await S('Runtime.evaluate', { expression: wrappedCode, returnByValue: true });
 
   // Poll final URL
@@ -89,7 +112,7 @@ async function main() {
     }
     if (!final) {
       try {
-        const r = await S('Runtime.evaluate', { expression: 'location.href', returnByValue: true });
+        const r = await S('Runtime.evaluate', { expression: 'window.__SL_FINAL_HREF || location.href', returnByValue: true });
         final = r.result && r.result.result ? r.result.result.value : '';
       } catch (_) {}
     }
@@ -108,6 +131,7 @@ async function main() {
   console.log('FINAL_URL=' + final);
   console.log('MATCH=' + (final.includes(expect) ? 'YES' : 'NO'));
   console.log('SKIPPER_LOGS=' + JSON.stringify(logs.map(l => l.slice(0, 300)).slice(0, 15)));
+  try { await send('Target.closeTarget', { targetId }); } catch (_) {}
   ws.close();
   process.exit(0);
 }

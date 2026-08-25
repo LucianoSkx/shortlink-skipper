@@ -47,5 +47,14 @@
     "expect": "about:blank",
     "family": "negative",
     "note": "no shortlink indicators -- skipper must NOT navigate"
+  },
+  {
+    "id": "wp-lock-1",
+    "html": "<div class='getmylink'><a href='https://www.mediafire.com/file/12b3yy74wasb4ym/Spider-Man+v1.2.3e+Fix.apk/file'>Get Link</a></div><p>Please Wait 15 Seconds...</p><span id='newtimer'></span>",
+    "expect": "mediafire.com/file/12b3yy74wasb4ym",
+    "family": "wp-content-lock",
+    "host": "ssdhostting.com",
+    "timeout": 40,
+    "note": "WordPress content-lock: timer + external getmylink link to mediafire"
   }
 ]

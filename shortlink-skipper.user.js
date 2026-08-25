@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.7-dev
+// @version      1.10.7
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -1624,24 +1624,24 @@
     return goto(dest);
   }
 
-  async function handleWpContentLock() {
-    log('WordPress content-lock pattern detected');
-    const btn = await waitFor(() => {
-      const candidates = document.querySelectorAll('a.btn, button.btn, .getmylink, .wp2continuelink, #wp2continue, #getmylink, #getnewlink');
-      for (const el of candidates) {
-        if (visible(el) && el.href && !el.href.includes(location.hostname)) return el;
+    async function handleWpContentLock(timeoutMs = 25000) {
+      log('WordPress content-lock pattern detected');
+      const btn = await waitFor(() => {
+        const candidates = document.querySelectorAll('a.btn, button.btn, .getmylink, .getmylink a, .wp2continuelink, .wp2continuelink a, #wp2continue, #getmylink, #getnewlink');
+        for (const el of candidates) {
+          if (visible(el) && el.href && isPlausibleUrl(el.href) && !sameAsCurrent(el.href)) return el;
+        }
+        const generic = findByText(/\b(get\s+link|continue|proceed|download\s+now)\b/i);
+        if (generic && visible(generic) && generic.href && isPlausibleUrl(generic.href) && !sameAsCurrent(generic.href)) return generic;
+        return null;
+      }, timeoutMs, 500);
+      if (!btn) {
+        log('content-lock: no external button found after wait');
+        return false;
       }
-      const generic = findByText(/\b(get\s+link|continue|proceed|download\s+now)\b/i);
-      if (generic && visible(generic) && generic.href && !generic.href.includes(location.hostname)) return generic;
-      return null;
-    }, 25000, 500);
-    if (!btn) {
-      log('content-lock: no external button found after wait');
-      return false;
+      log('content-lock: navigating to', btn.href);
+      return goto(btn.href);
     }
-    log('content-lock: navigating to', btn.href);
-    return goto(btn.href);
-  }
 
   const GENERIC_RULES = [
     { name: 'image-host', when: () => IMAGE_HOSTS.test(location.host), run: handleImageHost },
@@ -1789,7 +1789,13 @@
     // Cloudflare challenge interstitial: never interfere -- let it run so the
     // user can solve it and the real page loads afterward.
     if (document.readyState === 'loading') {
-      await new Promise((resolve) => PAGE.addEventListener('DOMContentLoaded', resolve, { once: true }));
+      await new Promise((resolve) => {
+        if (document.readyState !== 'loading') return resolve();
+        PAGE.addEventListener('DOMContentLoaded', resolve, { once: true });
+        // Guard against the event having already fired (race in synthetic
+        // test contexts where setDocumentContent resolves before we attach).
+        setTimeout(resolve, 0);
+      });
     }
     if (cloudflareChallenging()) {
       log('Cloudflare challenge detected -- standing by, not interfering');
@@ -1869,6 +1875,7 @@
       looksLikeShortlink,
       knownShortener,
       goto,
+      handleWpContentLock,
       handleLinkvertiseEasy,
       handleAdLinkFly,
       handleBypassCity,
