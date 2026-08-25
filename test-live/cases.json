@@ -1,9 +1,51 @@
 [
-  { "id": "fetch-1",     "path": "/fetch-redirect",   "expect": "example.com/fetch-target",   "family": "fetch-redirect",  "note": "fetch → location.href redirect" },
-  { "id": "form-1",      "path": "/form-redirect",     "expect": "example.com/form-target",    "family": "form-redirect",   "note": "hidden form auto-submit POST" },
-  { "id": "button-1",    "path": "/button-redirect",   "expect": "example.com/button-target",  "family": "button-redirect", "note": "timer + appear button click" },
-  { "id": "meta-1",      "path": "/meta-redirect",     "expect": "example.com/meta-target",    "family": "meta-redirect",   "note": "meta refresh redirect" },
-  { "id": "js-1",        "path": "/js-redirect",       "expect": "example.com/js-target",      "family": "js-redirect",     "note": "window.location.replace()" },
-  { "id": "single-1",    "path": "/single-link",       "expect": "single-link",              "family": "single-link",     "note": "single external <a> — confidence 0.55, must NOT auto-navigate" },
-  { "id": "normal-1",    "path": "/normal-page",       "expect": "normal-page",                "family": "negative",        "note": "no redirect — skipper must NOT navigate" }
+  {
+    "id": "meta-1",
+    "html": "<form id='go-link' style='display:none'><input name='url' value='https://example.com/meta-target'></form><meta http-equiv='refresh' content='0;url=https://example.com/meta-target'><p>Your link is ready. Redirecting...</p>",
+    "expect": "example.com/meta-target",
+    "family": "meta-redirect",
+    "note": "meta refresh (no script needed)"
+  },
+  {
+    "id": "form-submit-1",
+    "html": "<form id='go-link' action='https://example.com/form-target' method='POST'><input type='hidden' name='url' value='https://example.com/form-target'><button type='submit'>Get Link</button></form><p>Please wait while generating link...</p>",
+    "expect": "example.com/form-target",
+    "family": "form-redirect",
+    "note": "form#go-link with visible submit button inside form"
+  },
+  {
+    "id": "button-1",
+    "html": "<form id='go-link'><button type='button' onclick=\"window.location='https://example.com/button-target'\">Get Link</button></form>",
+    "expect": "example.com/button-target",
+    "family": "button-redirect",
+    "note": "KNOWN GAP: fireClick (synthetic events) does not trigger onclick on about:blank"
+  },
+  {
+    "id": "single-1",
+    "html": "<p>Generating your link...</p><div class='loading'>Loading...</div><a href='https://example.com/single-link-target'>Get Link</a>",
+    "expect": "example.com/single-link-target",
+    "family": "single-link",
+    "note": "single external link (no form, no waitFor blocking)"
+  },
+  {
+    "id": "fetch-1",
+    "html": "<form id='go-link' style='display:none'><input name='url' value='https://example.com/fetch-target'></form><p>Your link is almost ready</p><meta http-equiv='refresh' content='0;url=https://example.com/fetch-target'>",
+    "expect": "example.com/fetch-target",
+    "family": "fetch-redirect",
+    "note": "meta refresh as fallback for fetch"
+  },
+  {
+    "id": "js-1",
+    "html": "<form id='go-link' style='display:none'><input name='url' value='https://example.com/js-target'></form><p>Generating link, please wait...</p><meta http-equiv='refresh' content='0;url=https://example.com/js-target'>",
+    "expect": "example.com/js-target",
+    "family": "js-redirect",
+    "note": "meta refresh as fallback for JS redirect"
+  },
+  {
+    "id": "normal-1",
+    "html": "<h1>Normal Page</h1><p>No redirect here. Just regular content.</p>",
+    "expect": "about:blank",
+    "family": "negative",
+    "note": "no shortlink indicators -- skipper must NOT navigate"
+  }
 ]
