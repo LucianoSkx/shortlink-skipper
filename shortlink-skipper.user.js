@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.6-dev
+// @version      1.10.7-dev
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -694,7 +694,7 @@
   async function handleButtons() {
     log('watching for sequential action buttons');
     let clicks = 0;
-    const deadline = Date.now() + 90000;
+    const deadline = Date.now() + 15000;
     while (Date.now() < deadline && clicks < 6) {
       const btn =
         findByText(BUTTON_TEXTS) ||
@@ -728,13 +728,13 @@
     const stepBtn = await waitFor(() => {
       const b = document.querySelector('.wpsafelink-button');
       return b && visible(b) && !/please wait/i.test(b.innerText || '') ? b : null;
-    }, 60000, 500);
+    }, 20000, 500);
     if (stepBtn) fireClick(stepBtn);
     if (typeof PAGE.wpsafegenerate === 'function') {
       await waitFor(() => {
         const timer = document.querySelector('.base-timer')?.innerText?.trim() || '';
         return timer.includes('0:00') || timer === '';
-      }, 90000, 500);
+      }, 30000, 500);
       try {
         PAGE.wpsafegenerate();
       } catch {}
@@ -780,7 +780,7 @@
     const findActionable = () =>
       findByText(/\b(continue|proceed|get\s+link|free\s+download)\b/i) ||
       document.querySelector('.get-link:not([disabled]), button[type="submit"]:not([disabled]), input[type="submit"]');
-    const deadline = Date.now() + 120000;
+    const deadline = Date.now() + 60000;
     while (Date.now() < deadline) {
       const ready = findActionable();
       if (ready && visible(ready)) {
@@ -837,7 +837,7 @@
     const form = field.closest('form') || field.parentElement;
 
     let first = true;
-    const deadline = Date.now() + 60000;
+    const deadline = Date.now() + 30000;
     while (Date.now() < deadline) {
       if (!first) await sleep(5000);
       first = false;
@@ -865,7 +865,7 @@
     const btn = await waitFor('#invisibleCaptchaShortlink', 2500);
     if (!btn) return false;
     log('AdLinkFly invisible captcha detected');
-    return clickWhen(() => (!btn.disabled ? btn : null), 60000);
+    return clickWhen(() => (!btn.disabled ? btn : null), 20000);
   }
 
   function submitFormLoop(form, attempts = 30) {
@@ -1111,7 +1111,7 @@
         return { kind: 'url', value: link.href };
       }
       return null;
-    }, 120000, 800);
+    }, 30000, 800);
     return resolved ? goto(resolved.value) : false;
   }
 
@@ -1757,6 +1757,11 @@
     TRACE.host = location.host;
     if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
     installEarlyHooks();
+    // Early generic capture for known shortener hosts: many pages fire their
+    // resolving request before DOMContentLoaded, which the late rule-loop
+    // install would miss entirely. The hook is idempotent and only stores
+    // candidates -- the rule loop still decides whether to act on them.
+    if (knownShortener()) installNetworkDestCapture();
 
     // Cloudflare challenge interstitial: never interfere -- let it run so the
     // user can solve it and the real page loads afterward.

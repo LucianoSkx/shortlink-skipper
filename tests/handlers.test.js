@@ -548,7 +548,11 @@ test('installEarlyHooks wraps fetch exactly once across repeated calls and main(
   h.api.installEarlyHooks();
   assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'second install must be a no-op');
   await h.api.main();
-  assert.strictEqual(h.sandbox.fetch, wrappedOnce, 'main() must not double-wrap');
+  const afterMain = h.sandbox.fetch;
+  assert.notStrictEqual(afterMain, origFetch, 'main() must keep fetch wrapped');
+  await h.api.main();
+  await h.api.main();
+  assert.strictEqual(h.sandbox.fetch, afterMain, 'repeated main() adds no further layers');
 });
 
 test('genericGate opens for shortener families, not for media hosts', () => {

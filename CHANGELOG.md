@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.10.6-dev (branch `dev`, unreleased)
+## 1.10.7-dev (branch `dev`, unreleased)
+
+### Fixed
+- **Early network capture** (`P0`): the generic fetch/XHR hook is now installed at `document-start` for known shortener hosts — many pages fire their resolving request before `DOMContentLoaded`, which the late rule-loop install missed entirely. Still gated: ordinary pages never get wrapped.
+- **Slow rules no longer freeze the cascade** (`P0`): blocking budgets reduced — final-button 90s→15s, captcha-manual 120s→60s (human still gets a full minute), wpsafelink 60/90s→20/30s, adlinkfly retries 60s→30s, invisible-captcha click 60s→20s, token-link 120s→30s.
 
 ### Added
 - **Local telemetry** (`sl_stats` in GM storage): per-rule outcome counts (ok/fail) written by the rule loop — shows exactly where investment pays off. Menu gains "Report false positive on this page" (stores host/url/rule/candidates/refusals locally, capped at 200) and "Show local statistics". Nothing leaves the device.
