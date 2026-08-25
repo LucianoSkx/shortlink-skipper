@@ -1,0 +1,9 @@
+[
+  { "id": "fetch-1",     "path": "/fetch-redirect",   "expect": "example.com/fetch-target",   "family": "fetch-redirect",  "note": "fetch → location.href redirect" },
+  { "id": "form-1",      "path": "/form-redirect",     "expect": "example.com/form-target",    "family": "form-redirect",   "note": "hidden form auto-submit POST" },
+  { "id": "button-1",    "path": "/button-redirect",   "expect": "example.com/button-target",  "family": "button-redirect", "note": "timer + appear button click" },
+  { "id": "meta-1",      "path": "/meta-redirect",     "expect": "example.com/meta-target",    "family": "meta-redirect",   "note": "meta refresh redirect" },
+  { "id": "js-1",        "path": "/js-redirect",       "expect": "example.com/js-target",      "family": "js-redirect",     "note": "window.location.replace()" },
+  { "id": "single-1",    "path": "/single-link",       "expect": "single-link",              "family": "single-link",     "note": "single external <a> — confidence 0.55, must NOT auto-navigate" },
+  { "id": "normal-1",    "path": "/normal-page",       "expect": "normal-page",                "family": "negative",        "note": "no redirect — skipper must NOT navigate" }
+]

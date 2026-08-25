@@ -1,7 +1,12 @@
 'use strict';
 
+const fs   = require('fs');
+const path = require('path');
 const http = require('http');
-const WebSocket = globalThis.WebSocket;
+const WebSocket = require('ws');
+
+const CDP_URL    = process.env.CDP_URL || 'http://127.0.0.1:9222';
+const SCRIPT_PATH = path.join(__dirname, '..', 'shortlink-skipper.user.js');
 
 function getJSON(url) {
   return new Promise((res, rej) => {
@@ -15,13 +20,27 @@ function getJSON(url) {
   });
 }
 
+const GM_MOCKS = `
+'use strict';
+if (typeof unsafeWindow === 'undefined') var unsafeWindow = globalThis;
+if (typeof GM_getValue === 'undefined')  var GM_getValue  = (k, d) => d ?? false;
+if (typeof GM_setValue === 'undefined')  var GM_setValue  = () => {};
+if (typeof GM_registerMenuCommand === 'undefined') var GM_registerMenuCommand = () => {};
+if (typeof GM_openInTab === 'undefined')  var GM_openInTab  = () => {};
+if (typeof GM_setClipboard === 'undefined') var GM_setClipboard = () => {};
+if (typeof GM_xmlhttpRequest === 'undefined') var GM_xmlhttpRequest = (o) => { try { o.onerror?.({}); } catch(_){} };
+`;
+
 async function main() {
   const targetUrl = process.argv[2];
-  const expect = process.argv[3] || 'example.com';
-  const stage = (s) => { try { require('fs').appendFileSync('/tmp/live-stage.log', s + '\n'); } catch (_) {} };
+  const expect    = process.argv[3] || 'example.com';
+  const timeoutMs = parseInt(process.env.LIVE_TIMEOUT_MS || '25000', 10);
+  const stage = (s) => { try { fs.appendFileSync('/tmp/live-stage.log', s + '\n'); } catch (_) {} };
   stage('start ' + targetUrl);
-  setTimeout(() => { stage('HARD_TIMEOUT'); console.error('HARD_TIMEOUT'); process.exit(3); }, 25000);
-  const ver = await getJSON('http://127.0.0.1:9222/json/version');
+
+  const hardKill = setTimeout(() => { stage('HARD_TIMEOUT'); console.error('HARD_TIMEOUT'); process.exit(3); }, timeoutMs);
+
+  const ver = await getJSON(CDP_URL + '/json/version');
   stage('cdp-version-ok');
   const ws = new WebSocket(ver.webSocketDebuggerUrl);
   let msgId = 0;
@@ -48,11 +67,21 @@ async function main() {
 
   await S('Page.enable');
   await S('Runtime.enable');
+
+  const userscriptCode = fs.readFileSync(SCRIPT_PATH, 'utf8');
+  const wrappedScript  = GM_MOCKS + '\n' + userscriptCode;
+  await S('Page.addScriptToEvaluateOnNewDocument', {
+    source: wrappedScript,
+  });
+  stage('script-injected');
+
   await S('Page.navigate', { url: targetUrl });
+  stage('navigating');
 
   let final = '';
   const logs = [];
-  for (let i = 0; i < 40; i++) {
+  const pollCount = Math.ceil(timeoutMs / 500);
+  for (let i = 0; i < pollCount; i++) {
     await new Promise((r) => setTimeout(r, 500));
     try {
       const r = await S('Runtime.evaluate', { expression: 'location.href', returnByValue: true });
@@ -68,9 +97,10 @@ async function main() {
     }
   }
 
+  clearTimeout(hardKill);
   console.log('FINAL_URL=' + final);
   console.log('MATCH=' + (final.includes(expect) ? 'YES' : 'NO'));
-  console.log('SKIPPER_LOGS=' + JSON.stringify(logs.slice(0, 6)));
+  console.log('SKIPPER_LOGS=' + JSON.stringify(logs.slice(0, 8)));
   ws.close();
   process.exit(0);
 }
