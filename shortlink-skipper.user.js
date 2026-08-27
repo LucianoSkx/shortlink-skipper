@@ -343,8 +343,13 @@
   }
 
   let _shortishCache = null;
+  let _shortishCacheSig = null;
   function looksLikeShortlink(doc = document) {
-    if (doc === document && _shortishCache !== null) return _shortishCache;
+    if (doc === document && _shortishCache !== null) {
+      const sig = (doc.body?.innerText || '').length + '|' + (doc.body?.innerHTML || '').length;
+      if (sig === _shortishCacheSig) return _shortishCache;
+      _shortishCache = null;
+    }
     const hits = [];
     const structural = doc.querySelector(GO_LINK_FORM) ||
       doc.querySelector('input[name="ad_form_data"], #invisibleCaptchaShortlink, #wpsafegenerate, .wpsafelink-button');
@@ -371,6 +376,7 @@
       if (doc === document) TRACE.score = score;
     }
     if (doc === document) {
+      _shortishCacheSig = (doc.body?.innerText || '').length + '|' + (doc.body?.innerHTML || '').length;
       _shortishCache = result;
       TRACE.detected = result;
       TRACE.detectionHits = hits;
