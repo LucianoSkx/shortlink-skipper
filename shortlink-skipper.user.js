@@ -88,22 +88,22 @@
 
   const OUO_HOST = /(^|\.)ouo\.(io|press|today)$|(^|\.)uii\.io$/;
   const ADFOC_FAMILY =
-    /(adfoc\.us|adf\.ly|clk\.sh|shrink\.pe)$/;
+    /(^|\.)(adfoc\.us|adf\.ly|clk\.sh|shrink\.pe)$/;
   const AYLINK_HOST =
-    /(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
+    /(^|\.)(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
   const BCVC_HOST = /(^|\.)bcvc\.(live|xyz|go)$|(bcvcgo)\.xyz$/;
-  const SKIP_BUTTON_HOST = /(hurirk\.net|usfinf\.net|xervoo\.net)$/;
+  const SKIP_BUTTON_HOST = /(^|\.)(hurirk\.net|usfinf\.net|xervoo\.net)$/;
   const CLOSE_INTERSTITIAL_HOST = /(^|\.)?(doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
   const REKONISE_HOST = /(^|\.)rekonise\.com$/;
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
-  const LOOTLINK_HOST = /(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com|links\.lootlabs\.gg)$/;
+  const LOOTLINK_HOST = /(^|\.)(loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com|links\.lootlabs\.gg)$/;
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.(com|net)$/;
   const ADLINKFLY_HOSTS =
     /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com|shrinkbixby\.com)$/;
-  const TOKEN_HOST = /(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
+  const TOKEN_HOST = /(^|\.)(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
@@ -1217,9 +1217,10 @@
     if (!ACORTALINK_HOST.test(location.host)) return false;
     log('acortalink.me detected');
     // Funnel through goto() so the spoofed open honors validation + anti-loop.
+    // Return null on refusal so call sites that check for popup-block behavior
+    // see the same shape as the real blocked window.open().
     PAGE.open = (url) => {
-      goto(url);
-      return PAGE;
+      return goto(url) ? PAGE : null;
     };
     PAGE.addEventListener(
       'message',
@@ -1434,26 +1435,32 @@
     for (const type of ['contextmenu', 'copy', 'cut', 'selectstart', 'dragstart']) {
       document.addEventListener(type, (event) => event.stopPropagation(), true);
     }
+    // Clean up immediately (handles SPAs and re-navigations).
+    cleanupInteractions();
     PAGE.addEventListener(
       'DOMContentLoaded',
       () => {
-        for (const el of document.querySelectorAll('[oncontextmenu], [onselectstart], [ondragstart]')) {
-          for (const attr of ['oncontextmenu', 'onselectstart', 'ondragstart']) {
-            if (el.hasAttribute(attr)) el.removeAttribute(attr);
-          }
-        }
-        for (const sheet of document.styleSheets) {
-          try {
-            for (const rule of sheet.cssRules) {
-              if (rule.selectorText && rule.style?.userSelect === 'none' && rule.selectorText !== '*::-moz-selection') {
-                rule.style.userSelect = 'auto';
-              }
-            }
-          } catch {}
-        }
+        cleanupInteractions();
       },
       { once: true },
     );
+  }
+
+  function cleanupInteractions() {
+    for (const el of document.querySelectorAll('[oncontextmenu], [onselectstart], [ondragstart]')) {
+      for (const attr of ['oncontextmenu', 'onselectstart', 'ondragstart']) {
+        if (el.hasAttribute(attr)) el.removeAttribute(attr);
+      }
+    }
+    for (const sheet of document.styleSheets) {
+      try {
+        for (const rule of sheet.cssRules) {
+          if (rule.selectorText && rule.style?.userSelect === 'none' && rule.selectorText !== '*::-moz-selection') {
+            rule.style.userSelect = 'auto';
+          }
+        }
+      } catch {}
+    }
   }
 
   function removeAdblockBanners() {
@@ -1474,6 +1481,9 @@
         }
       }, 500);
     };
+    // Sweep immediately on first call (DOMContentLoaded may already have fired
+    // or the page is an SPA that won't fire it again).
+    sweep();
     PAGE.addEventListener('DOMContentLoaded', sweep, { once: true });
     new MutationObserver(sweep).observe(document.documentElement, { childList: true, subtree: true });
   }
