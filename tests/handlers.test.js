@@ -83,10 +83,11 @@ function load(opts = {}) {
         setItem: (k, v) => { store[k] = String(v); },
       };
     })(),
-    GM_getValue: (k, d) => d,
+    GM_getValue: (k, d) => (k === 'trw_api_key' ? 'test-key' : d),
     GM_setValue: () => {},
     GM_registerMenuCommand: () => {},
     GM_xmlhttpRequest: () => {},
+    performance: { now: () => Date.now() },
     fetch: () => Promise.resolve({ json: () => Promise.resolve(null), clone: () => ({ text: () => Promise.resolve('') }) }),
     XMLHttpRequest: function () { this.open = () => {}; this.send = () => {}; this.addEventListener = () => {}; },
     WebSocket: function () {},
@@ -337,7 +338,7 @@ test('resolveExternal returns the trw destination inline when the API succeeds',
 
 test('resolveExternal falls through to null when the API fails, and delegation still happens', async () => {
   const h = load({ href: 'https://work.ink/something', querySelector: () => null });
-  const store = {};
+  const store = { trw_api_key: 'test-key' };
   h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
   h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
   h.setGmXhr((opts) => opts.onerror());
@@ -350,7 +351,7 @@ test('resolveExternal falls through to null when the API fails, and delegation s
 
 test('circuit breaker skips a resolver after repeated failures', async () => {
   const h = load({ href: 'https://work.ink/something', querySelector: () => null });
-  const store = {};
+  const store = { trw_api_key: 'test-key' };
   h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
   h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
   let calls = 0;
@@ -787,4 +788,80 @@ test('SKIP_BUTTON_HOST regex matches subdomains (direct check)', () => {
   assert.ok(re.test('sub.hurirk.net'));
   assert.ok(!re.test('evilhurirk.net'));
   assert.ok(!re.test('hurirk.net.evil.com'));
+});
+
+// --- A3: SPA late-hydration, task wall, malformed inputs ---
+
+test('A3: SPA late-hydration invalidates the shortish cache', () => {
+  let hydrated = false;
+  const h = load({
+    href: 'https://spa.example/view',
+    querySelector: (sel) => (hydrated && sel.includes('go-link') ? { id: 'go-link' } : null),
+  });
+  h.doc.body.innerText = 'Welcome to our article';
+  h.doc.body.innerHTML = '<p>Welcome</p>';
+  assert.strictEqual(h.api.looksLikeShortlink(), false, 'before hydration the page is not shortish');
+
+  hydrated = true;
+  h.doc.body.innerText = 'Your link is almost ready - continue to destination';
+  h.doc.body.innerHTML = '<form id="go-link"></form>';
+  assert.strictEqual(h.api.looksLikeShortlink(), true, 'after hydration the cache must recompute');
+});
+
+test('A3: engagement task wall is left alone (no bypass, no boost)', async () => {
+  const h = load({
+    href: 'https://unlock.example/offer',
+    querySelector: (sel) => (sel.includes('go-link') ? { id: 'go-link' } : null),
+  });
+  h.doc.body.innerText = 'Spend 30 minutes on the website to unlock';
+  h.doc.body.innerHTML = '<form id="go-link"></form>';
+  const origSetTimeout = h.sandbox.setTimeout;
+  await h.api.main();
+  assert.strictEqual(h.navs.length, 0, 'must not navigate on a task wall');
+  assert.strictEqual(h.api.trace.rule, null, 'no rule may act on a task wall');
+  assert.strictEqual(h.sandbox.setTimeout, origSetTimeout, 'prepareBoost must not wrap timers');
+});
+
+test('A3: goto refuses malformed and dangerous URLs', () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  for (const bad of ['', 'not a url', 'javascript:alert(1)', 'data:text/html,x', 'http://', 'ftp://x.example/y']) {
+    assert.strictEqual(h.api.goto(bad), false, String(bad));
+  }
+  assert.strictEqual(h.navs.length, 0);
+  assert.ok(h.api.trace.refusals.length >= 4, 'refusals recorded on the trace');
+});
+
+test('A3: extractDestFromParams ignores malformed encodings', () => {
+  const h = load({ href: 'https://short.site.example/goto/%%%bad%%%', querySelector: () => null });
+  assert.strictEqual(h.api.extractDestFromParams(), null);
+});
+
+test('A3: handleLinkvertiseEasy refuses a malformed r param', async () => {
+  const h = load({ href: 'https://linkvertise.com/x?r=!!!not-base64!!!', querySelector: () => null });
+  const ok = await h.api.handleLinkvertiseEasy();
+  assert.strictEqual(ok, false);
+  assert.strictEqual(h.navs.length, 0);
+});
+
+test('A3: handleBypassCity ignores a malformed HTML response', async () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  h.setGmXhr((opts) => opts.onload({ responseText: '<<<not html at all>>>' }));
+  const ok = await h.api.handleBypassCity();
+  assert.strictEqual(ok, false);
+  assert.strictEqual(h.navs.length, 0);
+});
+
+// --- API key: no key means no network, fallback still works ---
+
+test('without an API key, resolveExternal makes zero network calls and still delegates', async () => {
+  const h = load({ href: 'https://work.ink/something', querySelector: () => null });
+  h.sandbox.GM_getValue = (k, d) => (k === 'trw_api_key' ? '' : d);
+  let calls = 0;
+  h.setGmXhr(() => { calls += 1; });
+  const r = await h.api.resolveExternal(h.loc.href);
+  assert.strictEqual(r, null);
+  assert.strictEqual(calls, 0, 'no key must mean no API request');
+  const ok = await h.api.handleExternalService();
+  assert.ok(ok, 'bypass.tools delegation still works without a key');
+  assert.ok(h.navs.some((u) => u.startsWith('https://bypass.tools/bypass?url=')));
 });

@@ -78,10 +78,11 @@ function load(opts = {}) {
         setItem: (k, v) => { store[k] = String(v); },
       };
     })(),
-    GM_getValue: (k, d) => d,
+    GM_getValue: (k, d) => (k === 'trw_api_key' ? 'test-key' : d),
     GM_setValue: () => {},
     GM_registerMenuCommand: () => {},
     GM_xmlhttpRequest: () => {},
+    performance: { now: () => Date.now() },
     fetch: () => Promise.resolve({ json: () => Promise.resolve(null), clone: () => ({ text: () => Promise.resolve('') }) }),
     XMLHttpRequest: function () { this.open = () => {}; this.send = () => {}; this.addEventListener = () => {}; },
     WebSocket: function () {},
@@ -170,4 +171,32 @@ test('normal page: local telemetry stays untouched', async () => {
   await h.api.main();
   assert.deepStrictEqual(store.sl_stats, undefined, 'no rule stats on a normal page');
   assert.deepStrictEqual(store.sl_fp_reports, undefined, 'no reports without user action');
+});
+
+// --- A3: popular non-shortlink fixtures ---
+
+test('A3: popular non-shortlink sites stay untouched', async () => {
+  const cases = [
+    ['github', 'https://github.com/LucianoSkx/shortlink-skipper'],
+    ['reddit', 'https://www.reddit.com/r/programming/'],
+    ['wikipedia', 'https://en.wikipedia.org/wiki/Link_shortener'],
+    ['amazon', 'https://www.amazon.com/dp/B0TEST123'],
+  ];
+  for (const [name, href] of cases) {
+    const h = load({ href, querySelector: () => null });
+    await h.api.main();
+    assert.strictEqual(h.navs.length, 0, `${name} must not navigate`);
+    assert.strictEqual(h.api.trace.detected, false, `${name} must not be detected`);
+    assert.strictEqual(h.api.trace.rule, null, `${name} must not run a rule`);
+  }
+});
+
+// --- C1: main() duration measurement ---
+
+test('C1: main() records durationMs on the decision trace', async () => {
+  const h = load();
+  await h.api.main();
+  const d = h.api.trace.durationMs;
+  assert.strictEqual(typeof d, 'number', 'durationMs must be a number');
+  assert.ok(d >= 0 && d < 50, `durationMs=${d} must be a quiet-page measurement under 50ms`);
 });

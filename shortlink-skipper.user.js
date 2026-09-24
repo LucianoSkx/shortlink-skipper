@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.8
+// @version      1.10.9
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -53,6 +53,7 @@
     candidates: [],
     navigations: [],
     refusals: [],
+    durationMs: null,
   };
 
   const EXCLUDE_HOSTS = [
@@ -613,10 +614,15 @@
     } catch {}
   }
 
+  function nowMs() {
+    return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+  }
+
   async function trwResolver(url) {
+    const key = GM_getValue('trw_api_key', '');
+    if (!key) return { skip: 'no API key configured' };
     const data = await gmGetJson(
-      'https://trw.lat/api/bypass?apikey=TRW_FREE-GAY-15a92945-9b04-4c75-8337-f2a6007281e9&url=' +
-        encodeURIComponent(url),
+      'https://trw.lat/api/bypass?apikey=' + encodeURIComponent(key) + '&url=' + encodeURIComponent(url),
       RESOLVER_TIMEOUT_MS,
     );
     if (data?.success && typeof data.result === 'string' && /^https?:\/\//i.test(data.result)) {
@@ -635,6 +641,10 @@
         continue;
       }
       const result = await resolver(url);
+      if (result && result.skip) {
+        log(`resolver ${name}: skipped - ${result.skip}`);
+        continue;
+      }
       if (result && validateDestination(result.url).valid) {
         resolverRecordSuccess(name);
         TRACE.candidates.push({ url: result.url, source: name, confidence: 0.9 });
@@ -1751,6 +1761,17 @@
       else PAGE.open('https://bypass.link/');
       log('current URL copied -- paste it on bypass.link and solve its captcha');
     });
+    GM_registerMenuCommand(
+      GM_getValue('trw_api_key', '') ? 'trw.lat API key: set (click to change)' : 'trw.lat API key: not set (click to set)',
+      () => {
+        const ask = typeof PAGE.prompt === 'function' ? PAGE.prompt : typeof prompt === 'function' ? prompt : null;
+        if (!ask) return;
+        const next = ask('trw.lat API key (empty clears):', GM_getValue('trw_api_key', ''));
+        if (next === null || next === undefined) return;
+        GM_setValue('trw_api_key', String(next).trim());
+        location.reload();
+      },
+    );
   }
 
   function installEarlyHooks() {
@@ -1797,93 +1818,99 @@
   }
 
   async function main() {
-    registerMenu();
-    TRACE.host = location.host;
-    if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
-    installEarlyHooks();
-    // Early generic capture for known shortener hosts: many pages fire their
-    // resolving request before DOMContentLoaded, which the late rule-loop
-    // install would miss entirely. The hook is idempotent and only stores
-    // candidates -- the rule loop still decides whether to act on them.
-    // Skip on a challenge/captcha page so we never wrap the request layer that
-    // the widget (e.g. Turnstile) relies on.
-    if (knownShortener() && !cloudflareChallenging()) installNetworkDestCapture();
+    const t0 = nowMs();
+    try {
+      registerMenu();
+      TRACE.host = location.host;
+      if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
+      installEarlyHooks();
+      // Early generic capture for known shortener hosts: many pages fire their
+      // resolving request before DOMContentLoaded, which the late rule-loop
+      // install would miss entirely. The hook is idempotent and only stores
+      // candidates -- the rule loop still decides whether to act on them.
+      // Skip on a challenge/captcha page so we never wrap the request layer that
+      // the widget (e.g. Turnstile) relies on.
+      if (knownShortener() && !cloudflareChallenging()) installNetworkDestCapture();
 
-    // Cloudflare challenge interstitial: never interfere -- let it run so the
-    // user can solve it and the real page loads afterward.
-    if (document.readyState === 'loading') {
-      await new Promise((resolve) => {
-        if (document.readyState !== 'loading') return resolve();
-        PAGE.addEventListener('DOMContentLoaded', resolve, { once: true });
-        // Guard against the event having already fired (race in synthetic
-        // test contexts where setDocumentContent resolves before we attach).
-        setTimeout(resolve, 0);
-      });
-    }
-    if (cloudflareChallenging()) {
-      log('Cloudflare challenge detected -- standing by, not interfering');
-      return;
-    }
-
-    if (excluded() || disabled()) return;
-
-    const shortish = looksLikeShortlink();
-    // Delegation landing pages carry their own rules (service-last-resort on
-    // bypass.tools) that must run even though the page itself is not a
-    // shortener -- otherwise the cascade dies at its second level.
-    const delegated = /^bypass\.tools$/.test(location.host);
-    const taskWall = shortish && looksLikeTaskWall();
-    const knownShort = knownShortener();
-    const media = knownMediaHost();
-
-    if (!shortish && !delegated && !knownShort && !media) {
-      log('not a shortlink page -- leaving the page untouched');
-      return;
-    }
-
-    if (taskWall) {
-      log('engagement task-wall detected: stepping back, complete the steps manually');
-      enableInteractions();
-      return;
-    }
-
-    if (shortish || knownShort || media) {
-      prepareBoost();
-      enableBoost();
-      blockPopups();
-      restoreFocus();
-      removeAdblockBanners();
-      enableInteractions();
-    }
-
-    // Rules run in declaration order; the first rule whose run() returns truthy
-    // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout
-    // (e.g. captcha-manual waits up to 120s) blocks every later rule until it
-    // resolves -- keep fast/early rules before slow ones when ordering matters.
-    for (const rule of GENERIC_RULES) {
-      if (disabled()) break;
-      let shouldRun = false;
-      try {
-        shouldRun = rule.when();
-      } catch (error) {
-        log(`rule ${rule.name}: when error:`, error.message);
+      // Cloudflare challenge interstitial: never interfere -- let it run so the
+      // user can solve it and the real page loads afterward.
+      if (document.readyState === 'loading') {
+        await new Promise((resolve) => {
+          if (document.readyState !== 'loading') return resolve();
+          PAGE.addEventListener('DOMContentLoaded', resolve, { once: true });
+          // Guard against the event having already fired (race in synthetic
+          // test contexts where setDocumentContent resolves before we attach).
+          setTimeout(resolve, 0);
+        });
       }
-      if (!shouldRun) continue;
-      if (rule.name === 'network-capture') installNetworkDestCapture();
-      TRACE.rule = rule.name;
-      try {
-        const acted = await rule.run();
-        log(`rule ${rule.name}: ${acted ? 'acted' : 'no action'}`);
-        bumpStat(rule.name, acted ? 'ok' : 'fail');
-        if (acted) {
-          log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
-          return;
+      if (cloudflareChallenging()) {
+        log('Cloudflare challenge detected -- standing by, not interfering');
+        return;
+      }
+
+      if (excluded() || disabled()) return;
+
+      const shortish = looksLikeShortlink();
+      // Delegation landing pages carry their own rules (service-last-resort on
+      // bypass.tools) that must run even though the page itself is not a
+      // shortener -- otherwise the cascade dies at its second level.
+      const delegated = /^bypass\.tools$/.test(location.host);
+      const taskWall = shortish && looksLikeTaskWall();
+      const knownShort = knownShortener();
+      const media = knownMediaHost();
+
+      if (!shortish && !delegated && !knownShort && !media) {
+        log('not a shortlink page -- leaving the page untouched');
+        return;
+      }
+
+      if (taskWall) {
+        log('engagement task-wall detected: stepping back, complete the steps manually');
+        enableInteractions();
+        return;
+      }
+
+      if (shortish || knownShort || media) {
+        prepareBoost();
+        enableBoost();
+        blockPopups();
+        restoreFocus();
+        removeAdblockBanners();
+        enableInteractions();
+      }
+
+      // Rules run in declaration order; the first rule whose run() returns truthy
+      // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout
+      // (e.g. captcha-manual waits up to 120s) blocks every later rule until it
+      // resolves -- keep fast/early rules before slow ones when ordering matters.
+      for (const rule of GENERIC_RULES) {
+        if (disabled()) break;
+        let shouldRun = false;
+        try {
+          shouldRun = rule.when();
+        } catch (error) {
+          log(`rule ${rule.name}: when error:`, error.message);
         }
-      } catch (error) {
-        log(`rule ${rule.name}: run error:`, error.message);
+        if (!shouldRun) continue;
+        if (rule.name === 'network-capture') installNetworkDestCapture();
+        TRACE.rule = rule.name;
+        try {
+          const acted = await rule.run();
+          log(`rule ${rule.name}: ${acted ? 'acted' : 'no action'}`);
+          bumpStat(rule.name, acted ? 'ok' : 'fail');
+          if (acted) {
+            log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
+            return;
+          }
+        } catch (error) {
+          log(`rule ${rule.name}: run error:`, error.message);
+        }
       }
+      log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
+    } finally {
+      TRACE.durationMs = Math.round((nowMs() - t0) * 100) / 100;
+      log('main() took', TRACE.durationMs, 'ms');
     }
-    log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
   }
 
   if (typeof module !== 'undefined' && module.exports) {
@@ -1896,6 +1923,7 @@
       cloudflareChallenging,
       captchaPresent,
       looksLikeShortlink,
+      looksLikeTaskWall,
       knownShortener,
       goto,
       handleWpContentLock,
