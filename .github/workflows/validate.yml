@@ -23,3 +23,9 @@ jobs:
           node -e "const s=require('fs').readFileSync('shortlink-skipper.user.js','utf8').split('\n').slice(14).join('\n'); if(/[^\x00-\x7F]/.test(s)){console.error('non-ASCII found in code');process.exit(1)}"
       - name: Run tests
         run: npm test
+      - name: Live harness syntax check
+        run: |
+          node --check test-live/run-all.js
+          node --check test-live/live.js
+          node --check test-live/server.js
+          node --check test-live/test-server.js

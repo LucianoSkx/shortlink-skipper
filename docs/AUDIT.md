@@ -1,7 +1,9 @@
 # Function-by-function audit — prioritized changes
 
 Scope: `shortlink-skipper.user.js` (~85 functions, v1.10.5). Order = impact ÷ effort.
-Working branch: `dev` (main becomes release-only; installed users poll raw `main`).
+Branch flow: `main` is protected (PR + Validate). Prefer short PRs into `main`;
+use `dev` only for long-running work and fast-forward it after each merge
+(`git push origin main:dev`). Installed users poll raw `main`.
 
 ## P0 — reliability (do first, all low-risk)
 
