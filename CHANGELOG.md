@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.10.11 — 2026-09-24
+
+### Fixed
+- **bcvc unhandled rejection**: the fire-and-forget `POST /ln.php` now carries a `.catch` — a network failure no longer leaks an unhandled promise rejection (covered by a dedicated regression test).
+- **skip-button `/ad/locked` was dead code**: it built a relative path that `validateDestination` always refused; the target is now resolved against the current origin.
+- **skip-button `dest` parsing**: extracted via `URL.searchParams` instead of `split('dest=')` + `decodeURIComponent` — trailing params (`&track=1`) no longer leak into the destination and malformed percent-encodings no longer throw `URIError`.
+- **Stale comment**: rule-loop note said captcha-manual waits up to 120s; the actual budget is 60s.
+
+### Added
+- **37 new tests (74 → 111)** covering the 16 rules that had none: close-interstitial, rekonise, mboost, lootlink-local, aylink-family, bcvc, skip-button-dest, acortalink, bstlar, token-link, zafree-link-view, adlinkfly-captcha, go-link-form, wpsafelink, final-button, captcha-manual. The previously untested handlers are now exported through `module.exports` (test surface only).
+- **Shared test harness** (`tests/helpers/harness.js`): the three copies of `load()`/`baseDoc()`/`makeLocation()` collapsed into one module (−346 duplicated lines).
+
+### Performance
+- **Full suite 30s → 6.7s**: `readGlobal` bails out immediately when script injection itself throws (retrying the same impossible DOM for 8s could never help); `runSingleExternalLink(settleMs = 4000)` and `handleButtons(deadlineMs = 15000, maxClicks = 6)` take optional parameters (defaults unchanged) so tests stop sleeping through production budgets.
+
 ## 1.10.10 — 2026-09-24
 
 ### Security
