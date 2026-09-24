@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Docs / CI / process
+- **Privacy section in README**: documents every third-party endpoint that can receive the current page URL (`trw.lat`, `bypass.tools`, `adbypass.org`, `bypass.city`, `api.rekonise.com`, loot-link bookkeeping, manual `bypass.link`) and lists GM storage keys that never leave the device.
+- **README accuracy**: rule count corrected to **34** and the table completed to match `GENERIC_RULES`; debug logs documented as **off by default**; live harness commands fixed (`run-all.js` / `live.js`, not the removed `cdp-client.js`); missing menu commands (false-positive report, local statistics) documented.
+- **Release checklist**: manual live smoke (`npm run test:live`) required before bumping `@version`; CI cannot run CDP cases but now syntax-checks `test-live/*.js` so the harness cannot rot silently.
+- **Branch flow**: `main` protected (PR + Validate required); `docs/AUDIT.md` updated so `dev` is fast-forwarded after each merge instead of drifting.
+- **package-lock** synced to `1.10.8` (was stuck at `1.10.7`).
+
 ## 1.10.7-dev (branch `dev`, unreleased)
 
 ### Fixed
