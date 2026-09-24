@@ -7,63 +7,42 @@ use `dev` only for long-running work and fast-forward it after each merge
 
 ## P0 — reliability (do first, all low-risk)
 
-### A1. Centralize destination validation inside `goto()` — the "destination validator"
+### A1. Centralize destination validation inside `goto()` — the "destination validator" — CLOSED
 **Functions touched:** `goto()` (L254), `isPlausibleUrl()` (L245); new `validateDestination()`.
+Shipped in 1.10.7: every caller inherits the same bar; refusals land on the trace with a reason.
 
-Today each caller pre-filters destinations (`handleBypassCity`, `findExternalExit`,
-`extractDestFromParams`, `handleNetworkCapture`, …). The three live bugs of 2026-08-24
-(trustpilot, gmail, wordpress) were three caller-side filters with holes. Moving the
-filter *into* `goto()` protects every current and future consumer at once:
+### A2. Debug OFF by default — CLOSED
+Shipped in 1.10.7: `VERBOSE = GM_getValue('verbose', false)` + menu toggle.
 
-```
-candidate → normalize (strip tracking params) → protocol check (http/https only,
-reject js/data/blob) → reject EXCLUDE_HOSTS / INFRA_HOST / SOCIAL_HOST as target
-→ sameAsCurrent → cycle check (already there) → hop budget (already there) → navigate
-```
-
-`isPlausibleUrl()` upgrades into `validateDestination()` returning
-`{ ok, confidence, reason }`; `goto()` consumes it and logs the reason on refusal.
-Test it in isolation: dangerous protocols, excluded targets as *destinations*
-(allowed as hosts today — that asymmetry is the bug class), IP literals, ports.
-
-### A2. Debug OFF by default
-**Functions touched:** L41 `VERBOSE = GM_getValue('verbose', true)` → `false`;
-add a `registerMenu()` toggle ("Toggle verbose logging") so debugging stays one click away.
-Console pollution on every known host disappears for regular users. Zero behavioral risk.
-
-### A3. Grow the regression suite (false-positive collection)
-Existing coverage is strong on loops/cycles and recent live bugs. Missing cases:
+### A3. Grow the regression suite (false-positive collection) — CLOSED
+Shipped in 1.10.9:
 
 | Case | Status |
 |---|---|
-| malformed URL to every handler | partial |
-| `javascript:` / `data:` / `blob:` candidate destinations | missing |
-| SPA late-hydration page that later renders go-link form | partial |
-| task wall → must not bypass | one indirect test |
+| malformed URL to every handler | closed — `goto`, `extractDestFromParams`, `handleLinkvertiseEasy`, `handleBypassCity` |
+| `javascript:` / `data:` / `blob:` candidate destinations | closed — validateDestination matrix |
+| SPA late-hydration page that later renders go-link form | closed — cache invalidation test |
+| task wall → must not bypass | closed — dedicated `main()` test (no nav, no boost) |
 | Cloudflare interstitial → untouched | covered |
 | Google/YouTube/Gmail → untouched | covered by @exclude + lean tests |
 | 10+ hop budget overflow observability | covered |
-| popular non-shortlink sites (GitHub, Reddit, Wikipedia, Amazon…) | missing — add as lean fixtures |
+| popular non-shortlink sites (GitHub, Reddit, Wikipedia, Amazon…) | closed — lean fixtures |
 
 ## P1 — observability
 
-### B1. Structured decision trace
-**Functions touched:** `log()` (L115), `looksLikeShortlink()` (L294), rule loop in `main()` (L1596).
-
-Make decisions inspectable instead of prose lines:
-- `looksLikeShortlink` already computes a score internally — return/expose `{score, hits[]}`.
-- Rule loop logs `{rule, acted, durationMs}`; refusals from `goto()` log
-  `{candidate, reason}` (falls out of A1 for free).
-- Keep human-readable output when `VERBOSE=true`; structured payload behind it.
+### B1. Structured decision trace — CLOSED
+Shipped in 1.10.7: `TRACE` with detection hits/score, winning rule, navigations, refusals, durationMs.
 
 ## P2 — measured hardening
 
-### C1. Hook cost gates
-**Functions:** `prepareBoost`(1223), `enableBoost`(1232), `blockPopups`(1239),
-`restoreFocus`(1257), `enableInteractions`(1274), `removeAdblockBanners`(1300),
-`installNetworkDestCapture`(1167), early hooks (1537).
-Already gated by `shortish || knownShort || media`; `lean.test.js` enforces quiet pages.
-Next step is *measurement* (time `main()`, MutationObserver, fetch wrap) before any change.
+### C1. Hook cost gates — CLOSED
+`lean.test.js` enforces quiet pages (zero MO, zero timer wrap, `main()` < 50ms) and
+`TRACE.durationMs` is measured on every load (asserted < 50ms on a quiet page).
+
+## API key
+Hardcoded trw.lat key removed (1.10.9). Key is stored only in GM storage
+(`trw_api_key`), set via the userscript menu. Without a key the external
+resolver skips (zero network) and still delegates to bypass.tools.
 
 ## Explicitly deferred (per philosophy: don't refactor without need)
 - Rule contract `true` → `{handled, destination, confidence}`: revisit only when a rule
