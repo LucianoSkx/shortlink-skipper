@@ -84,10 +84,15 @@ function load(opts = {}) {
     atob,
     btoa,
     sessionStorage: { getItem: () => null, setItem: () => {} },
-    GM_getValue: (k, d) => (k === 'verbose' && opts.verbose !== undefined ? opts.verbose : d),
+    GM_getValue: (k, d) => {
+      if (k === 'verbose' && opts.verbose !== undefined) return opts.verbose;
+      if (k === 'trw_api_key') return 'test-key';
+      return d;
+    },
     GM_setValue: () => {},
     GM_registerMenuCommand: (label) => menuCalls.push(label),
     GM_xmlhttpRequest: () => {},
+    performance: { now: () => Date.now() },
     fetch: () =>
       Promise.resolve({
         clone: () => ({ text: () => Promise.resolve('') }),

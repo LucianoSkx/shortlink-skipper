@@ -2,12 +2,20 @@
 
 ## Unreleased
 
+### Security
+- **Hardcoded trw.lat API key removed**: the key now lives only in GM storage (`trw_api_key`), set via the new menu command **"trw.lat API key: set/not set"**. Without a key the external resolver skips (zero network calls) and still delegates to bypass.tools. Rotate the previously hardcoded key on trw.lat (manual, outside this repo).
+
+### Added
+- **`TRACE.durationMs`**: `main()` measures itself with `performance.now()` (Date.now fallback) and records the duration on the decision trace — first data point for C1 hook-cost gates.
+- **A3 regression suite**: popular non-shortlink fixtures (GitHub, Reddit, Wikipedia, Amazon) leave the page untouched; SPA late-hydration invalidates the shortish cache when the go-link form renders; engagement task wall is not bypassed and does not wrap timers; malformed/dangerous URLs refused by `goto` / `extractDestFromParams` / `handleLinkvertiseEasy` / `handleBypassCity`; no-API-key path makes zero network calls and still reaches bypass.tools.
+- **C1 measurement**: quiet-page `main()` asserted < 50ms via `trace.durationMs`.
+
 ### Docs / CI / process
-- **Privacy section in README**: documents every third-party endpoint that can receive the current page URL (`trw.lat`, `bypass.tools`, `adbypass.org`, `bypass.city`, `api.rekonise.com`, loot-link bookkeeping, manual `bypass.link`) and lists GM storage keys that never leave the device.
-- **README accuracy**: rule count corrected to **34** and the table completed to match `GENERIC_RULES`; debug logs documented as **off by default**; live harness commands fixed (`run-all.js` / `live.js`, not the removed `cdp-client.js`); missing menu commands (false-positive report, local statistics) documented.
+- **Privacy section in README**: documents every third-party endpoint that can receive the current page URL (`trw.lat`, `bypass.tools`, `adbypass.org`, `bypass.city`, `api.rekonise.com`, loot-link bookkeeping, manual `bypass.link`) and lists GM storage keys that never leave the device (`trw_api_key` included).
+- **README accuracy**: rule count corrected to **34** and the table completed to match `GENERIC_RULES`; debug logs documented as **off by default**; live harness commands fixed (`run-all.js` / `live.js`, not the removed `cdp-client.js`); missing menu commands (false-positive report, local statistics, trw.lat API key) documented.
 - **Release checklist**: manual live smoke (`npm run test:live`) required before bumping `@version`; CI cannot run CDP cases but now syntax-checks `test-live/*.js` so the harness cannot rot silently.
 - **Branch flow**: `main` protected (PR + Validate required); `docs/AUDIT.md` updated so `dev` is fast-forwarded after each merge instead of drifting.
-- **package-lock** synced to `1.10.8` (was stuck at `1.10.7`).
+- **package-lock** synced to `1.10.9` (was stuck at `1.10.7`).
 
 ## 1.10.7-dev (branch `dev`, unreleased)
 
