@@ -104,17 +104,15 @@ server-side and cannot be skipped locally.
 ## Privacy — what leaves your device
 
 Local storage (never uploaded): `verbose`, `disabled_hosts`, `sl_stats`,
-`sl_fp_reports`, `sl_resolver_breakers`, `trw_api_key` — all in the userscript
-manager's GM storage on this machine only. The trw.lat API key is optional;
-without it the external resolver skips entirely (zero network) and the cascade
-falls back to bypass.tools.
+`sl_fp_reports`, `sl_resolver_breakers` — all in the userscript manager's GM
+storage on this machine only.
 
 Network calls that **can send the current page URL** (or a payload derived
 from it) to a third party, only when the matching rule fires:
 
 | Destination | When | What is sent |
 | --- | --- | --- |
-| [trw.lat](https://trw.lat) | `external-service` / lootlabs API fallback (only if an API key is set) | Current URL (and, for lootlabs, the WebSocket `r:` payload) |
+| [trw.lat](https://trw.lat) | `external-service` / lootlabs API fallback (keyless, no credentials) | Current URL (and, for lootlabs, the WebSocket `r:` payload) |
 | [bypass.tools](https://bypass.tools) | Delegation after trw.lat fails or is skipped | Current URL in `?url=` (browser navigation) |
 | [adbypass.org](https://adbypass.org) | `service-last-resort` after bypass.tools stalls | Current URL in `?bypass=` (browser navigation) |
 | [bypass.city](https://bypass.city) | `bypass-city` fallback | Current URL in `?bypass=` (via `GM_xmlhttpRequest`) |
@@ -137,7 +135,6 @@ Right-click the userscript icon (or open the manager's script menu) to access:
 | **Report false positive on this page** | Saves host/URL/rule/candidates locally (capped at 200); nothing is uploaded |
 | **Show local statistics** | Prints per-rule ok/fail counts from GM storage to the console |
 | **Open in bypass.link (manual fallback)** | Copies the current URL and opens [bypass.link](https://bypass.link) — it requires its own hCaptcha, so this is a manual escape hatch when every automatic level failed |
-| **trw.lat API key: set/not set** | Prompts for your trw.lat API key (empty clears). Stored only in GM storage; without a key the trw.lat resolver is skipped |
 
 ## Adding a site-specific rule
 

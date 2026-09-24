@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.10.10 — 2026-09-24
 
 ### Security
-- **Hardcoded trw.lat API key removed**: the key now lives only in GM storage (`trw_api_key`), set via the new menu command **"trw.lat API key: set/not set"**. Without a key the external resolver skips (zero network calls) and still delegates to bypass.tools. Rotate the previously hardcoded key on trw.lat (manual, outside this repo).
+- **trw.lat is now fully keyless**: the external resolver calls `https://trw.lat/api/bypass?origin=shortlink-skipper&url=…` with no credentials (confirmed against trw.lat docs, which state bypass endpoints are public/keyless, and live responses that never return auth errors). The `trw_api_key` GM key and the **"trw.lat API key: set/not set"** menu command were removed — no key material exists in the script or in GM storage. On failure the cascade still delegates to bypass.tools. The key previously hardcoded in older releases should be rotated on trw.lat (manual, outside this repo).
+
+## 1.10.9 — 2026-09-24
 
 ### Added
 - **`TRACE.durationMs`**: `main()` measures itself with `performance.now()` (Date.now fallback) and records the duration on the decision trace — first data point for C1 hook-cost gates.

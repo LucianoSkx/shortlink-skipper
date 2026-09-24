@@ -83,7 +83,7 @@ function load(opts = {}) {
         setItem: (k, v) => { store[k] = String(v); },
       };
     })(),
-    GM_getValue: (k, d) => (k === 'trw_api_key' ? 'test-key' : d),
+    GM_getValue: (k, d) => d,
     GM_setValue: () => {},
     GM_registerMenuCommand: () => {},
     GM_xmlhttpRequest: () => {},
@@ -338,9 +338,6 @@ test('resolveExternal returns the trw destination inline when the API succeeds',
 
 test('resolveExternal falls through to null when the API fails, and delegation still happens', async () => {
   const h = load({ href: 'https://work.ink/something', querySelector: () => null });
-  const store = { trw_api_key: 'test-key' };
-  h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
-  h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
   h.setGmXhr((opts) => opts.onerror());
   const r = await h.api.resolveExternal(h.loc.href);
   assert.strictEqual(r, null, 'failed resolver yields null');
@@ -351,7 +348,7 @@ test('resolveExternal falls through to null when the API fails, and delegation s
 
 test('circuit breaker skips a resolver after repeated failures', async () => {
   const h = load({ href: 'https://work.ink/something', querySelector: () => null });
-  const store = { trw_api_key: 'test-key' };
+  const store = {};
   h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
   h.sandbox.GM_setValue = (k, v) => { store[k] = v; };
   let calls = 0;
@@ -851,17 +848,21 @@ test('A3: handleBypassCity ignores a malformed HTML response', async () => {
   assert.strictEqual(h.navs.length, 0);
 });
 
-// --- API key: no key means no network, fallback still works ---
+// --- keyless trw.lat: no API key anywhere, fallback still works ---
 
-test('without an API key, resolveExternal makes zero network calls and still delegates', async () => {
+test('resolveExternal calls trw.lat keyless and still delegates on failure', async () => {
   const h = load({ href: 'https://work.ink/something', querySelector: () => null });
-  h.sandbox.GM_getValue = (k, d) => (k === 'trw_api_key' ? '' : d);
-  let calls = 0;
-  h.setGmXhr(() => { calls += 1; });
+  const urls = [];
+  h.setGmXhr((opts) => {
+    urls.push(opts.url);
+    opts.onerror();
+  });
   const r = await h.api.resolveExternal(h.loc.href);
   assert.strictEqual(r, null);
-  assert.strictEqual(calls, 0, 'no key must mean no API request');
+  assert.strictEqual(urls.length, 1, 'keyless resolver still calls the API');
+  assert.ok(!urls[0].includes('apikey='), 'no apikey parameter is sent');
+  assert.ok(urls[0].includes('origin=shortlink-skipper'), 'request is labelled with origin');
   const ok = await h.api.handleExternalService();
-  assert.ok(ok, 'bypass.tools delegation still works without a key');
+  assert.ok(ok, 'bypass.tools delegation still works');
   assert.ok(h.navs.some((u) => u.startsWith('https://bypass.tools/bypass?url=')));
 });

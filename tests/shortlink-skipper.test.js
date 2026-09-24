@@ -86,7 +86,6 @@ function load(opts = {}) {
     sessionStorage: { getItem: () => null, setItem: () => {} },
     GM_getValue: (k, d) => {
       if (k === 'verbose' && opts.verbose !== undefined) return opts.verbose;
-      if (k === 'trw_api_key') return 'test-key';
       return d;
     },
     GM_setValue: () => {},
