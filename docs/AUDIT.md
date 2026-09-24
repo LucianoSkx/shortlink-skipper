@@ -40,9 +40,9 @@ Shipped in 1.10.7: `TRACE` with detection hits/score, winning rule, navigations,
 `TRACE.durationMs` is measured on every load (asserted < 50ms on a quiet page).
 
 ## API key
-Hardcoded trw.lat key removed (1.10.9). Key is stored only in GM storage
-(`trw_api_key`), set via the userscript menu. Without a key the external
-resolver skips (zero network) and still delegates to bypass.tools.
+trw.lat is keyless for bypass endpoints (docs: "Bypass endpoints are public
+and keyless"). The resolver sends no credentials — only `origin=shortlink-skipper`
+for their logs. No `trw_api_key` GM key or menu command exists anymore.
 
 ## Explicitly deferred (per philosophy: don't refactor without need)
 - Rule contract `true` → `{handled, destination, confidence}`: revisit only when a rule

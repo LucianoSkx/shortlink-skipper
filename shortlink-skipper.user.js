@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.9
+// @version      1.10.10
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -619,10 +619,8 @@
   }
 
   async function trwResolver(url) {
-    const key = GM_getValue('trw_api_key', '');
-    if (!key) return { skip: 'no API key configured' };
     const data = await gmGetJson(
-      'https://trw.lat/api/bypass?apikey=' + encodeURIComponent(key) + '&url=' + encodeURIComponent(url),
+      'https://trw.lat/api/bypass?origin=shortlink-skipper&url=' + encodeURIComponent(url),
       RESOLVER_TIMEOUT_MS,
     );
     if (data?.success && typeof data.result === 'string' && /^https?:\/\//i.test(data.result)) {
@@ -1761,17 +1759,6 @@
       else PAGE.open('https://bypass.link/');
       log('current URL copied -- paste it on bypass.link and solve its captcha');
     });
-    GM_registerMenuCommand(
-      GM_getValue('trw_api_key', '') ? 'trw.lat API key: set (click to change)' : 'trw.lat API key: not set (click to set)',
-      () => {
-        const ask = typeof PAGE.prompt === 'function' ? PAGE.prompt : typeof prompt === 'function' ? prompt : null;
-        if (!ask) return;
-        const next = ask('trw.lat API key (empty clears):', GM_getValue('trw_api_key', ''));
-        if (next === null || next === undefined) return;
-        GM_setValue('trw_api_key', String(next).trim());
-        location.reload();
-      },
-    );
   }
 
   function installEarlyHooks() {

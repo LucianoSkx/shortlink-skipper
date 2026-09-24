@@ -78,7 +78,7 @@ function load(opts = {}) {
         setItem: (k, v) => { store[k] = String(v); },
       };
     })(),
-    GM_getValue: (k, d) => (k === 'trw_api_key' ? 'test-key' : d),
+    GM_getValue: (k, d) => d,
     GM_setValue: () => {},
     GM_registerMenuCommand: () => {},
     GM_xmlhttpRequest: () => {},
