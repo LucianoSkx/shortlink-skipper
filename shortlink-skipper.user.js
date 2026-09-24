@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.10
+// @version      1.10.11
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -156,6 +156,12 @@
         s.textContent = `document.documentElement.setAttribute('data-rg-${name}', JSON.stringify(typeof ${name} !== 'undefined' ? ${name} : null));`;
         document.documentElement.appendChild(s);
         s.remove();
+      } catch (e) {
+        // No usable DOM to inject into (e.g. documentElement rejected the
+        // script): retrying for 8s cannot help -- bail out immediately.
+        return null;
+      }
+      try {
         const raw = document.documentElement.getAttribute(`data-rg-${name}`);
         if (raw) {
           const v = JSON.parse(raw);
@@ -708,11 +714,11 @@
     return false;
   }
 
-  async function handleButtons() {
+  async function handleButtons(deadlineMs = 15000, maxClicks = 6) {
     log('watching for sequential action buttons');
     let clicks = 0;
-    const deadline = Date.now() + 15000;
-    while (Date.now() < deadline && clicks < 6) {
+    const deadline = Date.now() + deadlineMs;
+    while (Date.now() < deadline && clicks < maxClicks) {
       const btn =
         findByText(BUTTON_TEXTS) ||
         findByText(/\b(continue|proceed|free\s+download|download\s+now|get\s+link)\b/i);
@@ -1092,10 +1098,12 @@
           rt: token,
         }),
         ojk: 'jfhg',
-      }).then((json) => {
-        const url = json?.message?.url ?? json?.message;
-        if (typeof url === 'string') goto(url);
-      });
+      })
+        .then((json) => {
+          const url = json?.message?.url ?? json?.message;
+          if (typeof url === 'string') goto(url);
+        })
+        .catch((error) => log('bcvc API error:', error.message));
     }
     const clicked = await clickWhen(() => {
       const btn = document.getElementById('getLink');
@@ -1196,7 +1204,9 @@
     if (location.pathname.startsWith('/ad/locked')) {
       const params = new URLSearchParams(location.search);
       if (params.has('h') && params.has('url')) {
-        return goto(`/-${params.get('h')}/${params.get('url')}`);
+        // Absolute URL: goto() validates http(s) destinations and would
+        // silently refuse a relative path.
+        return goto(new URL(`/-${params.get('h')}/${params.get('url')}`, location.href).href);
       }
       return false;
     }
@@ -1206,9 +1216,14 @@
     }, 60000, 500);
     if (!link) return false;
     const href = link.getAttribute('href');
-    const dest = href.split('dest=')[1];
     log('skip button with dest found');
-    return dest ? goto(decodeURIComponent(dest)) : goto(href);
+    try {
+      // URL parsing keeps `dest` isolated from trailing params and never
+      // throws on malformed percent-encodings (decodeURIComponent did).
+      const dest = new URL(href, location.href).searchParams.get('dest');
+      if (dest) return goto(dest);
+    } catch {}
+    return goto(href);
   }
 
   async function handleLinkvertiseEasy() {
@@ -1645,8 +1660,8 @@
   // the destination, but only when nothing stronger appeared. Declared last on
   // purpose; the confidence is recorded so the trace shows why it acted.
   const SINGLE_EXTERNAL_CONFIDENCE = 0.55;
-  async function runSingleExternalLink() {
-    await sleep(4000);
+  async function runSingleExternalLink(settleMs = 4000) {
+    await sleep(settleMs);
     const dest = findExternalExit();
     if (!dest) return false;
     TRACE.candidates.push({ url: dest, source: 'single-external-link', confidence: SINGLE_EXTERNAL_CONFIDENCE });
@@ -1868,7 +1883,7 @@
 
       // Rules run in declaration order; the first rule whose run() returns truthy
       // wins and stops the loop (see GENERIC_RULES). A rule with a long timeout
-      // (e.g. captcha-manual waits up to 120s) blocks every later rule until it
+      // (e.g. captcha-manual waits up to 60s) blocks every later rule until it
       // resolves -- keep fast/early rules before slow ones when ordering matters.
       for (const rule of GENERIC_RULES) {
         if (disabled()) break;
@@ -1931,6 +1946,22 @@
       reportFalsePositive,
       handleImageHost,
       handleFileHost,
+      handleCloseInterstitial,
+      handleRekonise,
+      handleMboost,
+      handleLootLinkLocal,
+      handleAylink,
+      handleBcVc,
+      handleSkipButtonDest,
+      handleAcortalink,
+      handleBstlar,
+      handleTokenLink,
+      handleZafree,
+      handleInvisibleCaptcha,
+      handleGoLinkForm,
+      handleWpSafeLink,
+      handleButtons,
+      handleManualCaptcha,
       trace: TRACE,
       main,
     };
