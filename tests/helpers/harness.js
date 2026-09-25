@@ -43,6 +43,7 @@ function baseDoc(opts = {}) {
       getAttribute: () => null,
     }),
     addEventListener() {},
+    removeEventListener() {},
     // readGlobal/submitFormLoop probe the DOM through this; failing fast here
     // keeps readGlobal from burning its 40x200ms retry budget in tests.
     contains: () => false,

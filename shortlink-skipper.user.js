@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.11
+// @version      1.10.12
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -295,6 +295,12 @@
 
   function goto(url) {
     const candidate = { url: String(url), rule: TRACE.rule };
+    if (cfStandby) {
+      candidate.reason = 'cloudflare challenge stand-by';
+      TRACE.refusals.push(candidate);
+      log('navigation refused: cloudflare challenge stand-by -', url);
+      return false;
+    }
     const verdict = validateDestination(url);
     candidate.reason = verdict.reason;
     if (!verdict.valid) {
@@ -787,19 +793,99 @@
     );
   }
 
-  function cloudflareChallenging() {
+  function interstitialChallenging() {
     if (document.getElementById('cf-challenge-running')) return true;
     const cls = (document.documentElement.className + ' ' + (document.body?.className || '')).toLowerCase();
     if (/(^| )cf-challenge-running( |$)/.test(cls)) return true;
     if (/just a moment/i.test(document.title)) return true;
     if (document.querySelector('iframe[src*="challenges.cloudflare.com"]')) return true;
     if (document.querySelector('script[src*="challenges.cloudflare.com"], script[src*="cf-assets"]')) return true;
+    return false;
+  }
+
+  function turnstilePresent() {
     // Turnstile widget (tpi.li and friends): its challenge is timing-sensitive,
     // so never let prepareBoost's timer speed-up run underneath it.
     if (document.querySelector('.cf-turnstile')) return true;
     if (document.querySelector('script[src*="turnstile"]')) return true;
     if (typeof PAGE.turnstile !== 'undefined') return true;
     return false;
+  }
+
+  function cloudflareChallenging() {
+    return interstitialChallenging() || turnstilePresent();
+  }
+
+  // Two-tier Cloudflare stand-by:
+  //   - interstitial ("Just a moment...", cf-challenge-running) => full stand-by:
+  //     rules stop, goto() refuses, every environment hook is uninstalled.
+  //   - Turnstile widget on a live page => "quiet": the hooks that interfere with
+  //     the widget (timer boost, focus lock, popup block, net capture) are
+  //     silenced, but rules already running (captcha-manual) keep working.
+  function standbyState() {
+    return { standby: cfStandby, quiet: cfQuiet };
+  }
+
+  function enterChallengeStandby(reason) {
+    if (cfStandby) return;
+    cfStandby = true;
+    quietEnvironmentHooks();
+    log('Cloudflare challenge detected -- standing by, not interfering', reason ? `(${reason})` : '');
+  }
+
+  function quietEnvironmentHooks() {
+    if (cfQuiet) return;
+    cfQuiet = true;
+    disableBoost();
+    disablePopups();
+    disableFocusLock();
+    disableNetCapture();
+    log('environment hooks silenced (cloudflare widget present)');
+  }
+
+  // One evaluation step of the stand-by logic: full stand-by on the
+  // interstitial, quiet-mode on a Turnstile widget. Returns true when the
+  // script must stop touching the page entirely.
+  function syncChallengeState() {
+    if (cfStandby) return true;
+    if (interstitialChallenging()) {
+      enterChallengeStandby('detected after load');
+      return true;
+    }
+    if (cloudflareChallenging()) quietEnvironmentHooks();
+    return false;
+  }
+
+  // Polls the DOM for a challenge that shows up after main() already decided to
+  // activate: MutationObserver for injected markup plus a few one-shot timers
+  // for late-loading widget scripts. Unref'd so tests exit promptly.
+  function watchForChallenge() {
+    if (PAGE.__slCfWatch) return;
+    PAGE.__slCfWatch = true;
+    let mo = null;
+    const check = () => {
+      if (syncChallengeState()) {
+        try {
+          mo.disconnect();
+        } catch {}
+        return true;
+      }
+      return false;
+    };
+    try {
+      mo = new MutationObserver(() => check());
+      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    } catch {}
+    for (const ms of [1000, 3000, 8000, 20000]) {
+      const t = setTimeout(() => {
+        try {
+          check();
+        } catch {}
+      }, ms);
+      try {
+        if (t && typeof t.unref === 'function') t.unref();
+      } catch {}
+    }
   }
 
   async function handleManualCaptcha() {
@@ -1330,6 +1416,12 @@
   }
 
   let boostEnabled = false;
+  let cfStandby = false;
+  let cfQuiet = false;
+  let boostWrap = null;
+  let popupWrap = null;
+  let focusLock = null;
+  let netWrap = null;
 
   let capturedDestUrl = null;
   let capturedDestConfidence = 0;
@@ -1346,9 +1438,10 @@
   const NET_NAVIGATE_MIN_CONFIDENCE = 0.7;
 
   function installNetworkDestCapture() {
-    if (PAGE.__slNetCapturing) return;
+    if (PAGE.__slNetCapturing || cfQuiet || cfStandby) return;
     PAGE.__slNetCapturing = true;
     const scan = (text) => {
+      if (cfQuiet || cfStandby) return;
       if (typeof text !== 'string' || text.length > 500000) return;
       const pattern =
         /"(url|link|redirect(?:_url|_uri)?|final(?:_url)?|destination|target|go)"\s*:\s*"(https?:\/\/[^"\\]+)"/gi;
@@ -1374,29 +1467,46 @@
         } catch {}
       }
     };
-    const originalFetch = PAGE.fetch?.bind(PAGE);
-    if (originalFetch) {
-      PAGE.fetch = (...args) =>
-        originalFetch(...args).then((res) => {
+    const origFetch = PAGE.fetch;
+    const fetchBound = origFetch ? origFetch.bind(PAGE) : null;
+    const wrappedFetch = fetchBound
+      ? (...args) =>
+          fetchBound(...args).then((res) => {
+            try {
+              res.clone().text().then(scan).catch(() => {});
+            } catch {}
+            return res;
+          })
+      : null;
+    if (wrappedFetch) PAGE.fetch = wrappedFetch;
+    const origOpen = XMLHttpRequest.prototype.open;
+    const origSend = XMLHttpRequest.prototype.send;
+    const wrappedOpen = function (...args) {
+      return origOpen.apply(this, args);
+    };
+    const wrappedSend = function (...args) {
+      if (!cfQuiet && !cfStandby) {
+        this.addEventListener('load', () => {
           try {
-            res.clone().text().then(scan).catch(() => {});
+            scan(this.responseText);
           } catch {}
-          return res;
         });
-    }
-    const originalOpen = XMLHttpRequest.prototype.open;
-    const originalSend = XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.open = function (...args) {
-      return originalOpen.apply(this, args);
+      }
+      return origSend.apply(this, args);
     };
-    XMLHttpRequest.prototype.send = function (...args) {
-      this.addEventListener('load', () => {
-        try {
-          scan(this.responseText);
-        } catch {}
-      });
-      return originalSend.apply(this, args);
-    };
+    XMLHttpRequest.prototype.open = wrappedOpen;
+    XMLHttpRequest.prototype.send = wrappedSend;
+    netWrap = { origFetch, wrappedFetch, origOpen, wrappedOpen, origSend, wrappedSend };
+  }
+
+  function disableNetCapture() {
+    if (!netWrap) return;
+    try {
+      if (netWrap.wrappedFetch && PAGE.fetch === netWrap.wrappedFetch) PAGE.fetch = netWrap.origFetch;
+      if (XMLHttpRequest.prototype.open === netWrap.wrappedOpen) XMLHttpRequest.prototype.open = netWrap.origOpen;
+      if (XMLHttpRequest.prototype.send === netWrap.wrappedSend) XMLHttpRequest.prototype.send = netWrap.origSend;
+    } catch {}
+    netWrap = null;
   }
 
   async function handleNetworkCapture() {
@@ -1410,15 +1520,32 @@
   }
 
   function prepareBoost(factor = 15) {
+    if (boostWrap || cfQuiet || cfStandby) return;
     const originalTimeout = PAGE.setTimeout.bind(PAGE);
     const originalInterval = PAGE.setInterval.bind(PAGE);
     const speedUp = (delay) =>
       typeof delay === 'number' && delay > 400 && delay <= 90000 ? Math.max(30, Math.floor(delay / factor)) : delay;
-    PAGE.setTimeout = (handler, delay, ...rest) => originalTimeout(handler, boostEnabled ? speedUp(delay) : delay, ...rest);
-    PAGE.setInterval = (handler, delay, ...rest) => originalInterval(handler, boostEnabled ? speedUp(delay) : delay, ...rest);
+    const wrappedTimeout = (handler, delay, ...rest) =>
+      originalTimeout(handler, boostEnabled && !cfQuiet ? speedUp(delay) : delay, ...rest);
+    const wrappedInterval = (handler, delay, ...rest) =>
+      originalInterval(handler, boostEnabled && !cfQuiet ? speedUp(delay) : delay, ...rest);
+    boostWrap = { origTimeout: PAGE.setTimeout, origInterval: PAGE.setInterval, wrappedTimeout, wrappedInterval };
+    PAGE.setTimeout = wrappedTimeout;
+    PAGE.setInterval = wrappedInterval;
+  }
+
+  function disableBoost() {
+    boostEnabled = false;
+    if (!boostWrap) return;
+    try {
+      if (PAGE.setTimeout === boostWrap.wrappedTimeout) PAGE.setTimeout = boostWrap.origTimeout;
+      if (PAGE.setInterval === boostWrap.wrappedInterval) PAGE.setInterval = boostWrap.origInterval;
+    } catch {}
+    boostWrap = null;
   }
 
   function enableBoost() {
+    if (cfQuiet || cfStandby) return;
     if (!boostEnabled) {
       boostEnabled = true;
       log('timers boosted');
@@ -1426,38 +1553,89 @@
   }
 
   function blockPopups() {
-    PAGE.open = function blockedOpen(url) {
+    if (popupWrap || cfQuiet || cfStandby) return;
+    const originalOpen = PAGE.open;
+    const wrappedOpen = function blockedOpen(url) {
+      if (cfQuiet || cfStandby) {
+        return typeof originalOpen === 'function' ? originalOpen.call(PAGE, url) : null;
+      }
       log('popup blocked:', url || 'about:blank');
       return null;
     };
-    document.addEventListener(
-      'click',
-      (event) => {
-        const anchor = event.target.closest?.('a[target="_blank"]');
-        if (anchor && looksLikeShortlink()) {
-          event.preventDefault();
-          log('click popup blocked:', anchor.href);
-        }
-      },
-      true,
-    );
+    const clickGuard = (event) => {
+      if (cfQuiet || cfStandby) return;
+      const anchor = event.target.closest?.('a[target="_blank"]');
+      if (anchor && looksLikeShortlink()) {
+        event.preventDefault();
+        log('click popup blocked:', anchor.href);
+      }
+    };
+    PAGE.open = wrappedOpen;
+    document.addEventListener('click', clickGuard, true);
+    popupWrap = { originalOpen, wrappedOpen, clickGuard };
+  }
+
+  function disablePopups() {
+    if (!popupWrap) return;
+    try {
+      if (PAGE.open === popupWrap.wrappedOpen) PAGE.open = popupWrap.originalOpen;
+      document.removeEventListener('click', popupWrap.clickGuard, true);
+    } catch {}
+    popupWrap = null;
   }
 
   function restoreFocus() {
+    if (focusLock || cfQuiet || cfStandby) return;
+    const saved = {
+      onblur: PAGE.onblur,
+      onmouseleave: PAGE.onmouseleave,
+      props: ['hidden', 'webkitHidden', 'visibilityState', 'webkitVisibilityState'],
+      own: {},
+      listener: (event) => event.stopImmediatePropagation(),
+      types: ['visibilitychange', 'blur', 'mouseleave'],
+    };
+    focusLock = saved;
     try {
-      Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
-      Object.defineProperty(document, 'webkitHidden', { get: () => false, configurable: true });
-      Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
-      Object.defineProperty(document, 'webkitVisibilityState', { get: () => 'visible', configurable: true });
+      for (const prop of saved.props) {
+        saved.own[prop] = Object.getOwnPropertyDescriptor(document, prop) || null;
+        Object.defineProperty(document, prop, {
+          get: () => (prop.includes('State') ? 'visible' : false),
+          configurable: true,
+        });
+      }
+      saved.own.hasFocus = Object.getOwnPropertyDescriptor(document, 'hasFocus') || null;
       PAGE.onblur = null;
       PAGE.onmouseleave = null;
       document.hasFocus = () => true;
-      for (const type of ['visibilitychange', 'blur', 'mouseleave']) {
-        document.addEventListener(type, (event) => event.stopImmediatePropagation(), true);
+      for (const type of saved.types) {
+        document.addEventListener(type, saved.listener, true);
       }
     } catch (error) {
       log('failed to restore focus:', error.message);
     }
+  }
+
+  function disableFocusLock() {
+    if (!focusLock) return;
+    try {
+      for (const prop of focusLock.props) {
+        const own = Object.getOwnPropertyDescriptor(document, prop);
+        if (!own) continue;
+        if (focusLock.own[prop]) Object.defineProperty(document, prop, focusLock.own[prop]);
+        else if (own.configurable) delete document[prop];
+      }
+      PAGE.onblur = focusLock.onblur;
+      PAGE.onmouseleave = focusLock.onmouseleave;
+      const ownFocus = Object.getOwnPropertyDescriptor(document, 'hasFocus');
+      if (focusLock.own.hasFocus) Object.defineProperty(document, 'hasFocus', focusLock.own.hasFocus);
+      else if (ownFocus && ownFocus.configurable) delete document.hasFocus;
+      for (const type of focusLock.types) {
+        try {
+          document.removeEventListener(type, focusLock.listener, true);
+        } catch {}
+      }
+    } catch {}
+    focusLock = null;
   }
 
   function enableInteractions() {
@@ -1495,7 +1673,7 @@
   function removeAdblockBanners() {
     let sweeping = false;
     const sweep = () => {
-      if (sweeping) return;
+      if (sweeping || cfQuiet || cfStandby) return;
       sweeping = true;
       setTimeout(() => {
         sweeping = false;
@@ -1846,7 +2024,7 @@
         });
       }
       if (cloudflareChallenging()) {
-        log('Cloudflare challenge detected -- standing by, not interfering');
+        enterChallengeStandby('interstitial');
         return;
       }
 
@@ -1872,7 +2050,12 @@
         return;
       }
 
-      if (shortish || knownShort || media) {
+      // Live challenge watchdog, only where the script actually acts: a
+      // challenge showing up later must silence the hooks already installed
+      // (and stop goto()/rules) without costing normal pages an observer.
+      if (shortish || knownShort || media || delegated) watchForChallenge();
+
+      if (!cfStandby && !cfQuiet && (shortish || knownShort || media)) {
         prepareBoost();
         enableBoost();
         blockPopups();
@@ -1886,6 +2069,10 @@
       // (e.g. captcha-manual waits up to 60s) blocks every later rule until it
       // resolves -- keep fast/early rules before slow ones when ordering matters.
       for (const rule of GENERIC_RULES) {
+        if (cfStandby) {
+          log('cloudflare stand-by active -- stopping the rule loop');
+          break;
+        }
         if (disabled()) break;
         let shouldRun = false;
         try {
@@ -1964,6 +2151,21 @@
       handleManualCaptcha,
       trace: TRACE,
       main,
+      standbyState,
+      enterChallengeStandby,
+      quietEnvironmentHooks,
+      watchForChallenge,
+      syncChallengeState,
+      prepareBoost,
+      enableBoost,
+      disableBoost,
+      blockPopups,
+      disablePopups,
+      restoreFocus,
+      disableFocusLock,
+      disableNetCapture,
+      interstitialChallenging,
+      turnstilePresent,
     };
   }
 

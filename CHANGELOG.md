@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.10.12 — 2026-09-25
+
+### Fixed
+- **Cloudflare challenges are no longer disturbed after page load**: the stand-by check only ran once at DOMContentLoaded, so a Turnstile widget (or interstitial markers) injected *later* kept running underneath the timer boost, focus lock, popup block and network capture — the interference users hit on Cloudflare captchas. A live watchdog (`watchForChallenge`, installed only on pages where the script actually acts) now reacts with two tiers:
+  - **interstitial** (`cf-challenge-running`, "Just a moment...", `challenges.cloudflare.com`) => full stand-by: `goto()` refuses navigation, the rule loop stops, and every hook is uninstalled — `setTimeout`/`setInterval` wrappers, `window.open`, the focus lock (`document.hidden`/`visibilityState`/`hasFocus` overrides and the blur/visibility listeners) and the fetch/XHR capture are all restored to the originals;
+  - **Turnstile widget** (`.cf-turnstile`, turnstile script, `window.turnstile`) => quiet mode: the same environment hooks are silenced so they cannot affect the widget, but rules already in flight (e.g. `captcha-manual`) keep working.
+- **Hooks are now idempotent and uninstallable**: `prepareBoost`, `blockPopups`, `restoreFocus` and `installNetworkDestCapture` keep references to the originals, become no-ops under stand-by/quiet and can be rolled back (`disableBoost`/`disablePopups`/`disableFocusLock`/`disableNetCapture`).
+- **Anti-adblock banner sweep no longer scans the DOM** while a challenge/turnstile is present.
+
+### Added
+- **5 regression tests** (`tests/standby.test.js`): both stand-by tiers, hook restoration, `goto()` refusal during the interstitial, no re-install under stand-by, and the "no MutationObserver on normal pages" guarantee kept intact (the watchdog only installs where the script acts).
+
 ## 1.10.11 — 2026-09-24
 
 ### Fixed
