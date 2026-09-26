@@ -110,7 +110,7 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|giphy\.com|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgflip\.com|imgfrost\.net|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|prnt\.sc|rintor\.space|shotcan\.com|tenor\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -1326,6 +1326,11 @@
     return openSelectorHref('.btn-success.btn-lg.get-link', 15000);
   }
 
+  async function handleTurkdown() {
+    if (!/^link\.turkdown\.com$/.test(location.host)) return false;
+    return openSelectorHref('.btn-success.btn-lg.get-link', 15000);
+  }
+
   async function handleTutwuri() {
     if (!/(^|\.)tutwuri\.id$/.test(location.host)) return false;
     const first = await waitFor('#btn-1', 5000);
@@ -2186,6 +2191,7 @@
     { name: 'fir3', when: () => /(^|\.)fir3\.net$/.test(location.host), run: handleFir3 },
     { name: 'gplinks', when: () => /(^|\.)gplinks\.co$/.test(location.host), run: handleGplinks },
     { name: 'icutlink', when: () => ICUTLINK_HOST.test(location.host), run: handleIcutlink },
+    { name: 'turkdown', when: () => /^link\.turkdown\.com$/.test(location.host), run: handleTurkdown },
     { name: 'tutwuri', when: () => /(^|\.)tutwuri\.id$/.test(location.host), run: handleTutwuri },
     { name: 'exeo-app', when: () => EXEO_HOST.test(location.host), run: handleExeoApp },
     { name: 'lnk2', when: () => /(^|\.)lnk2\.cc$/.test(location.host), run: handleLnk2 },
@@ -2482,6 +2488,7 @@
       handleFir3,
       handleGplinks,
       handleIcutlink,
+      handleTurkdown,
       handleTutwuri,
       handleExeoApp,
       handleLnk2,

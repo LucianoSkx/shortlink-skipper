@@ -153,6 +153,15 @@ test('icutlink follows the get-link href', async () => {
   assert.ok(h.navs.includes('https://dest.example/x'));
 });
 
+test('turkdown follows the get-link href', async () => {
+  const h = load({
+    href: 'https://link.turkdown.com/abc',
+    querySelector: qsMap({ '.btn-success.btn-lg.get-link': { href: 'https://dest.example/x' } }),
+  });
+  assert.strictEqual(await h.api.handleTurkdown(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
 test('tribuntekno clicks verification buttons', async () => {
   const h = load({
     href: 'https://tribuntekno.com/abc',
@@ -202,7 +211,7 @@ for (const fn of [
   'handleA2zapk', 'handleBlogmado', 'handleMangalist', 'handleLinegee',
   'handleYasir252', 'handleImagetwistNetlify', 'handleUrlgalleries', 'handleHenTay',
   'handleWpsafeAnchor', 'handleTribuntekno', 'handleCuttty', 'handleFir3',
-  'handleGplinks', 'handleIcutlink', 'handleTutwuri', 'handleExeoApp', 'handleLnk2',
+  'handleGplinks', 'handleIcutlink', 'handleTurkdown', 'handleTutwuri', 'handleExeoApp', 'handleLnk2',
   'handleSpaste', 'handleF95zone', 'handleRlu', 'handleAdshnk', 'handleSimilarsites',
   'handleLolinez', 'handleUrlcash', 'handleGoLinkify', 'handleNetworkLoop',
   'handleGetClick2',

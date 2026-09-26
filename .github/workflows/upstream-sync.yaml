@@ -1,0 +1,31 @@
+name: Upstream sync
+
+on:
+  schedule:
+    - cron: '0 9 1 * *' # monthly, 1st at 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  gap:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compute coverage gap
+        run: node test-live/upstream-gap.js > gap.md
+      - name: Publish or refresh the tracking issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="Upstream gap: adsbypasser coverage not yet ported"
+          NUM=$(gh issue list --search "$TITLE in:title" --state open --json number -q '.[0].number')
+          if [ -z "$NUM" ]; then
+            gh issue create --title "$TITLE" --body-file gap.md
+          else
+            gh issue edit "$NUM" --body-file gap.md
+          fi
