@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.13
+// @version      1.10.14
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -1272,6 +1272,55 @@
     return openSelectorHref('center h2 p a, .btn-dark');
   }
 
+  const IMAGETWIST_HOST =
+    /(^|\.)(imagetwist\.com|imagehaha\.com|imagenpic\.com|imageshimage\.com|imagexport\.com|croea\.com)$/;
+  async function handleImagetwistFamily() {
+    if (!IMAGETWIST_HOST.test(location.host)) return false;
+    const img = await waitFor('img.pic', 10000, 500);
+    const src = img?.src;
+    if (src && isPlausibleUrl(src) && !sameAsCurrent(src)) {
+      return goto(src);
+    }
+    return false;
+  }
+
+  async function handleFastpic() {
+    if (!/(^|\.)fastpic\.org$/.test(location.host)) return false;
+    if (!/^\/(view|fullview)\//.test(location.pathname)) return false;
+    const links = [...document.querySelectorAll('a[href]')];
+    const byText = (re) => links.find((a) => re.test((a.textContent || '').trim()));
+    let url = byText(/continue to image|click to continue to image|\u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u043a \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u044e/i)
+      ?.href;
+    if (!url) url = links.find((a) => /fullview/i.test(a.href))?.href;
+    if (!url) {
+      const scripts = [...document.querySelectorAll('script:not([src])')].map((s) => s.textContent).join('\n');
+      const m = scripts.match(/pp0["sr"+"c"]\s*=\s*"([^"]+)"/);
+      if (m) url = m[1];
+    }
+    if (!url) url = document.querySelector('#imglink, #imga')?.href;
+    return url ? goto(url) : false;
+  }
+
+  async function handleImgtraffic() {
+    if (!/(^|\.)imgtraffic\.com$/.test(location.host)) return false;
+    const m = location.pathname.match(/^\/([ainz])-1\/(.+)\.jpeg\.html$/);
+    if (!m) return false;
+    return goto(`${location.origin}/${m[2]}.jpeg`);
+  }
+
+  const IMGAIR_HOST =
+    /(^|\.)(cloudgallery\.net|imgair\.net|imgblaze\.net|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs)$/;
+  async function handleImgair() {
+    if (!IMGAIR_HOST.test(location.host)) return false;
+    const scripts = [...document.querySelectorAll('script:not([src])')].map((s) => s.textContent).join('\n');
+    const m = scripts.match(/imgbg\.src\s*=\s*"([^"]+)";/);
+    const src = m?.[1];
+    if (src && isPlausibleUrl(src) && !sameAsCurrent(src)) {
+      return goto(src);
+    }
+    return false;
+  }
+
   async function handleUrlgalleries() {
     if (!/(^|\.)urlgalleries\.net$/.test(location.host)) return false;
     return clickSelectorWhen('#overlay.butstyle', 5000);
@@ -2158,6 +2207,10 @@
     }
 
   const GENERIC_RULES = [
+    { name: 'imagetwist-family', when: () => IMAGETWIST_HOST.test(location.host), run: handleImagetwistFamily },
+    { name: 'fastpic', when: () => /(^|\.)fastpic\.org$/.test(location.host), run: handleFastpic },
+    { name: 'imgtraffic', when: () => /(^|\.)imgtraffic\.com$/.test(location.host), run: handleImgtraffic },
+    { name: 'imgair', when: () => IMGAIR_HOST.test(location.host), run: handleImgair },
     { name: 'image-host', when: () => IMAGE_HOSTS.test(location.host), run: handleImageHost },
     { name: 'file-host', when: () => FILE_HOSTS.test(location.host), run: handleFileHost },
     { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
@@ -2459,6 +2512,10 @@
       reportFalsePositive,
       handleImageHost,
       handleFileHost,
+      handleImagetwistFamily,
+      handleFastpic,
+      handleImgtraffic,
+      handleImgair,
       handleCloseInterstitial,
       handleRekonise,
       handleMboost,
