@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*" # Triggers on version tags
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Fetch full history for proper tagging
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate GitHub Pages content
+        run: npm run ghpages
+
+      - name: Generate Release Notes
+        id: release-notes
+        run: |
+          node build/ci/release-notes.js ${{ github.ref_name }} > release-notes.md
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat release-notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Deploy to GitHub Pages
+        run: ./build/ci/deploy-gh-pages.sh
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+          SOURCE_DIR: ./dist/ghpages
+          TARGET_REPO: ${{ vars.GH_PAGES_REPO }}
+          TARGET_REPO_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.release-notes.outputs.notes }}
+          draft: false
+          prerelease: false
+          files: |
+            ./dist/adsbypasser.full.user.js
+            ./dist/adsbypasser.full.meta.js
+            ./dist/adsbypasser.lite.user.js
+            ./dist/adsbypasser.lite.meta.js

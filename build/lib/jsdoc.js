@@ -1,0 +1,67 @@
+import fs from "fs/promises";
+import path from "path";
+import { source } from "./paths.js";
+import { extractDomainsFromContent } from "./domain.js";
+
+const SITES_DIR = source.to("src/sites");
+
+/**
+ * Extract domains from JSDoc @domain tags in site files
+ * @param {string[]} [directories] - Optional array of subdirectories to scan (e.g., ['file', 'link'])
+ * @returns {Promise<string[]>} Array of domain strings
+ */
+export async function extractDomainsFromJSDoc(directories = null) {
+  const domains = new Set();
+
+  if (directories) {
+    // Scan only specified directories
+    for (const dir of directories) {
+      const dirPath = path.join(SITES_DIR, dir);
+      await scanDirectory(dirPath, domains);
+    }
+  } else {
+    // Start scanning from the sites directory
+    await scanDirectory(SITES_DIR, domains);
+  }
+
+  // Convert Set to sorted array
+  const sortedDomains = Array.from(domains).sort();
+
+  return sortedDomains;
+}
+
+/**
+ * Recursively scan all .js files in sites directory
+ * @param {string} dir - Directory to scan
+ * @param {Set<string>} domains - Set to collect domains
+ * @returns {Promise<void>} Promise that resolves when scanning is complete
+ */
+async function scanDirectory(dir, domains) {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      await scanDirectory(fullPath, domains);
+    } else if (entry.isFile() && entry.name.endsWith(".js")) {
+      await extractDomainsFromFile(fullPath, domains);
+    }
+  }
+}
+
+/**
+ * Extract domains from a single file
+ * @param {string} filePath - Path to the file to scan
+ * @param {Set<string>} domains - Set to collect domains
+ * @returns {Promise<void>} Promise that resolves when extraction is complete
+ */
+async function extractDomainsFromFile(filePath, domains) {
+  try {
+    const content = await fs.readFile(filePath, "utf-8");
+    const fileDomains = extractDomainsFromContent(content);
+    fileDomains.forEach((domain) => domains.add(domain));
+  } catch (error) {
+    console.warn(`Warning: Could not read file ${filePath}:`, error.message);
+  }
+}
