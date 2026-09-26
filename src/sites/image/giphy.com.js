@@ -1,0 +1,22 @@
+/**
+ * @domain giphy.com
+ */
+_.register({
+  rule: {
+    host: /^giphy\.com$/,
+    path: /^\/gifs\//,
+  },
+  async ready() {
+    const i = $('meta[property="og:image"]');
+    await $.openLink(i.content);
+  },
+});
+_.register({
+  rule: {
+    host: /^media[0-9]\.giphy\.com$/,
+  },
+  async ready() {
+    const img = $("img.block");
+    await $.openImage(img.src);
+  },
+});

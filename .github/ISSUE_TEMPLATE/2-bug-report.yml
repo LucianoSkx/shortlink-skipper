@@ -1,0 +1,76 @@
+name: Bug_Report
+description: Report a supported site that is not working correctly
+
+title: "[Bug] <site-domain>"
+labels: [bug]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Important:** AdsBypasser does **NOT** bypass reCAPTCHA.
+
+        **Note:** Please update the issue title to include the site domain:
+        `[Bug] example.com`
+
+  - type: input
+    id: site-domain
+    attributes:
+      label: Site Domain
+      description: What is the domain of the site that is not working?
+      placeholder: example.com
+    validations:
+      required: true
+
+  - type: input
+    id: full-link
+    attributes:
+      label: Full Link
+      description: Please paste the complete URL, including https://
+      placeholder: https://example.com/link
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-wrong
+    attributes:
+      label: What's Wrong?
+      description: Clearly describe the problem you are experiencing.
+      placeholder: Describe what happens when you try to use AdsBypasser.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should AdsBypasser do instead?
+      placeholder: Describe what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-message
+    attributes:
+      label: Error Message
+      description: If there is an error message, please paste it here.
+      placeholder: Paste the error message here, if applicable.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional Information
+      description: Provide any other information, screenshots, or relevant details.
+      placeholder: Anything else that may help reproduce or diagnose the issue.
+
+  - type: markdown
+    attributes:
+      value: |
+        **Before submitting:**
+        1. Please check if there is an existing ticket open for the same site.
+        2. Make sure the site is currently supported by AdsBypasser.
+        3. Make sure the problem is not caused by reCAPTCHA.
+        4. Make sure you have provided the complete URL and a clear description of the problem.
