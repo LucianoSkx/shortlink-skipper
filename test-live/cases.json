@@ -449,5 +449,85 @@
     "expect": "example.com/turk-target",
     "family": "ports",
     "note": "live: turkdown-1"
+  },
+  {
+    "id": "imagetwist-1",
+    "host": "imagetwist.com",
+    "path": "/abc",
+    "search": "",
+    "html": "<img class=\"pic\" src=\"https://example.com/itw-pic.jpg\"><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "example.com/",
+    "family": "media",
+    "note": "live: imagetwist-1"
+  },
+  {
+    "id": "fastpic-1",
+    "host": "fastpic.org",
+    "path": "/view/abc",
+    "search": "",
+    "html": "<a href=\"https://example.com/fp-full.jpg\">Continue to image</a><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "example.com/",
+    "family": "media",
+    "note": "live: fastpic-1"
+  },
+  {
+    "id": "imgtraffic-1",
+    "host": "imgtraffic.com",
+    "path": "/a-1/abc123.jpeg.html",
+    "search": "",
+    "html": "<p>img</p><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "imgtraffic.com/abc123.jpeg",
+    "family": "media",
+    "note": "live: imgtraffic-1"
+  },
+  {
+    "id": "imgtraffic-i-1",
+    "host": "imgtraffic.com",
+    "path": "/i-1/xyz789.jpeg.html",
+    "search": "",
+    "html": "<p>img</p><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "imgtraffic.com/xyz789.jpeg",
+    "family": "media",
+    "note": "live: imgtraffic-i-1"
+  },
+  {
+    "id": "imgair-1",
+    "host": "imgair.net",
+    "path": "/abc",
+    "search": "",
+    "html": "<script>imgbg.src = \"https://example.com/ia-bg.jpg\";</script><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "example.com/",
+    "family": "media",
+    "note": "live: imgair-1"
+  },
+  {
+    "id": "keeplinks-1",
+    "host": "keeplinks.org",
+    "path": "/abc",
+    "search": "",
+    "html": "<button id=\"btnproceedsubmit\">Proceed</button><script>document.getElementById(\"btnproceedsubmit\").addEventListener(\"click\",()=>{document.title=\"CLICKED-keeplinks\";});</script><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "CLICKED-keeplinks",
+    "family": "media",
+    "note": "live: keeplinks-1"
+  },
+  {
+    "id": "mirrored-1",
+    "host": "mirrored.to",
+    "path": "/files/abc",
+    "search": "",
+    "html": "<a class=\"secondary\" href=\"https://example.com/mir-file.zip\">Download</a><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "example.com/",
+    "family": "media",
+    "note": "live: mirrored-1"
+  },
+  {
+    "id": "multiup-1",
+    "host": "multiup.io",
+    "path": "/abc",
+    "search": "",
+    "html": "<button id=\"download-button\">Download</button><script>document.getElementById(\"download-button\").addEventListener(\"click\",()=>{document.title=\"CLICKED-multiup\";});</script><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "CLICKED-multiup",
+    "family": "media",
+    "note": "live: multiup-1"
   }
 ]
