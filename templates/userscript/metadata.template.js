@@ -1,14 +1,14 @@
 // @name           <%= title %>
-// @namespace      AdsBypasser
-// @description    Bypass Ads
-// @author         AdsBypasser Team
+// @namespace      ShortlinkSkipper
+// @description    Skip link shorteners automatically
+// @author         LucianoSkx
 // @version        <%= version %>
 // @license        BSD-3-Clause
-// @homepageURL    https://adsbypasser.github.io/
-// @supportURL     https://github.com/adsbypasser/adsbypasser/issues
-// @updateURL      https://adsbypasser.github.io/releases/adsbypasser.<%= buildName %>.meta.js
-// @downloadURL    https://adsbypasser.github.io/releases/adsbypasser.<%= buildName %>.user.js
-// @icon           https://raw.githubusercontent.com/adsbypasser/adsbypasser/v<%= version %>/static/img/logo.png
+// @homepageURL    https://github.com/LucianoSkx/shortlink-skipper
+// @supportURL    https://github.com/LucianoSkx/shortlink-skipper/issues
+// @updateURL      https://github.com/LucianoSkx/shortlink-skipper/releases/latest/download/shortlink-skipper.<%= buildName %>.meta.js
+// @downloadURL    https://github.com/LucianoSkx/shortlink-skipper/releases/latest/download/shortlink-skipper.<%= buildName %>.user.js
+// @icon           https://github.com/LucianoSkx/shortlink-skipper/raw/main/static/img/logo.png
 // @grant          GM_deleteValue
 // @grant          GM_getValue
 // @grant          GM_info
@@ -27,4 +27,3 @@
 // @noframes
 // @run-at         document-start
 // @connect        *
-// @match          *://adsbypasser.github.io/*

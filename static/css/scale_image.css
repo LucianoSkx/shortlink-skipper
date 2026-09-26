@@ -1,7 +1,7 @@
 /**
  * Scale Image CSS
  *
- * Styles for resizable images in the AdsBypasser userscript.
+ * Styles for resizable images in the ShortlinkSkipper userscript.
  * Provides zoom cursors and responsive sizing.
  */
 
@@ -10,7 +10,7 @@
  * Shows zoom-out cursor to indicate the image can be resized
  * Vendor prefixes are included for maximum browser compatibility
  */
-#adsbypasser-image.adsbypasser-resizable {
+#shortlink-skipper-image.shortlink-skipper-resizable {
   cursor: -webkit-zoom-out;
   cursor: -moz-zoom-out;
   cursor: zoom-out;
@@ -21,7 +21,7 @@
  * Shows zoom-in cursor and constrains image size to container
  * Vendor prefixes are included for maximum browser compatibility
  */
-#adsbypasser-image.adsbypasser-resizable.adsbypasser-shrinked {
+#shortlink-skipper-image.shortlink-skipper-resizable.shortlink-skipper-shrinked {
   max-width: 100%;
   max-height: 100%;
   cursor: -webkit-zoom-in;

@@ -9,9 +9,9 @@ function log(method, args) {
 
   args = Array.prototype.slice.call(args);
   if (isString(args[0])) {
-    args[0] = "AdsBypasser: " + args[0];
+    args[0] = "ShortlinkSkipper: " + args[0];
   } else {
-    args.unshift("AdsBypasser:");
+    args.unshift("ShortlinkSkipper:");
   }
 
   const fn = console[method];

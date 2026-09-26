@@ -2,13 +2,13 @@
  * Unit tests for core utility functions
  *
  * This file contains comprehensive tests for the core utility functions
- * used throughout the AdsBypasser project. These functions provide
+ * used throughout the ShortlinkSkipper project. These functions provide
  * essential functional programming capabilities and collection operations.
  */
 
 import { afterEach, describe, it, expect, vi } from "vitest";
 import {
-  AdsBypasserError,
+  ShortlinkSkipperError,
   partial,
   every,
   find,
@@ -37,8 +37,8 @@ describe("core", () => {
      * Test that partial throws an error when not given a function
      */
     it("throws if the first argument is not a function", () => {
-      expect(() => partial()).toThrow(AdsBypasserError);
-      expect(() => partial(0)).toThrow(AdsBypasserError);
+      expect(() => partial()).toThrow(ShortlinkSkipperError);
+      expect(() => partial(0)).toThrow(ShortlinkSkipperError);
     });
 
     /**
@@ -199,7 +199,7 @@ describe("core", () => {
       const fn = vi.fn(() => none);
 
       const result = tryEvery(100, fn, 2);
-      const rejection = expect(result).rejects.toThrow(AdsBypasserError);
+      const rejection = expect(result).rejects.toThrow(ShortlinkSkipperError);
       await vi.advanceTimersByTimeAsync(300);
 
       await rejection;
@@ -225,7 +225,7 @@ describe("core", () => {
       "throws for an invalid maximum attempt count of %s",
       (maxAttempts) => {
         expect(() => tryEvery(100, () => none, maxAttempts)).toThrow(
-          AdsBypasserError,
+          ShortlinkSkipperError,
         );
       },
     );

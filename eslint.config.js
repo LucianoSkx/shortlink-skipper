@@ -61,7 +61,7 @@ const nodeGlobals = {
 const libraryGlobals = {
   // Third-party library globals
   _: "readonly", // Lodash
-  $: "readonly", // AdsBypasser
+  $: "readonly", // ShortlinkSkipper
 };
 
 const customGlobals = {
@@ -103,13 +103,9 @@ export default [
       },
     },
   },
-  // Browser context: src/, templates/ghpages/js/, templates/jekyll/assets/js/
+  // Browser context: src/
   {
-    files: [
-      "src/**/*.js",
-      "templates/ghpages/js/**/*.js",
-      "templates/jekyll/assets/js/**/*.js",
-    ],
+    files: ["src/**/*.js"],
     languageOptions: {
       globals: {
         ...browserGlobals,

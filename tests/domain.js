@@ -2,7 +2,7 @@
  * Unit tests for domain utility functions
  *
  * This file contains comprehensive tests for the domain utility functions
- * used in the AdsBypasser project. These functions handle domain validation,
+ * used in the ShortlinkSkipper project. These functions handle domain validation,
  * extraction from various sources, and deduplication of root domains.
  */
 

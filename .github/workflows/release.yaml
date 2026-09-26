@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -28,8 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate GitHub Pages content
-        run: npm run ghpages
+      - name: Build userscripts
+        run: npm run build
 
       - name: Generate Release Notes
         id: release-notes
@@ -38,14 +36,6 @@ jobs:
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           cat release-notes.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Deploy to GitHub Pages
-        run: ./build/ci/deploy-gh-pages.sh
-        env:
-          TAG_NAME: ${{ github.ref_name }}
-          SOURCE_DIR: ./dist/ghpages
-          TARGET_REPO: ${{ vars.GH_PAGES_REPO }}
-          TARGET_REPO_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -58,7 +48,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./dist/adsbypasser.full.user.js
-            ./dist/adsbypasser.full.meta.js
-            ./dist/adsbypasser.lite.user.js
-            ./dist/adsbypasser.lite.meta.js
+            ./dist/shortlink-skipper.full.user.js
+            ./dist/shortlink-skipper.full.meta.js
+            ./dist/shortlink-skipper.lite.user.js
+            ./dist/shortlink-skipper.lite.meta.js

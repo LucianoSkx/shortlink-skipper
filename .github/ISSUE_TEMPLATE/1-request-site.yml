@@ -9,7 +9,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Important:** AdsBypasser does **NOT** bypass reCAPTCHA.
+        **Important:** Shortlink Skipper does **NOT** bypass reCAPTCHA.
 
         **Note:** Please update the issue title to include the site domain:
         `[Request] example.com`
@@ -53,5 +53,5 @@ body:
       value: |
         **Before submitting:**
         1. Please check if there is an existing ticket open for the same site.
-        2. Make sure the site is not already supported by AdsBypasser.
+        2. Make sure the site is not already supported by Shortlink Skipper.
         3. Make sure you have provided a complete URL and a clear description of the site.

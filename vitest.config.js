@@ -2,7 +2,7 @@ import path from "path";
 import { defineConfig } from "vitest/config";
 
 /**
- * Vitest configuration for AdsBypasser
+ * Vitest configuration for ShortlinkSkipper
  *
  * This configuration sets up the testing environment for the project.
  * It includes settings for globals, environment, test file inclusion,

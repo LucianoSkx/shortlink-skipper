@@ -4,7 +4,7 @@ import { warn, info } from "./logger.js";
 import { removeAllTimer } from "./misc.js";
 import { GMAPI, VERSION } from "./platform.js";
 
-const RESOURCE_ROOT = `https://raw.githubusercontent.com/adsbypasser/adsbypasser/v${VERSION}/static`;
+const RESOURCE_ROOT = `https://raw.githubusercontent.com/shortlink-skipper/shortlink-skipper/v${VERSION}/static`;
 const ALIGN_CENTER = `${RESOURCE_ROOT}/css/align_center.css`;
 const SCALE_IMAGE = `${RESOURCE_ROOT}/css/scale_image.css`;
 const BACKGROUND_IMAGE = `${RESOURCE_ROOT}/img/imagedoc-darknoise.png`;
@@ -33,7 +33,7 @@ function enableScrolling() {
 }
 
 function toggleShrinking() {
-  this.classList.toggle("adsbypasser-shrinked");
+  this.classList.toggle("shortlink-skipper-shrinked");
 }
 
 function checkScaling() {
@@ -44,17 +44,17 @@ function checkScaling() {
 
   if (
     (nw > cw || nh > ch) &&
-    !this.classList.contains("adsbypasser-resizable")
+    !this.classList.contains("shortlink-skipper-resizable")
   ) {
-    this.classList.add("adsbypasser-resizable", "adsbypasser-shrinked");
+    this.classList.add("shortlink-skipper-resizable", "shortlink-skipper-shrinked");
     this.addEventListener("click", toggleShrinking);
   } else if (
     nw <= cw &&
     nh <= ch &&
-    this.classList.contains("adsbypasser-resizable")
+    this.classList.contains("shortlink-skipper-resizable")
   ) {
     this.removeEventListener("click", toggleShrinking);
-    this.classList.remove("adsbypasser-shrinked", "adsbypasser-resizable");
+    this.classList.remove("shortlink-skipper-shrinked", "shortlink-skipper-resizable");
   }
 }
 
@@ -85,8 +85,8 @@ function alignCenter() {
 
 function injectStyle(wrapper, img) {
   remove("style, link[rel=stylesheet]");
-  wrapper.id = "adsbypasser-wrapper";
-  img.id = "adsbypasser-image";
+  wrapper.id = "shortlink-skipper-wrapper";
+  img.id = "shortlink-skipper-image";
 }
 
 function appendStyleURL(url) {

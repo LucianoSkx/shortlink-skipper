@@ -1,7 +1,7 @@
-import { AdsBypasserError, isString, forEach, find, none } from "./core.js";
+import { ShortlinkSkipperError, isString, forEach, find, none } from "./core.js";
 import { debug } from "./logger.js";
 
-class DomNotFoundError extends AdsBypasserError {
+class DomNotFoundError extends ShortlinkSkipperError {
   constructor(selector) {
     super(`\`${selector}\` not found`);
   }
@@ -42,7 +42,7 @@ function toDOM(rawHTML) {
     const parser = new DOMParser();
     return parser.parseFromString(rawHTML, "text/html");
   } catch {
-    throw new AdsBypasserError("could not parse HTML to DOM");
+    throw new ShortlinkSkipperError("could not parse HTML to DOM");
   }
 }
 

@@ -1,13 +1,11 @@
 /**
- * Configuration loader and manager for AdsBypasser
+ * Configuration loader and manager for Shortlink Skipper
  *
  * This module handles loading, validating, and managing user configuration
- * for the AdsBypasser userscript. It includes functionality for the
- * configuration page and runtime config access.
+ * for the Shortlink Skipper userscript.
  */
 
-import { register } from "./dispatcher.js";
-import { usw, GMAPI } from "./platform.js";
+import { GMAPI } from "./platform.js";
 
 /**
  * Configuration manifest defining all available settings
@@ -99,27 +97,6 @@ async function sanityCheck() {
 }
 
 /**
- * Wait for the page to be fully loaded
- * @returns {Promise} - Resolves when page is ready
- */
-function waitForPage() {
-  return new Promise((resolve) => {
-    if (document.readyState === "complete" && usw.render) {
-      return resolve();
-    }
-
-    const check = () => {
-      if (document.readyState === "complete" && usw.render) {
-        clearInterval(interval);
-        resolve();
-      }
-    };
-    const interval = setInterval(check, 50);
-    document.addEventListener("DOMContentLoaded", check);
-  });
-}
-
-/**
  * Dump current configuration values
  * @returns {Promise<Object>} - Object containing all config values
  */
@@ -131,45 +108,12 @@ async function dumpConfig() {
 }
 
 /**
- * Load configuration and set up the configuration page
- * Registers a handler for the configuration page and sets up rendering
+ * Load configuration
+ * Runs a sanity check to ensure all config values are valid
  * @returns {Promise} - Resolves when configuration is loaded
  */
 async function loadConfig() {
   await sanityCheck();
-
-  register({
-    rule: { host: /^adsbypasser\.github\.io$/, path: /^\/configure\.html$/ },
-    async ready() {
-      await waitForPage();
-
-      usw.commit = async (data) => {
-        for (const [k, v] of Object.entries(data)) {
-          await GMAPI.setValue(k, v);
-        }
-      };
-
-      const config = await dumpConfig();
-
-      const options = MANIFEST.reduce((acc, d) => {
-        if (!d.type || d.key === "version") {
-          return acc;
-        }
-        acc[d.key] = {
-          type: d.type,
-          value: config[d.key],
-          label: d.label,
-          help: d.help,
-        };
-        if (d.type === "select") {
-          acc[d.key].menu = d.menu;
-        }
-        return acc;
-      }, {});
-
-      usw.render({ version: config.version, options });
-    },
-  });
 }
 
 export { dumpConfig, loadConfig };

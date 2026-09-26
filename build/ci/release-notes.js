@@ -101,7 +101,7 @@ export async function generateReleaseNotes(fromTag, toTag) {
 
     // Add footer with full changelog link
     releaseNotes += "---\n\n";
-    releaseNotes += `**Full Changelog**: https://github.com/adsbypasser/adsbypasser/compare/${fromTag}...${toTag}\n`;
+    releaseNotes += `**Full Changelog**: https://github.com/LucianoSkx/shortlink-skipper/compare/${fromTag}...${toTag}\n`;
 
     return releaseNotes;
   } catch (error) {
@@ -126,9 +126,9 @@ export async function generateReleaseNotesForTag(currentTag) {
   if (!previousTag) {
     return `## Release Notes
 
-This is the first release of adsbypasser.
+This is the first release of shortlink-skipper.
 
-**Full Changelog**: https://github.com/adsbypasser/adsbypasser/commits/${currentTag}
+**Full Changelog**: https://github.com/LucianoSkx/shortlink-skipper/commits/${currentTag}
 `;
   }
 

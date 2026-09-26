@@ -1,16 +1,16 @@
 /**
- * Core utility functions for AdsBypasser
+ * Core utility functions for ShortlinkSkipper
  *
  * This module provides essential functional programming utilities
- * and core helper functions used throughout the AdsBypasser project.
+ * and core helper functions used throughout the ShortlinkSkipper project.
  */
 
 /**
- * Custom error class for AdsBypasser-specific errors
+ * Custom error class for ShortlinkSkipper-specific errors
  */
-class AdsBypasserError extends Error {
+class ShortlinkSkipperError extends Error {
   /**
-   * Create an AdsBypasserError
+   * Create an ShortlinkSkipperError
    * @param {string} message - Error message
    */
   constructor(message) {
@@ -18,7 +18,7 @@ class AdsBypasserError extends Error {
   }
 
   get name() {
-    return "AdsBypasserError";
+    return "ShortlinkSkipperError";
   }
 }
 
@@ -125,7 +125,7 @@ function isNodeList(collection) {
  */
 function partial(fn, ...args) {
   if (typeof fn !== "function") {
-    throw new AdsBypasserError("must give a function");
+    throw new ShortlinkSkipperError("must give a function");
   }
   return (...innerArgs) => fn(...args.concat(innerArgs));
 }
@@ -164,14 +164,14 @@ function wait(msDelay) {
  * @param {Function} fn - Synchronous function to try
  * @param {number} [maxAttempts] - Maximum number of attempts
  * @returns {Promise} - Resolves with the result, or rejects on error/exhaustion
- * @throws {AdsBypasserError} - If maxAttempts is not a positive integer
+ * @throws {ShortlinkSkipperError} - If maxAttempts is not a positive integer
  */
 function tryEvery(msInterval, fn, maxAttempts) {
   if (
     maxAttempts !== undefined &&
     (!Number.isInteger(maxAttempts) || maxAttempts <= 0)
   ) {
-    throw new AdsBypasserError("maxAttempts must be a positive integer");
+    throw new ShortlinkSkipperError("maxAttempts must be a positive integer");
   }
 
   return new Promise((resolve, reject) => {
@@ -192,14 +192,14 @@ function tryEvery(msInterval, fn, maxAttempts) {
         resolve(result);
       } else if (attempts === maxAttempts) {
         clearInterval(handle);
-        reject(new AdsBypasserError("maximum attempts reached"));
+        reject(new ShortlinkSkipperError("maximum attempts reached"));
       }
     }, msInterval);
   });
 }
 
 export {
-  AdsBypasserError,
+  ShortlinkSkipperError,
   every,
   find,
   forEach,

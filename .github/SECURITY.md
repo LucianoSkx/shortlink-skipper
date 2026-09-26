@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We currently support the following versions of AdsBypasser with security updates:
+We currently support the following versions of Shortlink Skipper with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -12,11 +12,11 @@ We currently support the following versions of AdsBypasser with security updates
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in AdsBypasser, please follow these steps:
+If you discover a security vulnerability in Shortlink Skipper, please follow these steps:
 
 1. **Do not** create a public issue on GitHub
 2. **Do not** disclose the vulnerability publicly
-3. Send an email to the main developer at: legnaleurc@gmail.com
+3. Open a private security advisory at: https://github.com/LucianoSkx/shortlink-skipper/security/advisories/new
 
 Please include the following information in your report:
 - Description of the vulnerability
@@ -26,10 +26,10 @@ Please include the following information in your report:
 
 ## Security Considerations
 
-AdsBypasser is a userscript that runs in your browser with elevated privileges. As such, there are important security considerations:
+Shortlink Skipper is a userscript that runs in your browser with elevated privileges. As such, there are important security considerations:
 
 ### Permissions
-- AdsBypasser requires broad permissions to function across many different websites
+- Shortlink Skipper requires broad permissions to function across many different websites
 - These permissions are necessary to bypass ads and redirects on various sites
 - We follow the principle of least privilege where possible
 
@@ -39,16 +39,16 @@ AdsBypasser is a userscript that runs in your browser with elevated privileges. 
 - Automated security scanning is performed on dependencies
 
 ### Updates
-- Users should keep their AdsBypasser installation up to date
+- Users should keep their Shortlink Skipper installation up to date
 - Security updates will be released as needed
 - Major security issues will be communicated through our announcement channels
 
 ## Security Best Practices
 
 For users:
-- Only install AdsBypasser from official sources
+- Only install Shortlink Skipper from official sources
 - Keep your userscript manager (Tampermonkey, Violentmonkey, etc.) updated
-- Review the permissions granted to AdsBypasser periodically
+- Review the permissions granted to Shortlink Skipper periodically
 - Report any suspicious behavior immediately
 
 For developers:

@@ -1,5 +1,5 @@
 /**
- * URL pattern dispatcher for AdsBypasser
+ * URL pattern dispatcher for ShortlinkSkipper
  *
  * This module handles URL pattern matching and dispatches to appropriate
  * handlers based on the current page URL. It supports various pattern
@@ -7,7 +7,7 @@
  */
 
 import {
-  AdsBypasserError,
+  ShortlinkSkipperError,
   none,
   nop,
   partial,
@@ -56,7 +56,7 @@ function dispatchByObject(rule, urlObj) {
       });
       return r !== none ? r : null;
     }
-    throw new AdsBypasserError("invalid rule");
+    throw new ShortlinkSkipperError("invalid rule");
   });
 
   const passed = every(matched, (v) => !!v);

@@ -1,18 +1,18 @@
 /**
- * AJAX utility functions for AdsBypasser
+ * AJAX utility functions for ShortlinkSkipper
  *
  * This module provides utility functions for making HTTP requests
  * with proper error handling and data formatting.
  */
 
-import { AdsBypasserError, map, forEach, none } from "./core.js";
+import { ShortlinkSkipperError, map, forEach, none } from "./core.js";
 import { GMAPI } from "./platform.js";
 import { debug } from "./logger.js";
 
 /**
  * Custom error class for AJAX-related errors
  */
-class AjaxError extends AdsBypasserError {
+class AjaxError extends ShortlinkSkipperError {
   /**
    * Create an AjaxError
    * @param {string} method - HTTP method (GET, POST, etc.)
