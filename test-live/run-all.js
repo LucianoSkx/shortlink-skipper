@@ -16,7 +16,7 @@ function runCase(c) {
     const start = Date.now();
     const hostArg = c.host || '';
     const caseTimeout = c.timeout || TIMEOUT_S;
-    execFile(process.execPath, [LIVE_JS, c.html, c.expect, hostArg], {
+    execFile(process.execPath, [LIVE_JS, c.html, c.expect, hostArg, c.path || '/test/', c.search || ''], {
       timeout: (caseTimeout + 10) * 1000,
       maxBuffer: 1024 * 1024,
       env: { ...process.env, LIVE_TIMEOUT_MS: String(caseTimeout * 1000), CDP_URL: process.env.CDP_URL || 'http://127.0.0.1:9222' },
@@ -27,6 +27,8 @@ function runCase(c) {
       const matchLine = lines.find(l => l.startsWith('MATCH='))    || '';
       const logLine   = lines.find(l => l.startsWith('SKIPPER_LOGS=')) || '';
       const finalUrl  = finalLine.replace('FINAL_URL=', '');
+      const titleLine = lines.find(l => l.startsWith('TITLE=')) || '';
+      const title     = titleLine.replace('TITLE=', '');
       const match     = matchLine.replace('MATCH=', '') === 'YES';
       const exitCode  = err && err.code != null ? err.code : 0;
       const hardTimeout = (stderr || '').includes('HARD_TIMEOUT') || exitCode === 3;
@@ -36,6 +38,7 @@ function runCase(c) {
         family:  c.family,
         expect:  c.expect,
         finalUrl,
+        title,
         logs:    logLine,
         rawOut:  stdout || '',
         match,
@@ -69,7 +72,7 @@ async function main() {
     const r = await runCase(c);
     results.push(r);
     const icon = r.ok ? '[PASS]' : (r.hardTimeout ? '[TIME]' : '[FAIL]');
-    console.log(`${icon}  ${r.elapsed}s  ->  ${r.finalUrl || '(no redirect)'}`);
+    console.log(`${icon}  ${r.elapsed}s  ->  ${r.finalUrl || r.title || '(no redirect)'}`);
   }
 
   const pass = results.filter(r => r.ok).length;

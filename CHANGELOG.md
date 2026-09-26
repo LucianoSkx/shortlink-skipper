@@ -3,12 +3,12 @@
 ## 1.10.13 — 2026-09-26
 
 ### Added
-- **32 ported site rules** (techniques from adsbypasser, reimplemented as native rules with bounded `waitFor` instead of blind sleeps): `goo-st`, `1ink`, `cpmlink`, `thinfi`, `kimochi`, `a2zapk`, `blogmado`, `mangalist`, `linegee`, `yasir252`, `imagetwist-netlify`, `urlgalleries`, `hen-tay`, `wpsafe-anchor`, `tribuntekno`, `cuttty`, `fir3`, `gplinks`, `icutlink`, `tutwuri`, `exeo-app`, `lnk2`, `spaste`, `f95zone`, `rlu-preview`, `adshnk`, `similarsites`, `lolinez`, `urlcash`, `go-linkify`, `network-loop`, `get-click2`.
+- **33 ported site rules** (techniques from adsbypasser, reimplemented as native rules with bounded `waitFor` instead of blind sleeps): `goo-st`, `1ink`, `cpmlink`, `thinfi`, `kimochi`, `a2zapk`, `blogmado`, `mangalist`, `linegee`, `yasir252`, `imagetwist-netlify`, `urlgalleries`, `hen-tay`, `wpsafe-anchor`, `tribuntekno`, `cuttty`, `fir3`, `gplinks`, `icutlink`, `turkdown`, `tutwuri`, `exeo-app`, `lnk2`, `spaste`, `f95zone`, `rlu-preview`, `adshnk`, `similarsites`, `lolinez`, `urlcash`, `go-linkify`, `network-loop`, `get-click2`.
 - **`url-destination` learns new shapes**: `v` and `oldurl` query params, `/ads/`, `/goto/`, `/o/` and `/site/` path segments.
 - **`image-host` fast-path**: follows `link[rel="image_src"]` (Chevereto family) plus 36 new image hosts; **`file-host`** gains `gofile.download` and more download-button selectors.
 - **`boost-ink` fast-path**: reads the base64 destination from `body[result]` before fetching.
 - **New primitives**: `queryShadowDeep` (shadow-DOM traversal), page-global reads for destinations (`urlcash`), disabled-button enabling (`get-click2`).
-- **69 new unit tests** (`tests/ports.test.js`); `spaste.com` deliberately stays out of the known-host gate (pastebin home false positives) — its `/site/` rule still runs.
+- **71 new unit tests** (`tests/ports.test.js`); `spaste.com` deliberately stays out of the known-host gate (pastebin home false positives) — its `/site/` rule still runs.
 
 ## 1.10.12 — 2026-09-25
 

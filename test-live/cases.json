@@ -56,5 +56,398 @@
     "host": "ssdhostting.com",
     "timeout": 40,
     "note": "WordPress content-lock: timer + external getmylink link to mediafire"
+  },
+  {
+    "id": "goo-1",
+    "host": "goo.st",
+    "path": "/abc",
+    "html": "<button class=\"btn-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('.btn-primary').addEventListener('click',()=>{document.title='CLICKED-goo-1-1';});</script>",
+    "expect": "CLICKED-goo-1-1",
+    "family": "ports",
+    "note": "live: goo-1"
+  },
+  {
+    "id": "blogmado-1",
+    "host": "blogmado.com",
+    "path": "/abc",
+    "html": "<button class=\"btn\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('.btn').addEventListener('click',()=>{document.title='CLICKED-blogmado-1-1';});</script>",
+    "expect": "CLICKED-blogmado-1-1",
+    "family": "ports",
+    "note": "live: blogmado-1"
+  },
+  {
+    "id": "mangalist-1",
+    "host": "mangalist.org",
+    "path": "/abc",
+    "html": "<button class=\"btn-primary url text-center\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('.btn-primary.url.text-center').addEventListener('click',()=>{document.title='CLICKED-mangalist-1-1';});</script>",
+    "expect": "CLICKED-mangalist-1-1",
+    "family": "ports",
+    "note": "live: mangalist-1"
+  },
+  {
+    "id": "linegee-1",
+    "host": "linegee.net",
+    "path": "/abc",
+    "html": "<button class=\"btn-xs\">Go</button><p>Please wait a moment...</p><script>document.querySelector('.btn-xs').addEventListener('click',()=>{document.title='CLICKED-linegee-1-1';});</script>",
+    "expect": "CLICKED-linegee-1-1",
+    "family": "ports",
+    "note": "live: linegee-1"
+  },
+  {
+    "id": "urlgalleries-1",
+    "host": "urlgalleries.net",
+    "path": "/abc",
+    "html": "<div id=\"overlay\" class=\"butstyle\">x</div><p>Please wait a moment...</p><script>document.querySelector('#overlay.butstyle').addEventListener('click',()=>{document.title='CLICKED-urlgalleries-1-1';});</script>",
+    "expect": "CLICKED-urlgalleries-1-1",
+    "family": "ports",
+    "note": "live: urlgalleries-1"
+  },
+  {
+    "id": "tribuntekno-1",
+    "host": "tribuntekno.com",
+    "path": "/abc",
+    "html": "<button id=\"lite-human-verif-button\">v</button><button id=\"lite-start-sora-button\">s</button><p>Please wait a moment...</p><script>document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{window.__c=(window.__c||0)+1;document.title='CLICKED-tribuntekno-1-'+window.__c;}));</script>",
+    "expect": "CLICKED-tribuntekno-1-2",
+    "family": "ports",
+    "note": "live: tribuntekno-1"
+  },
+  {
+    "id": "cuttty-1",
+    "host": "cuttty.com",
+    "path": "/abc",
+    "html": "<button id=\"submit-button\">Submit</button><p>Please wait a moment...</p><script>document.querySelector('#submit-button').addEventListener('click',()=>{document.title='CLICKED-cuttty-1-1';});</script>",
+    "expect": "CLICKED-cuttty-1-1",
+    "family": "ports",
+    "note": "live: cuttty-1"
+  },
+  {
+    "id": "fir3-1",
+    "host": "fir3.net",
+    "path": "/abc",
+    "html": "<button class=\"btn btn-success btn-lg get-link\">Get</button><p>Please wait a moment...</p><script>document.querySelector('.btn.btn-success.btn-lg.get-link').addEventListener('click',()=>{document.title='CLICKED-fir3-1-1';});</script>",
+    "expect": "CLICKED-fir3-1-1",
+    "family": "ports",
+    "note": "live: fir3-1"
+  },
+  {
+    "id": "gplinks-1",
+    "host": "gplinks.co",
+    "path": "/abc",
+    "html": "<button class=\"get-link\">Get Link</button><p>Please wait a moment...</p><script>document.querySelector('.get-link').addEventListener('click',()=>{document.title='CLICKED-gplinks-1-1';});</script>",
+    "expect": "CLICKED-gplinks-1-1",
+    "family": "ports",
+    "note": "live: gplinks-1"
+  },
+  {
+    "id": "zegtrends-1",
+    "host": "zegtrends.com",
+    "path": "/abc",
+    "html": "<div><button class=\"bsub\">Go</button></div><p>Please wait a moment...</p><script>document.querySelector('div > button.bsub').addEventListener('click',()=>{document.title='CLICKED-zegtrends-1-1';});</script>",
+    "expect": "CLICKED-zegtrends-1-1",
+    "family": "ports",
+    "note": "live: zegtrends-1"
+  },
+  {
+    "id": "tutwuri-1",
+    "host": "tutwuri.id",
+    "path": "/abc",
+    "html": "<button id=\"btn-1\">1</button><button id=\"btn-2\">2</button><button id=\"btn-3\">3</button><p>Please wait a moment...</p><script>document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{window.__c=(window.__c||0)+1;document.title='CLICKED-tutwuri-1-'+window.__c;}));</script>",
+    "expect": "CLICKED-tutwuri-1-3",
+    "family": "ports",
+    "note": "live: tutwuri-1"
+  },
+  {
+    "id": "exeo-1",
+    "host": "exeo.app",
+    "path": "/abc",
+    "html": "<button class=\"link-button button\">1</button><button class=\"link-button\">2</button><button class=\"button link-button\">3</button><p>Please wait a moment...</p><script>document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{window.__c=(window.__c||0)+1;document.title='CLICKED-exeo-1-'+window.__c;}));</script>",
+    "expect": "CLICKED-exeo-1-3",
+    "family": "ports",
+    "note": "live: exeo-1"
+  },
+  {
+    "id": "lnk2-1",
+    "host": "lnk2.cc",
+    "path": "/go/abc",
+    "html": "<iframe src=\"about:blank\"></iframe><div class=\"popupOverlay\"></div><button id=\"getLink\">Get</button><p>Please wait a moment...</p><script>document.querySelector('#getLink').addEventListener('click',()=>{document.title='CLICKED-lnk2-1-1';});</script>",
+    "expect": "CLICKED-lnk2-1-1",
+    "family": "ports",
+    "note": "live: lnk2-1"
+  },
+  {
+    "id": "spaste-1",
+    "host": "www.spaste.com",
+    "path": "/site/abc",
+    "html": "<button id=\"template-contactform-submit\">Submit</button><p>Please wait 15 seconds...</p><p>Please wait a moment...</p><script>document.querySelector('#template-contactform-submit').addEventListener('click',()=>{document.title='CLICKED-spaste-1-1';});</script>",
+    "expect": "CLICKED-spaste-1-1",
+    "family": "ports",
+    "note": "live: spaste-1"
+  },
+  {
+    "id": "f95zone-1",
+    "host": "f95zone.to",
+    "path": "/masked/abc",
+    "html": "<a class=\"host_link\">host</a><p>Please wait a moment...</p><script>document.querySelector('.host_link').addEventListener('click',()=>{document.title='CLICKED-f95zone-1-1';});</script>",
+    "expect": "CLICKED-f95zone-1-1",
+    "family": "ports",
+    "note": "live: f95zone-1"
+  },
+  {
+    "id": "getclick2-1",
+    "host": "get-click2.blogspot.com",
+    "path": "/abc",
+    "html": "<button id=\"gotolink\" disabled>Go</button><p>Please wait a moment...</p><script>document.querySelector('button#gotolink').addEventListener('click',()=>{document.title='CLICKED-getclick2-1-1';});</script>",
+    "expect": "CLICKED-getclick2-1-1",
+    "family": "ports",
+    "note": "live: getclick2-1"
+  },
+  {
+    "id": "onelink-1",
+    "host": "1ink.cc",
+    "path": "/abc",
+    "search": "",
+    "html": "<a id=\"countingbtn\" href=\"https://example.com/1ink-target\">x</a>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: onelink-1"
+  },
+  {
+    "id": "cpmlink-1",
+    "host": "cpmlink.net",
+    "path": "/abc",
+    "search": "",
+    "html": "<a id=\"btn-main\" href=\"https://example.com/cpm-target\">x</a>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: cpmlink-1"
+  },
+  {
+    "id": "thinfi-1",
+    "host": "thinfi.com",
+    "path": "/abc",
+    "search": "",
+    "html": "<div><p><a href=\"https://example.com/thinfi-target\">x</a></p></div>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: thinfi-1"
+  },
+  {
+    "id": "kimochi-1",
+    "host": "kimochi.info",
+    "path": "/inter",
+    "search": "",
+    "html": "<a id=\"next\" href=\"https://example.com/kim-target\">x</a>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: kimochi-1"
+  },
+  {
+    "id": "a2zapk-1",
+    "host": "a2zapk.io",
+    "path": "/abc",
+    "search": "",
+    "html": "<div id=\"dlbtn\"><li><a href=\"https://example.com/a2-target\">x</a></li></div>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: a2zapk-1"
+  },
+  {
+    "id": "yasir-1",
+    "host": "download.yasir252.com",
+    "path": "/abc",
+    "search": "",
+    "html": "<a id=\"downloadBtn\" href=\"https://example.com/yas-target\">x</a>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: yasir-1"
+  },
+  {
+    "id": "itw-1",
+    "host": "imagetwist.netlify.app",
+    "path": "/abc",
+    "search": "",
+    "html": "<center><h2><p><a href=\"https://example.com/itw-target\">x</a></p></h2></center>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: itw-1"
+  },
+  {
+    "id": "hentay-1",
+    "host": "hen-tay.net",
+    "path": "/go/abc",
+    "search": "",
+    "html": "<div id=\"download_url\"><div><a href=\"https://example.com/hen-target\">x</a></div></div>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: hentay-1"
+  },
+  {
+    "id": "wpsafe-1",
+    "host": "otomi-games.com",
+    "path": "/go/abc",
+    "search": "",
+    "html": "<div id=\"wpsafe-link\"><a href=\"https://example.com/wps-target\">x</a></div>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: wpsafe-1"
+  },
+  {
+    "id": "rlu-1",
+    "host": "preview.rlu.ru",
+    "path": "/abc",
+    "search": "",
+    "html": "<div id=\"content\"><div class=\"long_url\"><a href=\"https://example.com/rlu-target\">x</a></div></div>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: rlu-1"
+  },
+  {
+    "id": "icutlink-1",
+    "host": "icutlink.com",
+    "path": "/abc",
+    "search": "",
+    "html": "<a class=\"btn-success btn-lg get-link\" href=\"https://example.com/icut-target\">x</a>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: icutlink-1"
+  },
+  {
+    "id": "adshnk-1",
+    "host": "adshnk.com",
+    "path": "/abc",
+    "search": "",
+    "html": "<button class=\"ui right labeled icon button primary huge fluid\">c</button><a id=\"final_redirect\" href=\"https://example.com/adshnk-target\">x</a>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: adshnk-1"
+  },
+  {
+    "id": "similarsites-1",
+    "host": "similarsites.com",
+    "path": "/goto/https://example.com/ss-target",
+    "search": "",
+    "html": "<p>redirect</p>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: similarsites-1"
+  },
+  {
+    "id": "lolinez-1",
+    "host": "www.lolinez.com",
+    "path": "/abc",
+    "search": "?https://example.com/lol-target",
+    "html": "<p>go</p>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: lolinez-1"
+  },
+  {
+    "id": "urlcash-1",
+    "host": "urlcash.com",
+    "path": "/abc",
+    "search": "",
+    "html": "<script>var linkDestUrl = 'https://example.com/uc-target';</script>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: urlcash-1"
+  },
+  {
+    "id": "linkify-1",
+    "host": "go.linkify.ru",
+    "path": "/abc",
+    "search": "",
+    "html": "<script>var u=\"https://go.linkify.ru/get/abc123\";</script>",
+    "expect": "go.linkify.ru/get/",
+    "family": "ports",
+    "note": "live: linkify-1"
+  },
+  {
+    "id": "netloop-1",
+    "host": "network-loop.com",
+    "path": "/abc",
+    "search": "?u=abc",
+    "html": "<div id=\"print_button\"></div><script>document.querySelector('#print_button').attachShadow({mode:'open'}).innerHTML='<a id=\"pb_2\" href=\"https://example.com/nl-target\">x</a>';</script>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: netloop-1"
+  },
+  {
+    "id": "boost-result-1",
+    "host": "boost.ink",
+    "path": "/abc",
+    "search": "",
+    "html": "<p>Please wait 5 seconds...</p><button>Get Link</button><script>document.body.setAttribute('result','aHR0cHM6Ly9leGFtcGxlLmNvbS9ici10YXJnZXQ=');</script>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: boost-result-1"
+  },
+  {
+    "id": "anchoreth-1",
+    "host": "anchoreth.com",
+    "path": "/abc",
+    "search": "?v=aHR0cHM6Ly9leGFtcGxlLmNvbS9hbi10YXJnZXQ=",
+    "html": "<p>go</p><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: anchoreth-1"
+  },
+  {
+    "id": "supercheats-1",
+    "host": "supercheats.com",
+    "path": "/interstitial.html",
+    "search": "?oldurl=https%3A%2F%2Fexample.com%2Fsc-target",
+    "html": "<p>go</p><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: supercheats-1"
+  },
+  {
+    "id": "binbox-1",
+    "host": "binbox.io",
+    "path": "/o/aHR0cHM6Ly9leGFtcGxlLmNvbS9iYi10YXJnZXQ=",
+    "search": "",
+    "html": "<p>go</p><p>Please wait 5 seconds...</p><button>Get Link</button>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: binbox-1"
+  },
+  {
+    "id": "nmac-1",
+    "host": "nmac.to",
+    "path": "/ads/aHR0cHM6Ly9leGFtcGxlLmNvbS9ubWFjLXRhcmdldA==",
+    "search": "",
+    "html": "<p>Please wait...</p>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: nmac-1"
+  },
+  {
+    "id": "image-src-1",
+    "host": "postimg.cc",
+    "path": "/abc",
+    "search": "",
+    "html": "<link rel=\"image_src\" href=\"https://example.com/is-target\">",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: image-src-1"
+  },
+  {
+    "id": "gofile-1",
+    "host": "gofile.download",
+    "path": "/abc",
+    "search": "",
+    "html": "<a id=\"download-button\" href=\"https://example.com/gf-target\">Download</a>",
+    "expect": "example.com/",
+    "family": "ports",
+    "note": "live: gofile-1"
+  },
+  {
+    "id": "turkdown-1",
+    "host": "link.turkdown.com",
+    "path": "/abc",
+    "html": "<a class=\"btn-success btn-lg get-link\" href=\"https://example.com/turk-target\">x</a>",
+    "expect": "example.com/turk-target",
+    "family": "ports",
+    "note": "live: turkdown-1"
   }
 ]

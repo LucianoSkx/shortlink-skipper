@@ -20,7 +20,7 @@ function getJSON(url) {
   });
 }
 
-const GM_MOCKS = (testHost) => `
+const GM_MOCKS = (testHost, testPath = '/test/', testSearch = '') => `
 'use strict';
 if (typeof unsafeWindow === 'undefined') var unsafeWindow = globalThis;
 if (typeof GM_getValue === 'undefined')  var GM_getValue  = (k, d) => { if (k === 'verbose') return true; return d ?? false; };
@@ -36,15 +36,17 @@ ${testHost ? `
 // window.location being redefinable (it is non-configurable in some CDP
 // contexts, which made Object.defineProperty flaky).
 var __sl_host = ${JSON.stringify(testHost)};
-var __sl_href = 'https://' + __sl_host + '/test/';
+var __sl_path = ${JSON.stringify(testPath)};
+var __sl_search = ${JSON.stringify(testSearch)};
+var __sl_href = 'https://' + __sl_host + __sl_path + __sl_search;
 try { Object.defineProperty(window, '__SL_FINAL_HREF', { configurable: true, writable: true, value: __sl_href }); } catch (_) {}
 var location = {
   get href() { return __sl_href; },
   set href(v) { __sl_href = String(v); try { window.__SL_FINAL_HREF = __sl_href; } catch (_) {} },
   host: __sl_host,
   hostname: __sl_host,
-  pathname: '/test/',
-  search: '',
+  pathname: __sl_path,
+  search: __sl_search,
   hash: '',
   origin: 'https://' + __sl_host,
   toString() { return __sl_href; },
@@ -57,6 +59,8 @@ async function main() {
   const html      = process.argv[2];  // raw HTML string
   const expect    = process.argv[3] || 'example.com';
   const testHost  = process.argv[4] || '';  // optional fake host for host-gated rules
+  const testPath  = process.argv[5] || '/test/';
+  const testSearch = process.argv[6] || '';
   const timeoutMs = parseInt(process.env.LIVE_TIMEOUT_MS || '25000', 10);
   const hardKill  = setTimeout(() => { console.error('HARD_TIMEOUT'); process.exit(3); }, timeoutMs);
 
@@ -96,11 +100,12 @@ async function main() {
 
   // Inject GM mocks + userscript via Runtime.evaluate
   const userscriptCode = fs.readFileSync(SCRIPT_PATH, 'utf8');
-  const wrappedCode = `(function(){\ntry{\n${GM_MOCKS(testHost)}\n${userscriptCode}\n}catch(e){console.log('INJECT_ERR:'+e.message);}\n})();`;
+  const wrappedCode = `(function(){\ntry{\n${GM_MOCKS(testHost, testPath, testSearch)}\n${userscriptCode}\n}catch(e){console.log('INJECT_ERR:'+e.message);}\n})();`;
   await S('Runtime.evaluate', { expression: wrappedCode, returnByValue: true });
 
   // Poll final URL
   let final = '';
+  let title = '';
   const pollCount = Math.ceil(timeoutMs / 500);
   for (let i = 0; i < pollCount; i++) {
     await new Promise((r) => setTimeout(r, 500));
@@ -116,7 +121,11 @@ async function main() {
         final = r.result && r.result.result ? r.result.result.value : '';
       } catch (_) {}
     }
-    if (final && final.includes(expect)) break;
+    try {
+      const r = await S('Runtime.evaluate', { expression: 'document.title', returnByValue: true });
+      title = (r.result && r.result.result ? r.result.result.value : '') || '';
+    } catch (_) {}
+    if ((final && final.includes(expect)) || (title && title.includes(expect))) break;
   }
 
   const logs = [];
@@ -129,7 +138,8 @@ async function main() {
 
   clearTimeout(hardKill);
   console.log('FINAL_URL=' + final);
-  console.log('MATCH=' + (final.includes(expect) ? 'YES' : 'NO'));
+  console.log('TITLE=' + title);
+  console.log('MATCH=' + (final.includes(expect) || title.includes(expect) ? 'YES' : 'NO'));
   console.log('SKIPPER_LOGS=' + JSON.stringify(logs.map(l => l.slice(0, 300)).slice(0, 15)));
   try { await send('Target.closeTarget', { targetId }); } catch (_) {}
   ws.close();
