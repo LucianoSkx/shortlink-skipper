@@ -1,13 +1,60 @@
 {
-  "name": "shortlink-skipper",
-  "version": "1.10.12",
-  "private": true,
-  "description": "Userscript that skips link shorteners; smoke tests with no external dependencies.",
-  "scripts": {
-    "test": "node --test tests/*.test.js",
-    "test:live": "node test-live/run-all.js"
+  "name": "adsbypasser",
+  "version": "8.26.0",
+  "description": "A lightweight userscript that automatically skips countdown ads, bypasses continue pages, and prevents ad pop-up windows on many supported sites.",
+  "keywords": [
+    "userscript",
+    "adblock",
+    "bypass",
+    "skip",
+    "countdown",
+    "ads",
+    "tampermonkey",
+    "violentmonkey",
+    "greasemonkey"
+  ],
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adsbypasser/adsbypasser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adsbypasser/adsbypasser/issues"
+  },
+  "homepage": "https://adsbypasser.github.io/",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=10.0.0"
   },
   "devDependencies": {
-    "ws": "^8.21.3"
+    "@rollup/plugin-alias": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "findup-sync": "^5.0.0",
+    "gulp": "^5.0.0",
+    "gulp-change": "^1.0.0",
+    "gulp-cli": "^3.1.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-inject-string": "^1.1.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-strip-comments": "^2.5.1",
+    "lodash": "^4.18.1",
+    "parse-domain": "^8.2.2",
+    "prettier": "^3.0.0",
+    "rollup": "^4.59.0",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp clean",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "ghpages": "gulp ghpages",
+    "ci:release-notes": "node build/ci/release-notes.js"
   }
 }
