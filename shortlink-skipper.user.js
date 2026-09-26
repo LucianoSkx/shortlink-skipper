@@ -1289,7 +1289,7 @@
     if (!/^\/(view|fullview)\//.test(location.pathname)) return false;
     const links = [...document.querySelectorAll('a[href]')];
     const byText = (re) => links.find((a) => re.test((a.textContent || '').trim()));
-    let url = byText(/continue to image|click to continue to image|перейти к изображению/i)
+    let url = byText(/continue to image|click to continue to image|\u043f\u0435\u0440\u0435\u0439\u0442\u0438 \u043a \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u044e/i)
       ?.href;
     if (!url) url = links.find((a) => /fullview/i.test(a.href))?.href;
     if (!url) {
