@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.14 — 2026-09-26
+
+### Added
+- **4 dedicated media-host rules**: `imagetwist-family` (`img.pic`), `fastpic` (fullview → `#imglink`/`#imga` → script), `imgtraffic` (path rewrite to direct jpeg), `imgair` (`imgbg.src` from inline scripts). Runs before the generic `image-host` fallback.
+- **16 new unit tests** (`tests/media-selectors.test.js`) + **8 live cases** (`media` family): 57 total live.
+
 ## 1.10.13 — 2026-09-26
 
 ### Added

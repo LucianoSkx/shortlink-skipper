@@ -35,7 +35,7 @@ small engine of **generic techniques** that cover most shorteners — they all
 share the same templates.
 
 <details open>
-<summary><b>The 67 rules</b></summary>
+<summary><b>The 71 rules</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -71,6 +71,10 @@ share the same templates.
 | `final-button` | Clicks unlocked "Get Link" / "Continue" buttons |
 | `service-last-resort` | If even bypass.tools fails on a delegated link, forwards the job to adbypass.org |
 | `bypass-city` | Queries bypass.city and follows a real destination (footer/social links filtered) |
+| `imagetwist-family` | Follows `img.pic` (`imagetwist.com`, `imagehaha.com`, `imagenpic.com`, `imageshimage.com`, `imagexport.com`, `croea.com`) |
+| `fastpic` | Fullview link → `#imglink`/`#imga` → inline script (`fastpic.org`) |
+| `imgtraffic` | Rewrites `/a-1/`, `/i-1/`, `/n-1/`, `/z-1/` to the direct jpeg (`imgtraffic.com`) |
+| `imgair` | Reads `imgbg.src` from inline scripts (`cloudgallery.net`, `imgair.net`, `imgblaze.net`, `imgfira.cc`, `imgfrost.net`) |
 | `captcha-manual` | Watches hCaptcha/reCAPTCHA/Turnstile; auto-submits **after you solve** |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
 | `goo-st` | Clicks `.btn-primary` (`goo.st`, `swzz.xyz`) |
