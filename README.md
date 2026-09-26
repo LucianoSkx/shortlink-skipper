@@ -35,7 +35,7 @@ small engine of **generic techniques** that cover most shorteners — they all
 share the same templates.
 
 <details open>
-<summary><b>The 66 rules</b></summary>
+<summary><b>The 67 rules</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -92,6 +92,7 @@ share the same templates.
 | `fir3` | Clicks the get-link button (`fir3.net`) |
 | `gplinks` | Clicks `.get-link` (`gplinks.co`) |
 | `icutlink` | Follows the get-link href / clicks `.bsub` (`icutlink.com`, `zegtrends.com`) |
+| `turkdown` | Follows the get-link href (`link.turkdown.com`) |
 | `tutwuri` | Clicks the btn-1/2/3 sequence (`tutwuri.id`) |
 | `exeo-app` | Clicks the three-stage buttons (`exe-links.com`, `exeo.app`, `exeygo.com`) |
 | `lnk2` | Strips overlays, clicks `#getLink` on `/go/` (`lnk2.cc`) |
@@ -207,11 +208,20 @@ validation in a real browser with Violentmonkey:
 
 ```bash
 npm run test:live             # run all cases (needs CDP on :9222)
-node test-live/run-all.js     # same runner; filter: node test-live/run-all.js form
-node test-live/live.js        # single case under the hood (html, expect, [host])
+node test-live/run-all.js     # same runner; filter: node test-live/run-all.js ports
+node test-live/live.js        # single case under the hood (html, expect, [host], [path], [query])
 node test-live/server.js      # optional host-based mock (skiplink.io / linkvertise)
 node test-live/test-server.js # optional route-based mock on :18999
 ```
+
+Click-only rules are validated through `document.title` markers (`TITLE=`),
+navigating rules through the final URL. Cases can pin a fake host, path and
+query string for host-gated rules.
+
+Upstream drift is tracked monthly: `node test-live/upstream-gap.js` diffs
+adsbypasser's `@domain` coverage against our host lists (or set
+`ADSBYPASSER_DIR` to a local checkout), and the `Upstream sync` workflow
+refreshes a tracking issue with the result.
 
 Live tests are **not** part of the required CI job (they need a local browser
 with CDP). CI only syntax-checks the harness so it cannot rot silently.
