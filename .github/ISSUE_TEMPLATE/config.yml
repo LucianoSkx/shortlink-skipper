@@ -1,8 +1,0 @@
-# Allow users to create issues without using a predefined template.
-blank_issues_enabled: true
-
-contact_links:
-  # Direct users to the documentation before they open an issue.
-  - name: Shortlink Skipper Documentation
-    url: https://github.com/LucianoSkx/shortlink-skipper/blob/main/README.md
-    about: Check the documentation before creating an issue

@@ -8,7 +8,7 @@ A lean, extensible userscript that distills the best techniques from
 eight bypass projects into one clean rule engine.
 
 [![Validate](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml/badge.svg)](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml)
-[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.txt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Userscript managers](https://img.shields.io/badge/Violentmonkey%20·%20Tampermonkey-compatible-blue)
 
 [**Install**](#install) · [How it works](#how-it-works) · [Safety](#built-in-safety) · [Privacy](#privacy--what-leaves-your-device) · [Extending](#adding-a-site-specific-rule) · [Credits](#credits)
@@ -22,12 +22,11 @@ eight bypass projects into one clean rule engine.
 1. Install [Violentmonkey](https://violentmonkey.github.io/) or [Tampermonkey](https://www.tampermonkey.net/).
 2. Click the install link below — your manager picks it up automatically:
 
-➡️ **[Install Shortlink Skipper (full)](https://github.com/LucianoSkx/shortlink-skipper/releases/latest/download/shortlink-skipper.full.user.js)**
+➡️ **[Install Shortlink Skipper](https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js)**
 
-> `https://github.com/LucianoSkx/shortlink-skipper/releases/latest/download/shortlink-skipper.full.user.js`
+> `https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js`
 
-Updates are automatic: new `v*` tags publish a GitHub Release and installed
-users pick it up via `@updateURL`.
+Updates are automatic: every push to `main` reaches installed users.
 
 ## How it works
 
@@ -155,32 +154,60 @@ The first rule that acts wins — order specific rules first.
 ## Development
 
 ```bash
-npm ci                              # install dependencies
-npm test                            # run the unit tests (vitest)
-npm run build                       # build dist/shortlink-skipper.{full,lite}.user.js
-npm run lint                        # eslint check
+npm test                          # run the unit tests (node --test tests/*.test.js)
+node --check shortlink-skipper.user.js   # syntax check (also run by CI)
 ```
 
-CI runs `npm ci`, `npm test` and `npm run build` on every push to `main` and on every pull request (the `syntax` job is required by branch protection).
+The unit tests load the userscript in a `vm` sandbox with mocked
+`location`/`document` (no headless browser needed for most cases):
+
+- `tests/shortlink-skipper.test.js` — loads without error, registers the menu, does not interfere with Cloudflare challenges
+- `tests/handlers.test.js` — exercises `handleLinkvertiseEasy`, `handleAdLinkFly`, `handleBypassCity` and `BYPASS_SERVICE_URL`
+- `tests/lean.test.js` — confirms `main()` does not install heavy hooks on normal pages and that `setc-form` no longer triggers a 4s wait
+
+CI runs the syntax check, the metadata check, a syntax check of the live
+harness files and `npm test` on every push to `main` and on every pull request.
+
+### Live integration harness
+
+`test-live/` ships mock shortlink pages plus a CDP client for end-to-end
+validation in a real browser with Violentmonkey:
+
+```bash
+npm run test:live             # run all cases (needs CDP on :9222)
+node test-live/run-all.js     # same runner; filter: node test-live/run-all.js form
+node test-live/live.js        # single case under the hood (html, expect, [host])
+node test-live/server.js      # optional host-based mock (skiplink.io / linkvertise)
+node test-live/test-server.js # optional route-based mock on :18999
+```
+
+Live tests are **not** part of the required CI job (they need a local browser
+with CDP). CI only syntax-checks the harness so it cannot rot silently.
 
 ### Branch flow
 
 - `main` is protected: PRs only, `Validate` must pass.
-- Prefer short PRs into `main`.
+- Prefer short PRs into `main` (matches how the project has been shipping).
+- Long-running work may use `dev`; after each merge to `main`, fast-forward
+  `dev` so it never falls behind (`git push origin main:dev`).
 
-### Releasing
+### Releasing (manual smoke required)
 
-Push a `v*` tag and the `Release` workflow builds the userscripts from `src/`,
-generates release notes and attaches to the GitHub Release:
+There is no GitHub Releases pipeline (the old auto-release workflow was removed
+in `d80a521`). Installed users update by polling `@updateURL`/`@downloadURL`
+(raw file on `main`).
 
-- `dist/shortlink-skipper.full.user.js` (+ `.meta.js`)
-- `dist/shortlink-skipper.lite.user.js` (+ `.meta.js`)
+Before bumping `@version` and merging to `main`:
 
-Installed users update by polling `@updateURL`/`@downloadURL` (latest GitHub
-Release).
+1. `node --check shortlink-skipper.user.js`
+2. `npm test`
+3. With Chrome/Chromium + Violentmonkey and CDP on `:9222`:
+   `npm install && npm run test:live` — all cases must pass.
+4. Spot-check one real shortener chain if you changed a host list or gate.
+5. Bump `@version` in the userscript header (keep `package.json` in sync) and merge.
 
-Site techniques are ported from other projects into this codebase's handler
-format. See [Credits](#credits).
+Techniques are distilled from other projects, reimplemented in this codebase's
+rule format. See [Credits](#credits).
 
 ## Credits
 
@@ -193,4 +220,4 @@ format. See [Credits](#credits).
 | [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | bypass.tools as second-level resolver for hardened links |
 | Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
-| [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-3-Clause | handler engine, site handlers and build pipeline (ported, then rebranded) |
+| [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported) |
