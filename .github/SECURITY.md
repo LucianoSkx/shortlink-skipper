@@ -6,9 +6,8 @@ We currently support the following versions of Shortlink Skipper with security u
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 8.x.x   | :white_check_mark: |
-| 7.x.x   | :x:                |
-| < 7.0   | :x:                |
+| 1.x.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
