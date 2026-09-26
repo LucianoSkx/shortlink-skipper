@@ -4,7 +4,7 @@ import { warn, info } from "./logger.js";
 import { removeAllTimer } from "./misc.js";
 import { GMAPI, VERSION } from "./platform.js";
 
-const RESOURCE_ROOT = `https://raw.githubusercontent.com/shortlink-skipper/shortlink-skipper/v${VERSION}/static`;
+const RESOURCE_ROOT = `https://raw.githubusercontent.com/LucianoSkx/shortlink-skipper/v${VERSION}/static`;
 const ALIGN_CENTER = `${RESOURCE_ROOT}/css/align_center.css`;
 const SCALE_IMAGE = `${RESOURCE_ROOT}/css/scale_image.css`;
 const BACKGROUND_IMAGE = `${RESOURCE_ROOT}/img/imagedoc-darknoise.png`;
