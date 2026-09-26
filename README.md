@@ -35,7 +35,7 @@ small engine of **generic techniques** that cover most shorteners — they all
 share the same templates.
 
 <details open>
-<summary><b>The 34 rules</b></summary>
+<summary><b>The 66 rules</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -73,6 +73,38 @@ share the same templates.
 | `bypass-city` | Queries bypass.city and follows a real destination (footer/social links filtered) |
 | `captcha-manual` | Watches hCaptcha/reCAPTCHA/Turnstile; auto-submits **after you solve** |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
+| `goo-st` | Clicks `.btn-primary` (`goo.st`, `swzz.xyz`) |
+| `1ink` | Follows `#countingbtn` (`1ink.cc`) |
+| `cpmlink` | Follows `#btn-main` (`cpmlink.net`) |
+| `thinfi` | Follows the content link (`thinfi.com`) |
+| `kimochi` | Follows `a#next` on `/inter` (`kimochi.info`) |
+| `a2zapk` | Follows `#dlbtn li a` (`a2zapk.io`) |
+| `blogmado` | Clicks `.btn` (`blogmado.com`) |
+| `mangalist` | Clicks the URL button (`mangalist.org`) |
+| `linegee` | Clicks `.btn-xs` (`linegee.net`) |
+| `yasir252` | Follows `#downloadBtn` (`download.yasir252.com`) |
+| `imagetwist-netlify` | Follows the download button (`imagetwist.netlify.app`) |
+| `urlgalleries` | Clicks the overlay button (`urlgalleries.net`) |
+| `hen-tay` | Follows the download link on `/go/` (`hen-tay.net`) |
+| `wpsafe-anchor` | Follows `#wpsafe-link a` (`otomi-games.com`, `ryuugames.com`) |
+| `tribuntekno` | Clicks the verification buttons (`tribuntekno.com`) |
+| `cuttty` | Clicks `#submit-button` (`cuttty.com`) |
+| `fir3` | Clicks the get-link button (`fir3.net`) |
+| `gplinks` | Clicks `.get-link` (`gplinks.co`) |
+| `icutlink` | Follows the get-link href / clicks `.bsub` (`icutlink.com`, `zegtrends.com`) |
+| `tutwuri` | Clicks the btn-1/2/3 sequence (`tutwuri.id`) |
+| `exeo-app` | Clicks the three-stage buttons (`exe-links.com`, `exeo.app`, `exeygo.com`) |
+| `lnk2` | Strips overlays, clicks `#getLink` on `/go/` (`lnk2.cc`) |
+| `spaste` | Submits the contact form on `/site/` (`www.spaste.com`) |
+| `f95zone` | Clicks `.host_link` on `/masked/` (`f95zone.to`) |
+| `rlu-preview` | Follows the long URL (`preview.rlu.ru`) |
+| `adshnk` | Clicks through to `#final_redirect` (`adshnk.com`) |
+| `similarsites` | Decodes the `/goto/` path (`similarsites.com`) |
+| `lolinez` | Follows the bare query URL (`www.lolinez.com`) |
+| `urlcash` | Reads the `linkDestUrl` page global (`urlcash.com`) |
+| `go-linkify` | Extracts the `/get/` URL from page scripts (`go.linkify.ru`) |
+| `network-loop` | Follows the shadow-DOM button (`network-loop.com`) |
+| `get-click2` | Enables and clicks `#gotolink` (`get-click2.blogspot.com`) |
 
 </details>
 
