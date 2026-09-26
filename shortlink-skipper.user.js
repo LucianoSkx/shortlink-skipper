@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.12
+// @version      1.10.13
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -79,6 +79,7 @@
     'url', 'u', 'go', 'target', 'dest', 'destination', 'redirect',
     'redirect_uri', 'redirect_url', 'r', 'redir', 'link', 'out', 'to',
     'continue', 'next', 'forward', 'jump', 's', 'safe', 'shortid', 'id',
+    'v', 'oldurl',
   ];
 
   const ADBLOCK_BANNER =
@@ -109,11 +110,11 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|cpmlink\.net|cutpaid\.com|cuttty\.com|exeo\.app|fir3\.net|gplinks\.co|icutlink\.com|kingofshrink\.com|linkpoi\.me|linkshrink\.net|lnk2\.cc|network-loop\.com|stfly\.me|stly\.link|thinfi\.com|tutwuri\.id)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com)$/;
   const IMAGE_HOSTS =
-    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cubeupload\.com|depic\.me|directupload\.eu|fastpic\.org|fotosik\.pl|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagenetz\.de|imageshack\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgpv\.com|imgtraffic\.com|imx\.to|keptarolo\.hu|pic-upload\.de|picstate\.com|pimpandhost\.com|pixhost\.to|postimages\.org|turboimagehost\.com|3xplanet\.com)$/;
+    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|giphy\.com|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgflip\.com|imgfrost\.net|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|prnt\.sc|rintor\.space|shotcan\.com|tenor\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
-    /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com)$/;
+    /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com)$/;
   const WP_CONTENT_LOCK_HOST =
     /(^|\.)(ssdhostting\.com|rvpaste\.com|shrinkbixby\.com)$/;
   const SETC_FORM = 'form#setc';
@@ -378,7 +379,7 @@
       try {
         if (findByText(BUTTON_TEXTS)) { score += 1; hits.push('action button text'); }
       } catch {}
-      if (/\/(go|out|link|r)\/|(^|\.)(short|safelink)[a-z0-9-]*\./i.test(`${location.pathname} ${location.host}`)) { score += 1; hits.push('url shape'); }
+      if (/\/(go|out|link|r|ads|goto|o|site)\/|(^|\.)(short|safelink)[a-z0-9-]*\./i.test(`${location.pathname} ${location.host}`)) { score += 1; hits.push('url shape'); }
       if (
         doc.querySelector('meta[http-equiv="refresh"]') ||
         doc.querySelector('.loader, .spinner, .loading, .countdown, [class*="timer" i], [id*="timer" i]')
@@ -1198,6 +1199,273 @@
     return Boolean(clicked);
   }
 
+  // --- Ports from adsbypasser (BSD-3-Clause) --------------------------------
+  // Small per-host handlers. Fixed upstream waits become bounded waitFor() so
+  // the rule acts as soon as the control appears instead of sleeping blindly.
+
+  async function clickSelectorWhen(selector, timeout = 5000) {
+    const el = await waitFor(selector, timeout);
+    if (!el) return false;
+    fireClick(el);
+    return true;
+  }
+
+  async function openSelectorHref(selector, timeout = 10000) {
+    const el = await waitFor(selector, timeout);
+    const href = el?.href || (typeof el?.getAttribute === 'function' ? el.getAttribute('href') : null);
+    return href ? goto(href) : false;
+  }
+
+  const GOO_ST_HOST = /(^|\.)(goo\.st|swzz\.xyz)$/;
+  async function handleGooSt() {
+    if (!GOO_ST_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.btn-primary', 5000);
+  }
+
+  async function handle1ink() {
+    if (!/(^|\.)1ink\.cc$/.test(location.host)) return false;
+    return openSelectorHref('#countingbtn');
+  }
+
+  async function handleCpmlink() {
+    if (!/(^|\.)cpmlink\.net$/.test(location.host)) return false;
+    return openSelectorHref('#btn-main');
+  }
+
+  async function handleThinfi() {
+    if (!/(^|\.)thinfi\.com$/.test(location.host)) return false;
+    return openSelectorHref('div p a');
+  }
+
+  async function handleKimochi() {
+    if (!/(^|\.)kimochi\.info$/.test(location.host) || !location.pathname.startsWith('/inter')) return false;
+    return openSelectorHref('a#next');
+  }
+
+  async function handleA2zapk() {
+    if (!/(^|\.)a2zapk\.io$/.test(location.host)) return false;
+    return openSelectorHref('#dlbtn li a');
+  }
+
+  async function handleBlogmado() {
+    if (!/(^|\.)blogmado\.com$/.test(location.host)) return false;
+    return clickSelectorWhen('.btn', 5000);
+  }
+
+  async function handleMangalist() {
+    if (!/(^|\.)mangalist\.org$/.test(location.host)) return false;
+    return clickSelectorWhen('.btn-primary.url.text-center', 5000);
+  }
+
+  async function handleLinegee() {
+    if (!/(^|\.)linegee\.net$/.test(location.host)) return false;
+    return clickSelectorWhen('.btn-xs', 5000);
+  }
+
+  async function handleYasir252() {
+    if (!/^download\.yasir252\.com$/.test(location.host)) return false;
+    return openSelectorHref('a[id="downloadBtn"]');
+  }
+
+  async function handleImagetwistNetlify() {
+    if (!/^imagetwist\.netlify\.app$/.test(location.host)) return false;
+    return openSelectorHref('center h2 p a, .btn-dark');
+  }
+
+  async function handleUrlgalleries() {
+    if (!/(^|\.)urlgalleries\.net$/.test(location.host)) return false;
+    return clickSelectorWhen('#overlay.butstyle', 5000);
+  }
+
+  async function handleHenTay() {
+    if (!/(^|\.)hen-tay\.net$/.test(location.host) || !location.pathname.startsWith('/go/')) return false;
+    return openSelectorHref('#download_url div a');
+  }
+
+  const WPSAFE_ANCHOR_HOST = /(^|\.)otomi-games\.com$|^www\.ryuugames\.com$/;
+  async function handleWpsafeAnchor() {
+    if (!WPSAFE_ANCHOR_HOST.test(location.host)) return false;
+    if (!location.pathname.startsWith('/go/') && !location.search.startsWith('?eroge=')) return false;
+    return openSelectorHref('#wpsafe-link a');
+  }
+
+  async function handleTribuntekno() {
+    if (!/(^|\.)tribuntekno\.com$/.test(location.host)) return false;
+    let clicked = false;
+    for (const sel of ['#lite-human-verif-button', '#lite-start-sora-button']) {
+      const el = await waitFor(sel, 5000);
+      if (el) {
+        fireClick(el);
+        clicked = true;
+      }
+    }
+    return clicked;
+  }
+
+  async function handleCuttty() {
+    if (!/(^|\.)cuttty\.com$/.test(location.host)) return false;
+    return clickSelectorWhen('#submit-button', 9000);
+  }
+
+  async function handleFir3() {
+    if (!/(^|\.)fir3\.net$/.test(location.host)) return false;
+    return clickSelectorWhen('.btn.btn-success.btn-lg.get-link', 12000);
+  }
+
+  async function handleGplinks() {
+    if (!/(^|\.)gplinks\.co$/.test(location.host)) return false;
+    return clickSelectorWhen('.get-link', 8000);
+  }
+
+  const ICUTLINK_HOST = /(^|\.)(icutlink\.com|zegtrends\.com)$/;
+  async function handleIcutlink() {
+    if (!ICUTLINK_HOST.test(location.host)) return false;
+    if (/zegtrends\.com$/.test(location.host)) {
+      return clickSelectorWhen('div > button.bsub', 12000);
+    }
+    return openSelectorHref('.btn-success.btn-lg.get-link', 15000);
+  }
+
+  async function handleTutwuri() {
+    if (!/(^|\.)tutwuri\.id$/.test(location.host)) return false;
+    const first = await waitFor('#btn-1', 5000);
+    if (!first) return false;
+    fireClick(first);
+    const second = await waitFor('#btn-2', 12000);
+    if (!second) return true;
+    fireClick(second);
+    const third = document.querySelector('#btn-3');
+    if (third) fireClick(third);
+    return true;
+  }
+
+  const EXEO_HOST = /(^|\.)(exe-links\.com|exeo\.app|exeygo\.com)$/;
+  async function handleExeoApp() {
+    if (!EXEO_HOST.test(location.host)) return false;
+    const first = await waitFor('.link-button.button', 8000);
+    if (!first) return false;
+    fireClick(first);
+    const second = await waitFor('.link-button', 8000);
+    if (!second) return true;
+    fireClick(second);
+    const third = await waitFor('.button.link-button', 10000);
+    if (!third) return true;
+    fireClick(third);
+    return true;
+  }
+
+  async function handleLnk2() {
+    if (!/(^|\.)lnk2\.cc$/.test(location.host) || !location.pathname.startsWith('/go/')) return false;
+    try {
+      document.querySelectorAll('iframe, .popupOverlay').forEach((el) => el.remove());
+    } catch {}
+    return clickSelectorWhen('#getLink', 18000);
+  }
+
+  async function handleSpaste() {
+    // NOTE: spaste.com stays OUT of EXTRA_SHORTENER_HOSTS on purpose -- the
+    // pastebin home caused live false positives. This rule only fires on the
+    // shortener path /site/, which the url-shape detector also recognizes.
+    if (!/^www\.spaste\.com$/.test(location.host) || !location.pathname.startsWith('/site/')) return false;
+    return clickSelectorWhen('#template-contactform-submit', 15000);
+  }
+
+  async function handleF95zone() {
+    if (!/(^|\.)f95zone\.to$/.test(location.host) || !location.pathname.startsWith('/masked/')) return false;
+    const link = await waitFor('.host_link', 30000, 500);
+    if (!link) return false;
+    fireClick(link);
+    return true;
+  }
+
+  async function handleRlu() {
+    if (!/^preview\.rlu\.ru$/.test(location.host)) return false;
+    return openSelectorHref('#content > .long_url > a');
+  }
+
+  async function handleAdshnk() {
+    if (!/(^|\.)adshnk\.com$/.test(location.host)) return false;
+    const btn = await waitFor('button[class="ui right labeled icon button primary huge fluid"]', 16000);
+    if (!btn) return false;
+    fireClick(btn);
+    const fin = await waitFor('a[id="final_redirect"]', 18000);
+    const href = fin?.href;
+    return href ? goto(href) : true;
+  }
+
+  async function handleSimilarsites() {
+    if (!/(^|\.)similarsites\.com$/.test(location.host)) return false;
+    const m = location.pathname.match(/^\/goto\/([^?]+)/);
+    if (!m) return false;
+    let dest = m[1];
+    try {
+      dest = decodeURIComponent(dest);
+    } catch {}
+    if (!/^https?:\/\//i.test(dest)) dest = `http://${dest}`;
+    return goto(dest);
+  }
+
+  async function handleLolinez() {
+    if (!/^www\.lolinez\.com$/.test(location.host)) return false;
+    const raw = location.search.replace(/^\?/, '');
+    if (!raw) return false;
+    return goto(raw);
+  }
+
+  async function handleUrlcash() {
+    if (!/(^|\.)urlcash\.com$/.test(location.host)) return false;
+    const fromGlobal = await readGlobal('linkDestUrl', (v) => typeof v === 'string' && isPlausibleUrl(v));
+    if (fromGlobal) return goto(fromGlobal);
+    const html = document.body?.innerHTML || '';
+    const m = html.match(/linkDestUrl\s*=\s*['"](https?:\/\/[^'"]+)['"]/);
+    return m ? goto(m[1]) : false;
+  }
+
+  async function handleGoLinkify() {
+    if (!/^go\.linkify\.ru$/.test(location.host)) return false;
+    const scripts = [...document.querySelectorAll('script:not([src])')].map((s) => s.textContent).join('\n');
+    const m = scripts.match(/https:\/\/go\.linkify\.ru\/get\/[^"'\s]+/);
+    return m ? goto(m[0]) : false;
+  }
+
+  function queryShadowDeep(selector, root = document) {
+    try {
+      const direct = root.querySelector(selector);
+      if (direct) return direct;
+    } catch {}
+    try {
+      const els = root.querySelectorAll('*');
+      for (const el of els) {
+        if (el.shadowRoot) {
+          const found = queryShadowDeep(selector, el.shadowRoot);
+          if (found) return found;
+        }
+      }
+    } catch {}
+    return null;
+  }
+
+  async function handleNetworkLoop() {
+    if (!/(^|\.)network-loop\.com$/.test(location.host)) return false;
+    if (!new URLSearchParams(location.search).get('u')) return false;
+    await waitFor(() => queryShadowDeep('a#pb_2'), 15000, 500);
+    const btn = queryShadowDeep('a#pb_2');
+    const href = btn?.href;
+    return href ? goto(href) : false;
+  }
+
+  async function handleGetClick2() {
+    if (!/^get-click2\.blogspot\.com$/.test(location.host)) return false;
+    const btn = await waitFor('button#gotolink', 15000);
+    if (!btn) return false;
+    try {
+      btn.removeAttribute('disabled');
+      btn.disabled = false;
+    } catch {}
+    fireClick(btn);
+    return true;
+  }
+
   function decodeTokenValue(raw) {
     const tryB64 = (value) => {
       try {
@@ -1252,6 +1520,17 @@
 
   async function handleBoostInk() {
     if (!/(^|\.)boost\.ink$/.test(location.host)) return false;
+    // Fast-path: some pages carry the base64 destination in body[result].
+    try {
+      const result = document.body?.getAttribute?.('result');
+      if (result) {
+        const dest = atob(result);
+        if (/^https?:\/\//i.test(dest)) {
+          log('boost.ink body[result] fast-path');
+          return goto(dest);
+        }
+      }
+    } catch {}
     log('boost.ink detected, fetching page for embedded payload');
     const html = await fetch(location.href, { credentials: 'include' })
       .then((r) => r.text())
@@ -1783,6 +2062,14 @@
         document.querySelectorAll(sel).forEach((el) => el.remove());
       } catch {}
     }
+    // Chevereto-family fast-path: the direct file is advertised in the head.
+    try {
+      const imageSrc = document.querySelector('link[rel="image_src"]');
+      if (imageSrc?.href && isPlausibleUrl(imageSrc.href) && !sameAsCurrent(imageSrc.href)) {
+        log('image-host: following image_src link');
+        return goto(imageSrc.href);
+      }
+    } catch {}
     const anchorSelectors = [
       'a.direct-link',
       'a.btn-download',
@@ -1818,7 +2105,7 @@
     if (!FILE_HOSTS.test(location.host)) return false;
     const findDownload = () =>
       findByText(/^(free\s+)?(download|generate\s+link)(\s+now)?$/i) ||
-      document.querySelector('#downloadbtn, .btn-download, a[download], form[action*="download"] button[type="submit"]');
+      document.querySelector('#downloadbtn, #download-button, #download, #btnproceedsubmit, .btn-download, .secondary, a[download], form[action*="download"] button[type="submit"]');
     let target = findDownload();
     if (!target) {
       log('file-host: waiting for the download control');
@@ -1880,6 +2167,38 @@
     { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
     { name: 'acortalink', when: () => ACORTALINK_HOST.test(location.host), run: handleAcortalink },
     { name: 'bstlar', when: () => BSTLAR_HOST.test(location.host), run: handleBstlar },
+    { name: 'goo-st', when: () => GOO_ST_HOST.test(location.host), run: handleGooSt },
+    { name: '1ink', when: () => /(^|\.)1ink\.cc$/.test(location.host), run: handle1ink },
+    { name: 'cpmlink', when: () => /(^|\.)cpmlink\.net$/.test(location.host), run: handleCpmlink },
+    { name: 'thinfi', when: () => /(^|\.)thinfi\.com$/.test(location.host), run: handleThinfi },
+    { name: 'kimochi', when: () => /(^|\.)kimochi\.info$/.test(location.host), run: handleKimochi },
+    { name: 'a2zapk', when: () => /(^|\.)a2zapk\.io$/.test(location.host), run: handleA2zapk },
+    { name: 'blogmado', when: () => /(^|\.)blogmado\.com$/.test(location.host), run: handleBlogmado },
+    { name: 'mangalist', when: () => /(^|\.)mangalist\.org$/.test(location.host), run: handleMangalist },
+    { name: 'linegee', when: () => /(^|\.)linegee\.net$/.test(location.host), run: handleLinegee },
+    { name: 'yasir252', when: () => /^download\.yasir252\.com$/.test(location.host), run: handleYasir252 },
+    { name: 'imagetwist-netlify', when: () => /^imagetwist\.netlify\.app$/.test(location.host), run: handleImagetwistNetlify },
+    { name: 'urlgalleries', when: () => /(^|\.)urlgalleries\.net$/.test(location.host), run: handleUrlgalleries },
+    { name: 'hen-tay', when: () => /(^|\.)hen-tay\.net$/.test(location.host), run: handleHenTay },
+    { name: 'wpsafe-anchor', when: () => WPSAFE_ANCHOR_HOST.test(location.host), run: handleWpsafeAnchor },
+    { name: 'tribuntekno', when: () => /(^|\.)tribuntekno\.com$/.test(location.host), run: handleTribuntekno },
+    { name: 'cuttty', when: () => /(^|\.)cuttty\.com$/.test(location.host), run: handleCuttty },
+    { name: 'fir3', when: () => /(^|\.)fir3\.net$/.test(location.host), run: handleFir3 },
+    { name: 'gplinks', when: () => /(^|\.)gplinks\.co$/.test(location.host), run: handleGplinks },
+    { name: 'icutlink', when: () => ICUTLINK_HOST.test(location.host), run: handleIcutlink },
+    { name: 'tutwuri', when: () => /(^|\.)tutwuri\.id$/.test(location.host), run: handleTutwuri },
+    { name: 'exeo-app', when: () => EXEO_HOST.test(location.host), run: handleExeoApp },
+    { name: 'lnk2', when: () => /(^|\.)lnk2\.cc$/.test(location.host), run: handleLnk2 },
+    { name: 'spaste', when: () => /^www\.spaste\.com$/.test(location.host), run: handleSpaste },
+    { name: 'f95zone', when: () => /(^|\.)f95zone\.to$/.test(location.host), run: handleF95zone },
+    { name: 'rlu-preview', when: () => /^preview\.rlu\.ru$/.test(location.host), run: handleRlu },
+    { name: 'adshnk', when: () => /(^|\.)adshnk\.com$/.test(location.host), run: handleAdshnk },
+    { name: 'similarsites', when: () => /(^|\.)similarsites\.com$/.test(location.host), run: handleSimilarsites },
+    { name: 'lolinez', when: () => /^www\.lolinez\.com$/.test(location.host), run: handleLolinez },
+    { name: 'urlcash', when: () => /(^|\.)urlcash\.com$/.test(location.host), run: handleUrlcash },
+    { name: 'go-linkify', when: () => /^go\.linkify\.ru$/.test(location.host), run: handleGoLinkify },
+    { name: 'network-loop', when: () => /(^|\.)network-loop\.com$/.test(location.host), run: handleNetworkLoop },
+    { name: 'get-click2', when: () => /^get-click2\.blogspot\.com$/.test(location.host), run: handleGetClick2 },
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
     { name: 'wp-content-lock', when: () => WP_CONTENT_LOCK_HOST.test(location.host), run: handleWpContentLock },
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
@@ -2114,6 +2433,7 @@
       looksLikeShortlink,
       looksLikeTaskWall,
       knownShortener,
+      knownMediaHost,
       goto,
       handleWpContentLock,
       handleLinkvertiseEasy,
@@ -2143,10 +2463,46 @@
       handleAcortalink,
       handleBstlar,
       handleTokenLink,
+      handleGooSt,
+      handle1ink,
+      handleCpmlink,
+      handleThinfi,
+      handleKimochi,
+      handleA2zapk,
+      handleBlogmado,
+      handleMangalist,
+      handleLinegee,
+      handleYasir252,
+      handleImagetwistNetlify,
+      handleUrlgalleries,
+      handleHenTay,
+      handleWpsafeAnchor,
+      handleTribuntekno,
+      handleCuttty,
+      handleFir3,
+      handleGplinks,
+      handleIcutlink,
+      handleTutwuri,
+      handleExeoApp,
+      handleLnk2,
+      handleSpaste,
+      handleF95zone,
+      handleRlu,
+      handleAdshnk,
+      handleSimilarsites,
+      handleLolinez,
+      handleUrlcash,
+      handleGoLinkify,
+      handleNetworkLoop,
+      handleGetClick2,
+      clickSelectorWhen,
+      openSelectorHref,
+      queryShadowDeep,
       handleZafree,
       handleInvisibleCaptcha,
       handleGoLinkForm,
       handleWpSafeLink,
+      handleBoostInk,
       handleButtons,
       handleManualCaptcha,
       trace: TRACE,
