@@ -68,7 +68,7 @@ export const plugins = {
             },
             output: {
               format: "iife",
-              name: "AdsBypasser",
+              name: "ShortlinkSkipper",
               ...config.output,
             },
           };

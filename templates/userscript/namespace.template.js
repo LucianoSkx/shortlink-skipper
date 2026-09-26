@@ -1,8 +1,8 @@
 /**
- * Namespace template for AdsBypasser userscript
+ * Namespace template for ShortlinkSkipper userscript
  *
  * This template provides the core utility imports and namespace setup
- * for the AdsBypasser userscript. It imports various utility modules
+ * for the ShortlinkSkipper userscript. It imports various utility modules
  * and creates a unified interface for accessing them.
  */
 
@@ -10,7 +10,7 @@
 import { get, post } from '$lib/ajax';
 import { getCookie, setCookie, resetCookies } from '$lib/cookie';
 import {
-  AdsBypasserError,
+  ShortlinkSkipperError,
   find,
   forEach,
   none,
@@ -44,7 +44,7 @@ import { usw } from '$lib/platform';
 
 // Functional utility object
 const _ = {
-  AdsBypasserError,
+  ShortlinkSkipperError,
   evil,
   find,
   forEach,

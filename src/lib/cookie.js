@@ -1,5 +1,5 @@
 /**
- * Cookie utility functions for AdsBypasser
+ * Cookie utility functions for ShortlinkSkipper
  *
  * This module provides functions for managing browser cookies,
  * including setting, getting, and resetting cookies.

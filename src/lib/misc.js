@@ -31,7 +31,7 @@ function nuke(url) {
   try {
     doc.open();
     doc.write(
-      `nuked by AdsBypasser, leading to <a href="${safeUrl}">${safeUrl}</a>`,
+      `nuked by ShortlinkSkipper, leading to <a href="${safeUrl}">${safeUrl}</a>`,
     );
     doc.close();
   } catch (e) {

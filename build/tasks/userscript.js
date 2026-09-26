@@ -78,10 +78,10 @@ function linkFiles(supportImage) {
 
   return gulp
     .src([
-      output.to(`adsbypasser.${featureName}.meta.js`),
+      output.to(`shortlink-skipper.${featureName}.meta.js`),
       output.to(`body/${featureName}.js`),
     ])
-    .pipe(plugins.concat(`adsbypasser.${featureName}.user.js`))
+    .pipe(plugins.concat(`shortlink-skipper.${featureName}.user.js`))
     .pipe(gulp.dest(output.path));
 }
 
@@ -102,7 +102,7 @@ function makeMeta(supportImage) {
           .catch((error) => done(error));
       }),
     )
-    .pipe(plugins.rename(`adsbypasser.${featureName}.meta.js`))
+    .pipe(plugins.rename(`shortlink-skipper.${featureName}.meta.js`))
     .pipe(plugins.removeEmptyLines())
     .pipe(gulp.dest(output.path));
 }
@@ -122,14 +122,14 @@ function makeBody(supportImage) {
     .pipe(
       plugins.rollup({
         alias: [
-          { find: "__ADSBYPASSER_NAMESPACE__", replacement: namespacePath },
-          { find: "__ADSBYPASSER_HANDLERS__", replacement: handlersPath },
+          { find: "__SHORTLINK_SKIPPER_NAMESPACE__", replacement: namespacePath },
+          { find: "__SHORTLINK_SKIPPER_HANDLERS__", replacement: handlersPath },
         ],
         modules: [source.to("src"), "node_modules"],
         extensions: [".js", ".json"],
         output: {
           format: "iife",
-          name: "AdsBypasser",
+          name: "ShortlinkSkipper",
         },
       }),
     )
@@ -146,7 +146,7 @@ function makeBody(supportImage) {
  */
 function makeHandlers(supportImage) {
   const featureName = getFeatureName(supportImage);
-  const namespaceScript = "import { _, $ } from '__ADSBYPASSER_NAMESPACE__';\n";
+  const namespaceScript = "import { _, $ } from '__SHORTLINK_SKIPPER_NAMESPACE__';\n";
 
   // Define which handlers to include based on image support
   const handlers = ["src/sites/file/*.js", "src/sites/link/*.js"];
@@ -233,7 +233,7 @@ async function finalizeMetadata(supportImage, content) {
   let s = _.template(content);
   s = s({
     version: pkg.version,
-    title: `AdsBypasser${featurePostfix}`,
+    title: `Shortlink Skipper${featurePostfix}`,
     buildName: featureName,
   });
 

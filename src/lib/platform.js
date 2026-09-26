@@ -57,7 +57,7 @@ function needStructuredClone() {
   return !excludedHandlers.has(scriptHandler);
 }
 
-const MAGIC_KEY = "__adsbypasser_reverse_proxy__";
+const MAGIC_KEY = "__shortlink-skipper_reverse_proxy__";
 
 /**
  * Get a proxy for the unsafe window.

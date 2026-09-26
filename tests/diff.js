@@ -2,7 +2,7 @@
  * Unit tests for domain diff functionality
  *
  * This file contains comprehensive tests for the domain diff functions
- * used in the AdsBypasser project. These functions handle domain comparison
+ * used in the ShortlinkSkipper project. These functions handle domain comparison
  * and changelog generation between git tags.
  */
 

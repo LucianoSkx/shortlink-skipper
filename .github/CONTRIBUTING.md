@@ -29,7 +29,7 @@ You are welcome to submit any issue, but it's appreciated if you review the sect
 
 ## Bug Report
 
-Before submitting, ensure your environment matches [Supported Platforms](https://github.com/adsbypasser/adsbypasser/wiki/Supported-Platforms).
+Before submitting, ensure your userscript manager is up to date (Violentmonkey or Tampermonkey, latest version).
 
 Compatibility with other userscripts or browser extensions cannot be guaranteed. If others cannot reproduce your problem, try creating a new browser profile.
 
@@ -104,7 +104,7 @@ If a previously supported site is no longer active:
 
 ## Pull Request
 
-Send pull requests (PRs) to the `master` branch.
+Send pull requests (PRs) to the `main` branch.
 
 Keep in mind:
 

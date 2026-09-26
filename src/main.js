@@ -3,7 +3,7 @@ import { findHandler } from "./lib/dispatcher.js";
 import { rawUSW, GMAPI, usw } from "./lib/platform.js";
 import { dumpConfig, loadConfig } from "./lib/config.js";
 import { warn, info } from "./lib/logger.js";
-import "__ADSBYPASSER_HANDLERS__";
+import "__SHORTLINK_SKIPPER_HANDLERS__";
 
 // -----------------------------
 // Safari detection
@@ -60,7 +60,7 @@ function disableLeavePrompt(element) {
 // DOM helpers
 // -----------------------------
 function changeTitle() {
-  document.title += " - AdsBypasser";
+  document.title += " - Shortlink Skipper";
 }
 
 function waitDOM() {
@@ -103,8 +103,8 @@ async function main() {
     // skip frames
     return;
   }
-  GMAPI.registerMenuCommand("AdsBypasser - Configure", () => {
-    GMAPI.openInTab("https://adsbypasser.github.io/configure.html");
+  GMAPI.registerMenuCommand("Shortlink Skipper - Help", () => {
+    GMAPI.openInTab("https://github.com/LucianoSkx/shortlink-skipper");
   });
 
   await loadConfig();
