@@ -60,7 +60,7 @@ share the same templates.
 | `boost-ink` | Fetches own source, decodes payload behind internal marker key |
 | `linkvertise-easy` | Extracts destination from Linkvertise `?r=` / `#r=` (base64) |
 | `adlinkfly-hosts` | Host-gated AdLinkFly family: serializes hidden fields, POSTs `/links/go` |
-| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat bypass API for an instant destination, falling back to the [bypass.tools](https://bypass.tools) resolver |
+| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat bypass API for an instant destination, falling back to [bypass.tools](https://bypass.tools) resolver |
 | `network-capture` | Hooks fetch/XHR; follows destination-shaped JSON responses |
 | `url-destination` | Base64/hex destinations in query params *and* path segments (`/goto/<b64>`) |
 | `adlinkfly` | Serializes hidden fields, POSTs `/links/go` with adaptive retries |
