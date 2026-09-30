@@ -364,6 +364,105 @@ test('captcha-manual clicks an already-unlocked button', async () => {
   assert.strictEqual(await h.api.handleManualCaptcha(), true);
 });
 
+// --- math-captcha ---
+
+test('math-captcha solves addition', async () => {
+  const h = load({ href: 'https://short.site.example/abc' });
+  h.doc.body.innerText = 'What is 12 + 7?';
+  const input = { value: '', dispatchEvent: () => true };
+  h.doc.querySelector = (sel) => (sel.includes('captcha') ? input : null);
+  const ok = await h.api.solveMathCaptcha();
+  assert.ok(ok);
+  assert.strictEqual(input.value, '19');
+});
+
+test('math-captcha solves sqrt', async () => {
+  const h = load({ href: 'https://short.site.example/abc' });
+  h.doc.body.innerText = 'What is sqrt(16)?';
+  const input = { value: '', dispatchEvent: () => true };
+  h.doc.querySelector = (sel) => (sel.includes('captcha') ? input : null);
+  const ok = await h.api.solveMathCaptcha();
+  assert.ok(ok);
+  assert.strictEqual(input.value, '4');
+});
+
+test('math-captcha solves division', async () => {
+  const h = load({ href: 'https://short.site.example/abc' });
+  h.doc.body.innerText = 'What is 20 / 4?';
+  const input = { value: '', dispatchEvent: () => true };
+  h.doc.querySelector = (sel) => (sel.includes('captcha') ? input : null);
+  const ok = await h.api.solveMathCaptcha();
+  assert.ok(ok);
+  assert.strictEqual(input.value, '5');
+});
+
+// --- paste-extract ---
+
+test('paste-extract follows URL found in paste content', async () => {
+  const h = load({ href: 'https://pastebin.com/abc' });
+  h.doc.body.innerText = 'Here is the link: https://dest.example/file';
+  const ok = await h.api.handlePasteExtract();
+  assert.ok(ok);
+  assert.ok(h.navs.includes('https://dest.example/file'));
+});
+
+test('paste-extract ignores other hosts', async () => {
+  const h = load({ href: 'https://example.com/x' });
+  assert.strictEqual(await h.api.handlePasteExtract(), false);
+});
+
+// --- indian shortener hosts ---
+
+test('indian shortener hosts open the gate', () => {
+  const hosts = [
+    'https://softurl.in/abc',
+    'https://shrinkme.io/abc',
+    'https://droplink.co/abc',
+    'https://lksfy.in/abc',
+    'https://rocklinks.in/abc',
+    'https://vplink.in/abc',
+    'https://jrlinks.in/abc',
+    'https://4hi.in/abc',
+    'https://linkshortify.in/abc',
+    'https://shrinkforearn.in/abc',
+    'https://indianshortner.com/abc',
+    'https://dekhe.click/abc',
+    'https://clk.wiki/abc',
+    'https://clk.kim/abc',
+    'https://clk.sh/abc',
+  ];
+  for (const href of hosts) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownShortener(), true, `${href} should be a known shortener`);
+  }
+});
+
+// --- new file hosters ---
+
+test('new file hosters open the gate', () => {
+  const hosts = [
+    'https://mega4upload.net/abc',
+    'https://uploady.io/abc',
+    'https://upfilesgo.com/abc',
+    'https://upfiles.app/abc',
+    'https://modsfire.com/abc',
+    'https://dailyuploads.net/abc',
+    'https://jioupload.link/abc',
+    'https://jioupload.com/abc',
+    'https://jioupload.icu/abc',
+    'https://cloudfam.io/abc',
+    'https://frdl.io/abc',
+    'https://freedl.ink/abc',
+    'https://fredl.ru/abc',
+    'https://frdl.is/abc',
+    'https://rapidgator.net/abc',
+  ];
+  for (const href of hosts) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownMediaHost(), true, `${href} should be a known media host`);
+  }
+});
+
 // --- boost-ink ---
 
 test('boost-ink fast-path reads base64 from body[result]', async () => {
