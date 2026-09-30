@@ -116,11 +116,11 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|giphy\.com|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgflip\.com|imgfrost\.net|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|prnt\.sc|rintor\.space|shotcan\.com|tenor\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
-    /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com)$/;
+    /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com|mega4upload\.net|uploady\.io|upfilesgo\.com|upfiles\.app|modsfire\.com|dailyuploads\.net|jioupload\.link|jioupload\.com|jioupload\.icu|cloudfam\.io|frdl\.io|freedl\.ink|fredl\.ru|frdl\.is|rapidgator\.net)$/;
   const WP_CONTENT_LOCK_HOST =
     /(^|\.)(ssdhostting\.com|rvpaste\.com|shrinkbixby\.com)$/;
   const SETC_FORM = 'form#setc';
@@ -1760,7 +1760,22 @@
 
   function solveMathCaptcha(root = document) {
     const source = root.body?.innerText || '';
-    const match = source.match(/(\d{1,4})\s*([+\-*x])\s*(\d{1,4})/);
+    // sqrt(N) pattern
+    const sqrtMatch = source.match(/sqrt\s*\(\s*(\d{1,4})\s*\)/i);
+    if (sqrtMatch) {
+      const n = Number(sqrtMatch[1]);
+      const result = Math.round(Math.sqrt(n));
+      const input = root.querySelector('input[name*="captcha" i], input[id*="captcha" i], input[placeholder*="captcha" i], input[placeholder*="answer" i]');
+      if (input && input.value.trim() === '') {
+        input.value = String(result);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        log(`math captcha solved: sqrt(${n}) = ${result}`);
+        return true;
+      }
+    }
+    // Standard arithmetic: a + b, a - b, a * x b, a / b
+    const match = source.match(/(\d{1,4})\s*([+\-*/x÷])\s*(\d{1,4})/);
     if (!match) return false;
     const [, aRaw, opRaw, bRaw] = match;
     const a = Number(aRaw);
@@ -1769,7 +1784,9 @@
     switch (opRaw) {
       case '+': result = a + b; break;
       case '-': result = a - b; break;
-      default: result = a * b;
+      case '*': case 'x': result = a * b; break;
+      case '/': case '÷': result = b !== 0 ? Math.round(a / b) : null; break;
+      default: return false;
     }
     if (result === null) return false;
     const input = root.querySelector('input[name*="captcha" i], input[id*="captcha" i], input[placeholder*="captcha" i], input[placeholder*="answer" i]');
@@ -2215,6 +2232,32 @@
     return true;
   }
 
+  // Paste extraction: some shorteners hide the destination in a paste site
+  // (pastebin, rentry, etc.). Extract URLs from the paste content and follow
+  // the first valid external destination.
+  const PASTE_HOSTS = /(^|\.)(pastebin\.com|rentry\.co|pastelink\.com|justpaste\.it|paste\.ee|hastebin\.com|ghostbin\.co|controlc\.com|paste\.org)$/;
+  async function handlePasteExtract() {
+    if (!PASTE_HOSTS.test(location.host)) return false;
+    log('paste-extract: extracting URLs from paste content');
+    const text = document.body?.innerText || '';
+    const urls = text.match(/https?:\/\/[^\s<>"')\]]+/g) || [];
+    for (const url of urls) {
+      try {
+        const u = new URL(url);
+        if (
+          u.host !== location.host.toLowerCase() &&
+          !EXCLUDE_HOSTS.some((re) => re.test(u.host.toLowerCase())) &&
+          !INFRA_HOST.test(u.host.toLowerCase())
+        ) {
+          log('paste-extract: found destination in paste');
+          return goto(url);
+        }
+      } catch {}
+    }
+    log('paste-extract: no valid destination found in paste');
+    return false;
+  }
+
   // Weakest evidence in the cascade (0.55): a lone external exit may well be
   // the destination, but only when nothing stronger appeared. Declared last on
   // purpose; the confidence is recorded so the trace shows why it acted.
@@ -2327,6 +2370,7 @@
     { name: 'final-button', when: () => looksLikeShortlink(), run: handleButtons },
     { name: 'service-last-resort', when: () => /^bypass\.tools$/.test(location.host), run: handleServiceLastResort },
     { name: 'bypass-city', when: genericGate, run: handleBypassCity },
+    { name: 'paste-extract', when: genericGate, run: handlePasteExtract },
     { name: 'captcha-manual', when: genericGate, run: handleManualCaptcha },
     { name: 'single-external-link', when: genericGate, run: runSingleExternalLink },
   ];
@@ -2549,6 +2593,8 @@
       runSingleExternalLink,
       resolveExternal,
       handleExternalService,
+      solveMathCaptcha,
+      handlePasteExtract,
       reportFalsePositive,
       handleImageHost,
       handleFileHost,
