@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.11.0 — 2026-09-30
+
+### Added
+- **`@connect` directives** for all external API domains (trw.lat, bypass.tools, adbypass.org, bypass.city, api.rekonise.com, bypass.link) — avoids userscript manager warnings.
+- **Security considerations section** in README documenting `unsafeWindow` access, script injection for global reads, `fetch` with credentials, and hook restoration behavior.
+- **Tests for `handleBoostInk`** (fast-path and fetch fallback) and **`handleLootLinkLocal`** host guard.
+
+### Fixed
+- **Hook restoration**: `handleAcortalink` now restores `PAGE.open` after 5s; `installBstlarXhrHook` restores `XMLHttpRequest.prototype.open` after 5min; `installLootLinkFetchCapture` restores `window.fetch` after 5min — prevents hook leakage across navigations.
+- **`handleSimilarsites` uses HTTPS-first** instead of HTTP fallback for bare destinations.
+- **`queryShadowDeep` bounded** — max depth 10 and max 5000 elements to prevent excessive traversal on pages with many shadow roots.
+- **`handleZafree` validates success** — waits for a destination link after submit instead of blindly returning true.
+- **`handleRekonise` uses `data.link`** directly instead of regex over stringified JSON — more robust against non-URL fields.
+- **Named constants** for magic numbers: `MAX_HOPS`, `BOOST_FACTOR`, `BOOST_MIN_DELAY`, `BOOST_MAX_DELAY`, `BOOST_FLOOR_MS`, `NET_CAPTURE_MAX_LENGTH`, `SHADOW_DEEP_MAX_DEPTH`, `SHADOW_DEEP_MAX_ELEMENTS`.
+
 ## 1.10.14 — 2026-09-26
 
 ### Added

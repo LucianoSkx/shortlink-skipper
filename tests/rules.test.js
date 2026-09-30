@@ -363,3 +363,38 @@ test('captcha-manual clicks an already-unlocked button', async () => {
   h.sandbox.grecaptcha = {};
   assert.strictEqual(await h.api.handleManualCaptcha(), true);
 });
+
+// --- boost-ink ---
+
+test('boost-ink fast-path reads base64 from body[result]', async () => {
+  const h = load({ href: 'https://boost.ink/abc' });
+  h.doc.body.getAttribute = () => btoa('https://dest.example/boost');
+  const ok = await h.api.handleBoostInk();
+  assert.ok(ok);
+  assert.ok(h.navs.includes('https://dest.example/boost'));
+});
+
+test('boost-ink fetches page when body[result] is missing', async () => {
+  const h = load({ href: 'https://boost.ink/abc' });
+  h.doc.body.getAttribute = () => null;
+  h.setFetch(() =>
+    Promise.resolve({
+      text: () => Promise.resolve('stuff bufpsvdhmjybvgfncqfa="' + btoa('https://dest.example/fetched') + '" more'),
+    }),
+  );
+  const ok = await h.api.handleBoostInk();
+  assert.ok(ok);
+  assert.ok(h.navs.includes('https://dest.example/fetched'));
+});
+
+test('boost-ink ignores other hosts', async () => {
+  const h = load({ href: 'https://example.com/x' });
+  assert.strictEqual(await h.api.handleBoostInk(), false);
+});
+
+// --- lootlink-local ---
+
+test('lootlink-local ignores other hosts', async () => {
+  const h = load({ href: 'https://example.com/x' });
+  assert.strictEqual(await h.api.handleLootLinkLocal(), false);
+});
