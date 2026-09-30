@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.10.14
+// @version      1.11.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -32,6 +32,12 @@
 // @grant        GM_openInTab
 // @downloadURL  https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
 // @updateURL    https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js
+// @connect      trw.lat
+// @connect      bypass.tools
+// @connect      adbypass.org
+// @connect      bypass.city
+// @connect      api.rekonise.com
+// @connect      bypass.link
 // ==/UserScript==
 
 (function () {
@@ -322,7 +328,6 @@
     // The entry URL is seeded once per tab so returning to it also counts as
     // a cycle (A->B->C->A).
     const KEY = 'sl_skipper_nav';
-    const MAX_HOPS = 10;
     let history = [];
     try {
       history = JSON.parse(sessionStorage.getItem(KEY) || '[]');
@@ -592,6 +597,14 @@
   const RESOLVER_BREAKER_KEY = 'sl_resolver_breakers';
   const BREAKER_THRESHOLD = 10;
   const BREAKER_COOLDOWN_MS = 5 * 60 * 1000;
+  const MAX_HOPS = 10;
+  const BOOST_FACTOR = 15;
+  const BOOST_MIN_DELAY = 400;
+  const BOOST_MAX_DELAY = 90000;
+  const BOOST_FLOOR_MS = 30;
+  const NET_CAPTURE_MAX_LENGTH = 500000;
+  const SHADOW_DEEP_MAX_DEPTH = 10;
+  const SHADOW_DEEP_MAX_ELEMENTS = 5000;
 
   function breakerState() {
     try {
@@ -1044,12 +1057,12 @@
       const res = await fetch(`https://api.rekonise.com/social-unlocks${location.pathname}/unlock`, {
         headers: { accept: 'application/json, text/plain, */*' },
       });
-      const data = JSON.stringify(await res.json());
-      const urls = data.match(/https?:\/\/[^\s"\\]+/g) || [];
-      const dest = urls.find(
-        (u) => !INFRA_HOST.test(u) && !/\.(png|jpe?g|gif|svg|webp|ico)(\?|$)/i.test(u),
-      );
-      return dest ? goto(dest) : false;
+      const data = await res.json();
+      const dest = data?.link;
+      if (typeof dest === 'string' && !INFRA_HOST.test(dest) && !/\.(png|jpe?g|gif|svg|webp|ico)(\?|$)/i.test(dest)) {
+        return goto(dest);
+      }
+      return false;
     } catch (error) {
       log('rekonise error:', error.message);
       return false;
@@ -1455,7 +1468,7 @@
     try {
       dest = decodeURIComponent(dest);
     } catch {}
-    if (!/^https?:\/\//i.test(dest)) dest = `http://${dest}`;
+    if (!/^https?:\/\//i.test(dest)) dest = `https://${dest}`;
     return goto(dest);
   }
 
@@ -1482,7 +1495,8 @@
     return m ? goto(m[0]) : false;
   }
 
-  function queryShadowDeep(selector, root = document) {
+  function queryShadowDeep(selector, root = document, depth = 0, count = 0) {
+    if (depth > SHADOW_DEEP_MAX_DEPTH || count > SHADOW_DEEP_MAX_ELEMENTS) return null;
     try {
       const direct = root.querySelector(selector);
       if (direct) return direct;
@@ -1491,7 +1505,7 @@
       const els = root.querySelectorAll('*');
       for (const el of els) {
         if (el.shadowRoot) {
-          const found = queryShadowDeep(selector, el.shadowRoot);
+          const found = queryShadowDeep(selector, el.shadowRoot, depth + 1, count + 1);
           if (found) return found;
         }
       }
@@ -1613,6 +1627,15 @@
       setVal('input[name="givenX"]', 'VFl0utOEF6a7BiS8YJdqTg==');
       setVal('input[name="givenY"]', 'rsW06vBB1oIFVpnFz61t5Q==');
       submitFormLoop(linkView, 10);
+      const success = await waitFor(() => {
+        const dest = document.querySelector('a[href^="http"]');
+        return dest && !sameAsCurrent(dest.href) ? dest.href : null;
+      }, 10000, 500);
+      if (success) {
+        log('za.gl destination found after submit');
+        return goto(success);
+      }
+      log('za.gl submit completed but no destination found');
       return true;
     }
     return false;
@@ -1664,6 +1687,7 @@
   async function handleAcortalink() {
     if (!ACORTALINK_HOST.test(location.host)) return false;
     log('acortalink.me detected');
+    const originalOpen = PAGE.open;
     // Funnel through goto() so the spoofed open honors validation + anti-loop.
     // Return null on refusal so call sites that check for popup-block behavior
     // see the same shape as the real blocked window.open().
@@ -1689,6 +1713,8 @@
     observer.observe(document, { childList: true, subtree: true });
     const btn = await waitFor('#contador', 30000, 300);
     if (btn && visible(btn)) fireClick(btn);
+    // Restore original open after the rule completes
+    setTimeout(() => { PAGE.open = originalOpen; }, 5000);
     return Boolean(btn);
   }
 
@@ -1717,6 +1743,13 @@
       });
       return originalOpen.apply(this, args);
     };
+    // Restore original open after 5 minutes to avoid leaking the hook
+    setTimeout(() => {
+      if (XMLHttpRequest.prototype.open !== originalOpen) {
+        XMLHttpRequest.prototype.open = originalOpen;
+        PAGE.__slBstlarHooked = false;
+      }
+    }, 300000);
   }
 
   async function handleBstlar() {
@@ -1775,7 +1808,7 @@
     PAGE.__slNetCapturing = true;
     const scan = (text) => {
       if (cfQuiet || cfStandby) return;
-      if (typeof text !== 'string' || text.length > 500000) return;
+      if (typeof text !== 'string' || text.length > NET_CAPTURE_MAX_LENGTH) return;
       const pattern =
         /"(url|link|redirect(?:_url|_uri)?|final(?:_url)?|destination|target|go)"\s*:\s*"(https?:\/\/[^"\\]+)"/gi;
       let match;
@@ -1852,12 +1885,12 @@
     return goto(capturedDestUrl);
   }
 
-  function prepareBoost(factor = 15) {
+  function prepareBoost(factor = BOOST_FACTOR) {
     if (boostWrap || cfQuiet || cfStandby) return;
     const originalTimeout = PAGE.setTimeout.bind(PAGE);
     const originalInterval = PAGE.setInterval.bind(PAGE);
     const speedUp = (delay) =>
-      typeof delay === 'number' && delay > 400 && delay <= 90000 ? Math.max(30, Math.floor(delay / factor)) : delay;
+      typeof delay === 'number' && delay > BOOST_MIN_DELAY && delay <= BOOST_MAX_DELAY ? Math.max(BOOST_FLOOR_MS, Math.floor(delay / factor)) : delay;
     const wrappedTimeout = (handler, delay, ...rest) =>
       originalTimeout(handler, boostEnabled && !cfQuiet ? speedUp(delay) : delay, ...rest);
     const wrappedInterval = (handler, delay, ...rest) =>
@@ -2049,6 +2082,13 @@
       }
       return res;
     };
+    // Restore original fetch after 5 minutes to avoid leaking the hook
+    setTimeout(() => {
+      if (window.fetch && window.fetch !== origFetch) {
+        window.fetch = origFetch;
+        PAGE.__slLootCapInstalled = false;
+      }
+    }, 300000);
   }
 
   async function handleLootLinkLocal() {

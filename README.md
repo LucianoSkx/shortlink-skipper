@@ -138,6 +138,24 @@ server-side and cannot be skipped locally.
 - Per-domain on/off switch in the userscript menu
 - Cloudflare challenges pass untouched (verified live)
 
+## Security considerations
+
+- **`unsafeWindow` access** — the script uses `unsafeWindow` to read page globals
+  (e.g. `linkDestUrl`, `click_url`, `p`). This is necessary for the bypass
+  techniques but means the script runs with full page context access. A
+  compromised page could theoretically interfere with the script's logic.
+- **Script injection for global reads** — `readGlobal()` injects a `<script>`
+  tag into the page to read global variables. The variable name is validated
+  against `/^[A-Za-z0-9_$]+$/` to prevent injection, but the mechanism is
+  inherently fragile and could break on pages with strict CSP.
+- **`fetch` with credentials** — `handleBoostInk` fetches the current page
+  with `credentials: 'include'` to extract the embedded payload. This sends
+  the site's own cookies back to the same origin (expected behavior).
+- **Hook restoration** — `handleAcortalink`, `installBstlarXhrHook` and
+  `installLootLinkFetchCapture` temporarily override `PAGE.open`,
+  `XMLHttpRequest.prototype.open` and `window.fetch`. All hooks are restored
+  after a timeout (5 minutes) to avoid leaking into subsequent navigations.
+
 ## Privacy — what leaves your device
 
 Local storage (never uploaded): `verbose`, `disabled_hosts`, `sl_stats`,
