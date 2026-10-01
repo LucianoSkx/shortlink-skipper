@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.12.2 — 2026-10-01
+
+### Fixed
+- **Delegation cascade no longer dies on bypass.tools** (found live on `linkvertise.com/329510/test-it-out/1`): the landing often carries a Turnstile/captcha marker in `<head>` at document-start, which put the script in full stand-by (navigation refused, no rules) on a fully usable page — stuck on "Bypass Failed" with no forward to adbypass.org. Widget-only challenges on the delegation host now switch to quiet mode and continue, so `service-last-resort` still fires; true interstitials still enter full stand-by everywhere.
+- **Recovery when a challenge clears in place**: the load-time stand-by path now installs the challenge watchdog, and if the markers disappear without navigation the page reloads once (session-guarded) so `main()` runs fresh instead of staying dead.
+- **4 new regression tests** (`tests/standby.test.js`): watchdog on load-time stand-by, reload-once recovery (plus guard), widget stand-by on shorteners, quiet + `service-last-resort` forward on bypass.tools.
+
 ## 1.12.1 — 2026-10-01
 
 ### Fixed
