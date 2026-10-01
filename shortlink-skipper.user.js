@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.12.1
+// @version      1.12.2
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -880,16 +880,31 @@
   // Polls the DOM for a challenge that shows up after main() already decided to
   // activate: MutationObserver for injected markup plus a few one-shot timers
   // for late-loading widget scripts. Unref'd so tests exit promptly.
+  // Also recovers from the load-time stand-by below: if the challenge markers
+  // disappear without any navigation, the page reloads once (session-guarded)
+  // so main() runs fresh on the real page instead of staying dead.
   function watchForChallenge() {
     if (PAGE.__slCfWatch) return;
     PAGE.__slCfWatch = true;
     let mo = null;
     const check = () => {
       if (syncChallengeState()) {
-        try {
-          mo.disconnect();
-        } catch {}
-        return true;
+        if (!interstitialChallenging() && !turnstilePresent()) {
+          try {
+            if (!sessionStorage.getItem('sl_cf_reloaded')) {
+              sessionStorage.setItem('sl_cf_reloaded', '1');
+              log('challenge cleared in place, reloading to resume');
+              location.reload();
+            }
+          } catch {}
+          try {
+            mo.disconnect();
+          } catch {}
+          return true;
+        }
+        // Challenge still present: stay out of its way but keep watching in
+        // case it clears later (the one-shot timers below bound the cost).
+        return false;
       }
       return false;
     };
@@ -2492,9 +2507,27 @@
           setTimeout(resolve, 0);
         });
       }
-      if (cloudflareChallenging()) {
+      // Hoisted: the challenge branch below treats the delegation landing
+      // (bypass.tools) differently from real shortener pages.
+      const delegatedHost = /^bypass\.tools$/.test(location.host);
+      if (interstitialChallenging()) {
         enterChallengeStandby('interstitial');
+        watchForChallenge();
         return;
+      }
+      if (cloudflareChallenging()) {
+        // Widget-only challenge (e.g. a Turnstile/captcha script sitting in
+        // <head> at document-start). On the delegation landing its only job --
+        // service-last-resort sleeps and navigates -- never touches the widget,
+        // so quiet mode (hooks off, navigation allowed) is enough to let the
+        // cascade continue. Everywhere else, stand by fully.
+        if (delegatedHost) {
+          quietEnvironmentHooks();
+        } else {
+          enterChallengeStandby('widget');
+          watchForChallenge();
+          return;
+        }
       }
 
       if (excluded() || disabled()) return;
@@ -2503,7 +2536,7 @@
       // Delegation landing pages carry their own rules (service-last-resort on
       // bypass.tools) that must run even though the page itself is not a
       // shortener -- otherwise the cascade dies at its second level.
-      const delegated = /^bypass\.tools$/.test(location.host);
+      const delegated = delegatedHost;
       const taskWall = shortish && looksLikeTaskWall();
       const knownShort = knownShortener();
       const media = knownMediaHost();

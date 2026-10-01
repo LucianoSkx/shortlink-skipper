@@ -216,3 +216,77 @@ test('captchaPresent enxerga o Turnstile via global', () => {
   h.sandbox.turnstile = {};
   assert.strictEqual(h.api.captchaPresent(), true, 'captcha-manual precisa esperar o Turnstile');
 });
+
+test('stand-by no load instala o watchdog para recuperar se o challenge sumir', async () => {
+  const h = load({ href: 'https://example.com/', cf: true });
+  let observers = 0;
+  const OrigMO = h.sandbox.MutationObserver;
+  h.sandbox.MutationObserver = function (...args) {
+    observers += 1;
+    return new OrigMO(...args);
+  };
+  await h.api.main();
+  assert.strictEqual(h.api.standbyState().standby, true);
+  assert.strictEqual(h.navs.length, 0, 'nao deve navegar durante o desafio');
+  assert.strictEqual(observers, 1, 'watchdog instalado mesmo no early-return');
+});
+
+test('desafio que some sem navegar recarrega uma vez para retomar', async () => {
+  let cb = null;
+  const h = load({ href: 'https://example.com/', cf: true });
+  h.sandbox.MutationObserver = function (fn) {
+    cb = fn;
+    this.observe = () => {};
+    this.disconnect = () => {};
+  };
+  await h.api.main();
+  assert.strictEqual(h.api.standbyState().standby, true);
+  assert.ok(cb, 'watchdog instalado no early-return');
+
+  let reloaded = 0;
+  h.loc.reload = () => { reloaded += 1; };
+  cb();
+  assert.strictEqual(reloaded, 0, 'com challenge presente, sem reload');
+
+  h.doc.getElementById = () => null;
+  h.doc.documentElement.className = '';
+  h.doc.title = 'Real page';
+  h.doc.querySelector = () => null;
+  cb();
+  assert.strictEqual(reloaded, 1, 'challenge sumiu sem navegar: reload para retomar');
+  cb();
+  assert.strictEqual(reloaded, 1, 'guard impede segundo reload');
+});
+
+test('widget no load em shortener: stand-by total com watchdog', async () => {
+  const h = load({
+    href: 'https://ouo.io/abc',
+    title: 'ouo.io',
+    querySelector: (sel) => (sel.includes('turnstile') ? { src: 'https://challenges.cloudflare.com/turnstile/api.js' } : null),
+  });
+  let observers = 0;
+  const OrigMO = h.sandbox.MutationObserver;
+  h.sandbox.MutationObserver = function (...args) {
+    observers += 1;
+    return new OrigMO(...args);
+  };
+  await h.api.main();
+  assert.strictEqual(h.api.standbyState().standby, true);
+  assert.strictEqual(h.navs.length, 0);
+  assert.strictEqual(observers, 1, 'watchdog instalado para recuperar se o widget sumir');
+});
+
+test('bypass.tools com widget: quiet e service-last-resort avanca para adbypass.org', async () => {
+  const h = load({
+    href: 'https://bypass.tools/bypass?url=https://linkvertise.com/x',
+    title: 'bypass.tools',
+    querySelector: (sel) => (sel.includes('turnstile') ? { src: 'https://challenges.cloudflare.com/turnstile/api.js' } : null),
+  });
+  await h.api.main();
+  assert.strictEqual(h.api.standbyState().standby, false, 'delegacao nao entra em stand-by total');
+  assert.strictEqual(h.api.standbyState().quiet, true);
+  assert.ok(
+    h.navs.some((u) => u.startsWith('https://adbypass.org/bypass?bypass=')),
+    `service-last-resort deve avancar, got: ${JSON.stringify(h.navs)}`,
+  );
+});

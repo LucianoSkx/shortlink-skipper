@@ -137,6 +137,7 @@ server-side and cannot be skipped locally.
 - Captcha widgets are never solved or tampered with — only observed
 - Per-domain on/off switch in the userscript menu
 - Cloudflare challenges pass untouched (verified live)
+- If a challenge clears without navigating away, the page reloads once so the script resumes on the real page
 
 ## Security considerations
 
