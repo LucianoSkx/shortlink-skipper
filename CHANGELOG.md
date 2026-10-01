@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.3 — 2026-10-01
+
+### Fixed
+- Bump de versão (`1.12.2` → `1.12.3`) — sincronização final.
+
 ## 1.12.2 — 2026-10-01
 
 ### Fixed
