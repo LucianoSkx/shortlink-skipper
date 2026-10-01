@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.11.0
+// @version      1.12.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -1775,7 +1775,7 @@
       }
     }
     // Standard arithmetic: a + b, a - b, a * x b, a / b
-    const match = source.match(/(\d{1,4})\s*([+\-*/x÷])\s*(\d{1,4})/);
+    const match = source.match(/(\d{1,4})\s*([+\-*/x])\s*(\d{1,4})/);
     if (!match) return false;
     const [, aRaw, opRaw, bRaw] = match;
     const a = Number(aRaw);
@@ -1785,7 +1785,7 @@
       case '+': result = a + b; break;
       case '-': result = a - b; break;
       case '*': case 'x': result = a * b; break;
-      case '/': case '÷': result = b !== 0 ? Math.round(a / b) : null; break;
+      case '/': result = b !== 0 ? Math.round(a / b) : null; break;
       default: return false;
     }
     if (result === null) return false;
