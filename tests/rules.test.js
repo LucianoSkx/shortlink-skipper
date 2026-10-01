@@ -497,3 +497,71 @@ test('lootlink-local ignores other hosts', async () => {
   const h = load({ href: 'https://example.com/x' });
   assert.strictEqual(await h.api.handleLootLinkLocal(), false);
 });
+
+// --- BypassTools v5 (MIT) hosts: loot mirrors, shorteners, paste infra ---
+
+test('new loot mirrors open the shortener gate', () => {
+  const hosts = [
+    'https://loot-labs.com/s/abc',
+    'https://lootlabs.com/s/abc',
+    'https://lootlabs.gg/s/abc',
+    'https://lootboost.net/s/abc',
+    'https://fast-links.org/s/abc',
+    'https://link-hub.net/s/abc',
+    'https://ultra-links.net/s/abc',
+    'https://lootlink.org/s/abc',
+    'https://lootlinks.com/s/abc',
+    'https://megalnk.com/s/abc',
+    'https://drlinker.com/s/abc',
+    'https://eofmukindwo.com/s/abc',
+    'https://realiukzemydre.com/s/abc',
+    'https://kmendation.com/s/abc',
+  ];
+  for (const href of hosts) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownShortener(), true, `${href} should be a known shortener`);
+  }
+});
+
+test('new shorteners open the shortener gate', () => {
+  const hosts = [
+    'https://bst.gg/x',
+    'https://booo.st/x',
+    'https://cety.app/x',
+    'https://v.gd/x',
+    'https://paster.gg/x',
+    'https://rinku.pro/x',
+    'https://lockr.so/x',
+    'https://lockr.net/x',
+    'https://subfinal.com/x',
+  ];
+  for (const href of hosts) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownShortener(), true, `${href} should be a known shortener`);
+  }
+});
+
+test('BYPASS_SERVICE_URL matches the new loot mirrors and paster.gg', () => {
+  const h = load({ href: 'https://example.com/' });
+  for (const href of [
+    'https://lootlabs.com/s/abc',
+    'https://lootlabs.gg/s/abc',
+    'https://lootboost.net/s/abc',
+    'https://fast-links.org/s/abc',
+    'https://megalnk.com/s/abc',
+    'https://eofmukindwo.com/s/abc',
+    'https://paster.gg/abc',
+  ]) {
+    assert.ok(h.api.BYPASS_SERVICE_URL.test(href), `${href} should match`);
+  }
+});
+
+test('paste-extract covers pasteebins and spacebin', async () => {
+  for (const href of ['https://pasteebins.com/abc', 'https://pypy.spacebin.in/abc']) {
+    const h = load({ href });
+    h.doc.body.innerText = 'mirror: https://dest.example/file';
+    const ok = await h.api.handlePasteExtract();
+    assert.ok(ok, href);
+    assert.ok(h.navs.includes('https://dest.example/file'), href);
+  }
+});
