@@ -114,8 +114,7 @@ test('hooks já em stand-by não são reinstalados', () => {
   assert.strictEqual(h.sandbox.fetch, origFetch, 'net capture deve ser no-op em stand-by');
 });
 
-test('watchForChallenge é idempotente e não observa páginas comuns', async () => {
-  const normal = load({ href: 'https://example.com/' });
+test('watchForChallenge é idempotente e não observa páginas comuns', async () => {  const normal = load({ href: 'https://example.com/' });
   let observers = 0;
   const OrigMO = normal.sandbox.MutationObserver;
   normal.sandbox.MutationObserver = function (...args) {
@@ -138,4 +137,82 @@ test('watchForChallenge é idempotente e não observa páginas comuns', async ()
   shortish.api.watchForChallenge();
   shortish.api.watchForChallenge();
   assert.strictEqual(shortObservers, 1, 'watchdog deve ser instalado uma única vez');
+});
+
+test('turnstile moderno: input cf-turnstile-response silencia os hooks', () => {
+  const h = load({ href: 'https://example.com/' });
+  const orig = armHooks(h);
+
+  h.doc.querySelector = (sel) => (sel.includes('cf-turnstile-response') ? { name: 'cf-turnstile-response' } : null);
+  const stop = h.api.syncChallengeState();
+
+  assert.strictEqual(stop, false, 'widget não deve parar as regras');
+  assert.strictEqual(h.api.standbyState().quiet, true);
+  assert.strictEqual(h.sandbox.setTimeout, orig.setTimeout, 'boost deve ser removido sob o widget');
+  assert.strictEqual(h.sandbox.fetch, orig.fetch, 'net capture deve ser removido sob o widget');
+  assert.strictEqual(h.sandbox.open, orig.open, 'window.open deve ser restaurado sob o widget');
+  assert.strictEqual(
+    Object.getOwnPropertyDescriptor(h.doc, 'hidden'),
+    undefined,
+    'focus lock deve ser removido sob o widget',
+  );
+});
+
+test('turnstile moderno: iframe challenge-platform silencia os hooks', () => {
+  const h = load({ href: 'https://example.com/' });
+  const orig = armHooks(h);
+
+  h.doc.querySelector = (sel) => (sel.includes('challenge-platform') ? { src: 'https://challenges.cloudflare.com/challenge-platform/h/b/123' } : null);
+  const stop = h.api.syncChallengeState();
+
+  assert.strictEqual(stop, false, 'widget não deve parar as regras');
+  assert.strictEqual(h.api.standbyState().quiet, true);
+  assert.strictEqual(h.sandbox.setTimeout, orig.setTimeout, 'boost deve ser removido sob o widget');
+  assert.strictEqual(h.sandbox.fetch, orig.fetch, 'net capture deve ser removido sob o widget');
+});
+
+test('turnstile via global: PAGE.turnstile silencia os hooks', () => {
+  const h = load({ href: 'https://example.com/', querySelector: () => null });
+  const orig = armHooks(h);
+
+  h.sandbox.turnstile = {};
+  const stop = h.api.syncChallengeState();
+
+  assert.strictEqual(stop, false, 'widget não deve parar as regras');
+  assert.strictEqual(h.api.standbyState().quiet, true);
+  assert.strictEqual(h.sandbox.setTimeout, orig.setTimeout, 'boost deve ser removido sob o widget');
+});
+
+test('intersticial moderno: titulo "Verifying you are human" entra em stand-by total', () => {
+  const h = load({ href: 'https://example.com/', title: 'Verifying you are human', querySelector: () => null });
+  const orig = armHooks(h);
+
+  const stop = h.api.syncChallengeState();
+
+  assert.strictEqual(stop, true, 'intersticial deve parar o script');
+  assert.strictEqual(h.api.standbyState().standby, true);
+  assert.strictEqual(h.sandbox.setTimeout, orig.setTimeout, 'boost deve ser removido');
+  assert.strictEqual(h.sandbox.fetch, orig.fetch, 'net capture deve ser removido');
+});
+
+test('main() entra em stand-by com titulo moderno de challenge e nao instala hooks', async () => {
+  const h = load({
+    href: 'https://short.example/go',
+    title: 'Verify you are human',
+    querySelector: (sel) => (sel.includes('go-link') ? { id: 'go-link' } : null),
+  });
+  const origSetTimeout = h.sandbox.setTimeout;
+
+  await h.api.main();
+
+  assert.strictEqual(h.navs.length, 0, 'nao deve navegar durante o desafio');
+  assert.strictEqual(h.api.standbyState().standby, true);
+  assert.strictEqual(h.sandbox.setTimeout, origSetTimeout, 'timers nao podem ser embrulhados sob challenge');
+});
+
+test('captchaPresent enxerga o Turnstile via global', () => {
+  const h = load({ href: 'https://example.com/', querySelector: () => null });
+  assert.strictEqual(h.api.captchaPresent(), false);
+  h.sandbox.turnstile = {};
+  assert.strictEqual(h.api.captchaPresent(), true, 'captcha-manual precisa esperar o Turnstile');
 });

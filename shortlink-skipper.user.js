@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.12.0
+// @version      1.12.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -803,15 +803,17 @@
     return Boolean(
       typeof PAGE.grecaptcha !== 'undefined' ||
       typeof PAGE.hcaptcha !== 'undefined' ||
-      document.querySelector("iframe[src*='recaptcha'], iframe[src^='https://newassets.hcaptcha.com'], .cf-turnstile"),
+      typeof PAGE.turnstile !== 'undefined' ||
+      document.querySelector("iframe[src*='recaptcha'], iframe[src^='https://newassets.hcaptcha.com'], .cf-turnstile, iframe[src*='turnstile'], input[name='cf-turnstile-response']"),
     );
   }
 
   function interstitialChallenging() {
     if (document.getElementById('cf-challenge-running')) return true;
+    if (document.getElementById('challenge-running')) return true;
     const cls = (document.documentElement.className + ' ' + (document.body?.className || '')).toLowerCase();
-    if (/(^| )cf-challenge-running( |$)/.test(cls)) return true;
-    if (/just a moment/i.test(document.title)) return true;
+    if (/(^| )(cf-challenge-running|challenge-running|cf-challenge)( |$)/.test(cls)) return true;
+    if (/just a moment|verifying you are human|verify you are human|attention required|checking your browser/i.test(document.title)) return true;
     if (document.querySelector('iframe[src*="challenges.cloudflare.com"]')) return true;
     if (document.querySelector('script[src*="challenges.cloudflare.com"], script[src*="cf-assets"]')) return true;
     return false;
@@ -820,8 +822,13 @@
   function turnstilePresent() {
     // Turnstile widget (tpi.li and friends): its challenge is timing-sensitive,
     // so never let prepareBoost's timer speed-up run underneath it.
+    // Markup varies by Cloudflare release: class, id, hidden response input,
+    // widget iframe, platform script, or the page global.
     if (document.querySelector('.cf-turnstile')) return true;
-    if (document.querySelector('script[src*="turnstile"]')) return true;
+    if (document.querySelector('#cf-turnstile')) return true;
+    if (document.querySelector('input[name="cf-turnstile-response"], input[name*="turnstile"]')) return true;
+    if (document.querySelector('iframe[src*="turnstile"], iframe[src*="challenge-platform"]')) return true;
+    if (document.querySelector('script[src*="turnstile"], script[src*="challenge-platform"]')) return true;
     if (typeof PAGE.turnstile !== 'undefined') return true;
     return false;
   }
@@ -890,7 +897,7 @@
       mo = new MutationObserver(() => check());
       mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
     } catch {}
-    for (const ms of [1000, 3000, 8000, 20000]) {
+    for (const ms of [300, 1000, 3000, 8000, 20000]) {
       const t = setTimeout(() => {
         try {
           check();
@@ -2517,6 +2524,11 @@
       // (and stop goto()/rules) without costing normal pages an observer.
       if (shortish || knownShort || media || delegated) watchForChallenge();
 
+      // Re-check: a challenge widget may have been injected while waiting for
+      // DOMContentLoaded. Installing the timer boost / focus spoof underneath
+      // Turnstile corrupts its bot telemetry and wedges it on "Verify you are
+      // human", so never install environment hooks under a challenge.
+      syncChallengeState();
       if (!cfStandby && !cfQuiet && (shortish || knownShort || media)) {
         prepareBoost();
         enableBoost();
