@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.12.0 — 2026-09-30
+
+### Added
+- **14 indian shortlink networks**: softurl.in, shrinkme.io, droplink.co, lksfy.in, rocklinks.in, vplink.in, jrlinks.in, 4hi.in, linkshortify.in, shrinkforearn.in, indianshortner.com, dekhe.click, clk.wiki, clk.kim, clk.sh.
+- **13 file hosters**: mega4upload.net, uploady.io, upfilesgo.com, upfiles.app, modsfire.com, dailyuploads.net, jioupload.link/.com/.icu, cloudfam.io, frdl.io, freedl.ink, fredl.ru, frdl.is, rapidgator.net.
+- **`paste-extract` rule**: extracts URLs from paste sites (pastebin.com, rentry.co, pastelink.com, justpaste.it, paste.ee, hastebin.com, ghostbin.co, controlc.com, paste.org) and follows the first valid external destination.
+- **Math captcha improvements**: sqrt(N) and division support.
+
+### Fixed
+- **CI failure**: removed non-ASCII character (÷) from math-captcha regex.
+
 ## 1.11.0 — 2026-09-30
 
 ### Added
