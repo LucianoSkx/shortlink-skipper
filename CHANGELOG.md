@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.12.1 — 2026-10-01
+
+### Fixed
+- **Cloudflare "Verify you are human" no longer wedges**: the Turnstile detector only knew the old `.cf-turnstile` markup, so on modern challenge pages the script installed the 15x timer boost and the focus spoof (`document.hidden`/`visibilityState`/`hasFocus`) underneath the widget — corrupting its bot telemetry and looping the checkbox forever. Now:
+  - `turnstilePresent()` also matches `#cf-turnstile`, `input[name="cf-turnstile-response"]`, `iframe[src*="turnstile" | "challenge-platform"]` and `script[src*="challenge-platform"]`;
+  - `interstitialChallenging()` also matches modern titles ("Verifying/Verify you are human", "Attention Required", "Checking your browser") and `#challenge-running` / `.cf-challenge` markers;
+  - `main()` re-checks the challenge state right before installing environment hooks, so a widget injected during the DOMContentLoaded wait can no longer slip under them;
+  - the late-challenge watchdog fires its first check at 300ms instead of 1000ms;
+  - `captchaPresent()` sees Turnstile-only pages, so `captcha-manual` waits for your solve instead of missing it.
+- **6 new regression tests** (`tests/standby.test.js`): modern Turnstile markers silence hooks, modern interstitial titles enter full stand-by, `main()` installs no hooks under a challenge, `captchaPresent()` sees the Turnstile global.
+
 ## 1.12.0 — 2026-09-30
 
 ### Added
