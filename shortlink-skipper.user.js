@@ -105,7 +105,7 @@
   const REKONISE_HOST = /(^|\.)rekonise\.com$/;
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
-  const LOOTLINK_HOST = /(^|\.)(loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com|links\.lootlabs\.gg)$/;
+  const LOOTLINK_HOST = /(^|\.)(loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com|links\.lootlabs\.gg)$/;
   const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.(com|net)$/;
@@ -116,7 +116,7 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|giphy\.com|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgflip\.com|imgfrost\.net|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|prnt\.sc|rintor\.space|shotcan\.com|tenor\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -125,7 +125,7 @@
     /(^|\.)(ssdhostting\.com|rvpaste\.com|shrinkbixby\.com)$/;
   const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
-    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|gplinks\.in)\/.+)/;
+    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|paster\.gg|gplinks\.in)\/.+)/;
   const INFRA_HOST =
     /googleapis|gstatic|jsdelivr|unpkg|cdnjs|cloudflare|fontawesome|jquery|bootstrapcdn|w3\.org|schema\.org|gravatar|recaptcha|hcaptcha|youtube|youtu\.be|vimeo|dailymotion|twitch|spotify|soundcloud|doubleclick|googlesyndication|googletagmanager|google-analytics|adservice|adsystem|amazon-adsystem|facebook|fbcdn|instagram|cdninstagram|twitter|x\.com|twimg|tiktok|pinterest|reddit|telegram|t\.me|discord|whatsapp|github|gitlab|codepen|stackexchange|wikipedia|trustpilot|patreon|ko-fi|buymeacoffee|opencollective|gumroad|wordpress/i;
 
@@ -1835,12 +1835,53 @@
   // destination-ish fields earn enough confidence to navigate on their own.
   // Weak candidates are recorded on the trace for diagnosis but never act.
   const NET_FIELD_CONFIDENCE = {
-    destination: 0.85, final: 0.85, final_url: 0.85,
+    destination: 0.85, final: 0.85, final_url: 0.85, cur_url: 0.85,
     redirect: 0.8, redirect_url: 0.8, redirect_uri: 0.8,
     target: 0.6, go: 0.6,
     url: 0.55, link: 0.55,
   };
   const NET_NAVIGATE_MIN_CONFIDENCE = 0.7;
+
+  function recordNetworkCandidate(raw, field, confidence) {
+    try {
+      const u = new URL(String(raw).replace(/\\u002F/gi, '/'));
+      const host = u.host.toLowerCase();
+      if (
+        u.host &&
+        host !== location.host.toLowerCase() &&
+        !EXCLUDE_HOSTS.some((re) => re.test(host)) &&
+        !INFRA_HOST.test(host)
+      ) {
+        TRACE.candidates.push({ url: u.href, source: 'network-capture', field, confidence });
+        if (confidence > capturedDestConfidence) {
+          capturedDestUrl = u.href;
+          capturedDestConfidence = confidence;
+          log(`destination candidate from network (${field}, ${confidence}):`, u.href);
+        }
+      }
+    } catch {}
+  }
+
+  // BypassTools v5 (MIT) technique: loot-link mirrors POST JSON carrying
+  // `cur_url` (the destination) to their /tc endpoint. The destination rides
+  // in the OUTGOING request body, so response scanning alone never sees it.
+  // We only observe -- unlike upstream, requests are never blocked or faked.
+  function scanRequestBody(body) {
+    if (cfQuiet || cfStandby) return;
+    if (typeof body !== 'string' || !body) return;
+    if (body.length > NET_CAPTURE_MAX_LENGTH) return;
+    if (body.indexOf('cur_url') === -1) return;
+    let cur = null;
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed && typeof parsed.cur_url === 'string') cur = parsed.cur_url;
+    } catch {}
+    if (!cur) {
+      const m = body.match(/"cur_url"\s*:\s*"(https?:\/\/[^"\\]+)"/i);
+      if (m) cur = m[1];
+    }
+    if (cur) recordNetworkCandidate(cur, 'cur_url', NET_FIELD_CONFIDENCE.cur_url);
+  }
 
   function installNetworkDestCapture() {
     if (PAGE.__slNetCapturing || cfQuiet || cfStandby) return;
@@ -1849,39 +1890,26 @@
       if (cfQuiet || cfStandby) return;
       if (typeof text !== 'string' || text.length > NET_CAPTURE_MAX_LENGTH) return;
       const pattern =
-        /"(url|link|redirect(?:_url|_uri)?|final(?:_url)?|destination|target|go)"\s*:\s*"(https?:\/\/[^"\\]+)"/gi;
+        /"(url|link|cur_url|redirect(?:_url|_uri)?|final(?:_url)?|destination|target|go)"\s*:\s*"(https?:\/\/[^"\\]+)"/gi;
       let match;
       while ((match = pattern.exec(text))) {
-        try {
-          const u = new URL(match[2].replace(/\\u002F/gi, '/'));
-          const host = u.host.toLowerCase();
-          if (
-            u.host &&
-            host !== location.host.toLowerCase() &&
-            !EXCLUDE_HOSTS.some((re) => re.test(host)) &&
-            !INFRA_HOST.test(host)
-          ) {
-            const confidence = NET_FIELD_CONFIDENCE[match[1].toLowerCase()] || 0.5;
-            TRACE.candidates.push({ url: u.href, source: 'network-capture', field: match[1], confidence });
-            if (confidence > capturedDestConfidence) {
-              capturedDestUrl = u.href;
-              capturedDestConfidence = confidence;
-              log(`destination candidate from network (${match[1]}, ${confidence}):`, u.href);
-            }
-          }
-        } catch {}
+        recordNetworkCandidate(match[2], match[1], NET_FIELD_CONFIDENCE[match[1].toLowerCase()] || 0.5);
       }
     };
     const origFetch = PAGE.fetch;
     const fetchBound = origFetch ? origFetch.bind(PAGE) : null;
     const wrappedFetch = fetchBound
-      ? (...args) =>
-          fetchBound(...args).then((res) => {
+      ? (...args) => {
+          try {
+            scanRequestBody(args[1] && args[1].body);
+          } catch {}
+          return fetchBound(...args).then((res) => {
             try {
               res.clone().text().then(scan).catch(() => {});
             } catch {}
             return res;
-          })
+          });
+        }
       : null;
     if (wrappedFetch) PAGE.fetch = wrappedFetch;
     const origOpen = XMLHttpRequest.prototype.open;
@@ -1890,6 +1918,9 @@
       return origOpen.apply(this, args);
     };
     const wrappedSend = function (...args) {
+      try {
+        scanRequestBody(args[0]);
+      } catch {}
       if (!cfQuiet && !cfStandby) {
         this.addEventListener('load', () => {
           try {
@@ -2257,7 +2288,7 @@
   // Paste extraction: some shorteners hide the destination in a paste site
   // (pastebin, rentry, etc.). Extract URLs from the paste content and follow
   // the first valid external destination.
-  const PASTE_HOSTS = /(^|\.)(pastebin\.com|rentry\.co|pastelink\.com|justpaste\.it|paste\.ee|hastebin\.com|ghostbin\.co|controlc\.com|paste\.org)$/;
+  const PASTE_HOSTS = /(^|\.)(pastebin\.com|rentry\.co|pastelink\.com|justpaste\.it|paste\.ee|hastebin\.com|ghostbin\.co|controlc\.com|paste\.org|pasteebins\.com|spacebin\.in)$/;
   async function handlePasteExtract() {
     if (!PASTE_HOSTS.test(location.host)) return false;
     log('paste-extract: extracting URLs from paste content');

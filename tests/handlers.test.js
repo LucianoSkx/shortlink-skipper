@@ -193,6 +193,57 @@ test('network-capture records weak candidates but never navigates on them', asyn
   assert.strictEqual(h.api.trace.candidates[0].confidence, 0.55, 'weak candidate kept for diagnosis');
 });
 
+test('network-capture reads cur_url from fetch request bodies (BypassTools v5 technique)', async () => {
+  const h = load({ href: 'https://loot-link.com/s/abc', querySelector: () => null });
+  h.sandbox.fetch = () =>
+    Promise.resolve({
+      clone: () => ({ text: () => Promise.resolve('{}') }),
+      json: () => Promise.resolve(null),
+    });
+  h.api.installNetworkDestCapture();
+  await h.sandbox.fetch('https://loot-link.com/tc', {
+    method: 'POST',
+    body: JSON.stringify({ cur_url: 'https://dest.example/final', tid: 1 }),
+  });
+  await new Promise((r) => setTimeout(r, 10));
+  assert.ok(await h.api.handleNetworkCapture(), 'cur_url body must navigate');
+  assert.ok(h.navs.includes('https://dest.example/final'));
+  const cand = h.api.trace.candidates.find((c) => c.field === 'cur_url');
+  assert.ok(cand, 'cur_url candidate recorded');
+  assert.strictEqual(cand.confidence, 0.85);
+});
+
+test('network-capture matches cur_url in JSON responses', async () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  h.sandbox.fetch = () =>
+    Promise.resolve({
+      clone: () => ({ text: () => Promise.resolve('{"cur_url":"https://dest.example/r"}') }),
+      json: () => Promise.resolve(null),
+    });
+  h.api.installNetworkDestCapture();
+  await h.sandbox.fetch('https://page.example/api');
+  await new Promise((r) => setTimeout(r, 10));
+  assert.ok(await h.api.handleNetworkCapture(), 'cur_url response must navigate');
+  assert.ok(h.navs.includes('https://dest.example/r'));
+});
+
+test('network-capture ignores a non-URL cur_url', async () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  h.sandbox.fetch = () =>
+    Promise.resolve({
+      clone: () => ({ text: () => Promise.resolve('{}') }),
+      json: () => Promise.resolve(null),
+    });
+  h.api.installNetworkDestCapture();
+  await h.sandbox.fetch('https://page.example/tc', {
+    method: 'POST',
+    body: JSON.stringify({ cur_url: 'not-a-url' }),
+  });
+  await new Promise((r) => setTimeout(r, 10));
+  assert.strictEqual(await h.api.handleNetworkCapture(), false);
+  assert.strictEqual(h.navs.length, 0);
+});
+
 test('single-external-link acts with recorded low confidence', async () => {
   const h = load({
     href: 'https://short.site.example/abc',
