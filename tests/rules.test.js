@@ -663,3 +663,14 @@ test('main() survives a null documentElement and the rule still acts', async () 
   await h.api.main();
   assert.strictEqual(h.api.trace.rule, 'encurta', 'gate + rule must work even pre-root');
 });
+
+test('monetiza.link (same family) opens the gate and submits form-continue', async () => {
+  const btn = visibleBtn({ innerText: 'Clique aqui para prosseguir' });
+  const form = { querySelector: () => btn };
+  const h = load({
+    href: 'https://monetiza.link/991ahIm',
+    querySelector: (sel) => (sel.includes('form-continue') ? form : null),
+  });
+  assert.strictEqual(h.api.knownShortener(), true);
+  assert.strictEqual(await h.api.handleEncurta(), true);
+});

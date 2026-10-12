@@ -296,3 +296,58 @@ test('file-host finds #download-button controls', async () => {
   assert.strictEqual(await h.api.handleFileHost(), true);
   assert.ok(h.navs.includes('https://gofile.download/d/abc'));
 });
+
+// --- forumdinheiro (adsbypasser port: tRPC stage chain) ---
+
+function forumdinheiroFetch(seen) {
+  return (url, opts) => {
+    seen.push({ url: String(url), headers: (opts && opts.headers) || {} });
+    if (String(url).includes('/api/session-info')) {
+      return Promise.resolve({
+        json: () => Promise.resolve({
+          hasSession: true, stageNumber: 0, totalStage: 1,
+          sessionToken: 'tok', stageId: 'stage',
+        }),
+      });
+    }
+    return Promise.resolve({
+      text: () => Promise.resolve('[{"result":{"data":{"json":{"destinationLink":"https://dest.example/final"}}}}]'),
+    });
+  };
+}
+
+test('forumdinheiro walks the stage chain to the destination', async () => {
+  const seen = [];
+  const h = load({ href: 'https://forumdinheiro.com/abc' });
+  h.setFetch(forumdinheiroFetch(seen));
+  assert.strictEqual(await h.api.handleForumdinheiro(), true);
+  assert.ok(h.navs.includes('https://dest.example/final'));
+  const trpc = seen.find((c) => c.url.includes('linkSession.nextStage'));
+  assert.ok(trpc, 'must call the tRPC endpoint');
+  assert.strictEqual(trpc.headers['trpc-accept'], 'application/jsonl');
+  assert.ok(trpc.url.includes('tok'), 'must send the session token');
+});
+
+test('forumdinheiro stands down without a session', async () => {
+  const h = load({ href: 'https://guis2.com/abc' });
+  h.setFetch(() => Promise.resolve({ json: () => Promise.resolve({ hasSession: false }) }));
+  assert.strictEqual(await h.api.handleForumdinheiro(), false);
+  assert.strictEqual(h.navs.length, 0);
+});
+
+test('forumdinheiro ignores other hosts', async () => {
+  const h = load({ href: 'https://example.com/' });
+  assert.strictEqual(await h.api.handleForumdinheiro(), false);
+});
+
+test('forumdinheiro family opens the shortener gate', () => {
+  for (const href of [
+    'https://forumdinheiro.com/abc',
+    'https://guis2.com/abc',
+    'https://tarviral.com/abc',
+    'https://umconto.com/abc',
+  ]) {
+    const h = load({ href });
+    assert.strictEqual(h.api.knownShortener(), true, href);
+  }
+});

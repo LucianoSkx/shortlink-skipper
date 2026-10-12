@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.13.3 — 2026-10-12
+
+### Added
+- **New rule `forumdinheiro`** (port of adsbypasser `link/forumdinheiro.com.js`, BSD): walks the tRPC `linkSession.nextStage` chain server-side with the session token — the server does not check the countdown. Covers `forumdinheiro.com`, `guis2.com`, `tarviral.com`, `umconto.com`. Bounded to 25 stages, navigation only via `goto()`.
+- Closed the last non-adult gap from `upstream-gap.js` (4 link roots; the 61 remaining are all javball-family image hosts, excluded by maintainer decision).
+
 ## 1.13.2 — 2026-10-12
 
 ### Added

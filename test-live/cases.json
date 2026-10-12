@@ -556,5 +556,14 @@
     "expect": "CLICKED-encurta-1",
     "family": "encurta",
     "note": "live: encurta submits form-continue, ignores ad decoys"
+  },
+  {
+    "id": "monetiza-1",
+    "host": "monetiza.link",
+    "path": "/991ahIm",
+    "html": "<form id=\"form-continue\" method=\"post\" action=\"/991ahIm\" onsubmit=\"event.preventDefault();\"><input type=\"hidden\" name=\"action\" value=\"continue\"/><button class=\"btn btn-primary\" type=\"submit\">Clique aqui para prosseguir</button></form><script>document.querySelector('#form-continue button').addEventListener('click',()=>{document.title='CLICKED-monetiza-1';});</script>",
+    "expect": "CLICKED-monetiza-1",
+    "family": "encurta",
+    "note": "live: monetiza.link submits form-continue (same family template)"
   }
 ]
