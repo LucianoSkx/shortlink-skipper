@@ -529,5 +529,23 @@
     "expect": "CLICKED-multiup",
     "family": "media",
     "note": "live: multiup-1"
+  },
+  {
+    "id": "paste-1",
+    "host": "pastebin.com",
+    "path": "/abc123",
+    "html": "<pre>mirror: https://example.com/paste-target</pre>",
+    "expect": "example.com/paste-target",
+    "family": "paste",
+    "note": "live: paste-extract follows URL in paste body"
+  },
+  {
+    "id": "paste-empty-1",
+    "host": "pastebin.com",
+    "path": "/def456",
+    "html": "<pre>just some text, nothing to follow</pre>",
+    "expect": "pastebin.com/def456",
+    "family": "paste",
+    "note": "live: paste-extract stays put without URL (no navigation)"
   }
 ]
