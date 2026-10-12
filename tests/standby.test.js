@@ -290,3 +290,44 @@ test('bypass.tools com widget: quiet e service-last-resort avanca para adbypass.
     `service-last-resort deve avancar, got: ${JSON.stringify(h.navs)}`,
   );
 });
+
+test('sem captcha: boost rapido (60x) em countdowns', async () => {
+  const h = load({ href: 'https://example.com/', querySelector: () => null });
+  assert.strictEqual(h.api.captchaPresent(), false);
+  h.api.prepareBoost();
+  h.api.enableBoost();
+  const start = Date.now();
+  await new Promise((r) => h.sandbox.setTimeout(r, 6000));
+  const elapsed = Date.now() - start;
+  assert.ok(elapsed < 300, `6000ms deviam virar ~100ms sem captcha, levaram ${elapsed}ms`);
+});
+
+test('com captcha: boost conservador (15x)', async () => {
+  const h = load({ href: 'https://example.com/', querySelector: () => null });
+  h.sandbox.turnstile = {};
+  assert.strictEqual(h.api.captchaPresent(), true);
+  h.api.prepareBoost();
+  h.api.enableBoost();
+  const start = Date.now();
+  await new Promise((r) => h.sandbox.setTimeout(r, 6000));
+  const elapsed = Date.now() - start;
+  assert.ok(
+    elapsed >= 350 && elapsed < 2000,
+    `6000ms deviam virar ~400ms sob captcha, levaram ${elapsed}ms`,
+  );
+});
+
+test('captcha tardio desliga o boost mas mantem os outros hooks', async () => {
+  const h = load({ href: 'https://example.com/' });
+  const orig = armHooks(h);
+  assert.notStrictEqual(h.sandbox.setTimeout, orig.setTimeout, 'boost instalado');
+  h.api.watchForChallenge();
+  // reCAPTCHA injetado depois dos hooks: nao e Cloudflare, entao sem
+  // stand-by/quiet -- so os timers voltam ao real.
+  h.sandbox.grecaptcha = {};
+  await new Promise((r) => setTimeout(r, 600));
+  assert.strictEqual(h.sandbox.setTimeout, orig.setTimeout, 'boost desligado pelo captcha tardio');
+  assert.notStrictEqual(h.sandbox.fetch, orig.fetch, 'net capture continua embrulhado');
+  assert.strictEqual(h.api.standbyState().standby, false, 'sem stand-by total');
+  assert.strictEqual(h.api.standbyState().quiet, false, 'sem quiet: so o boost cai');
+});

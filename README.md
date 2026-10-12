@@ -116,7 +116,7 @@ share the same templates.
 
 ### Global protections
 
-- **Timer boost** — countdowns run up to 15× faster on shortener pages
+- **Timer boost** — countdowns run up to 60× faster on captcha-free pages (conservative 15× tier while a captcha widget is present; boost drops to real time if one appears late)
 - **Popup shield** — `window.open` is neutralized
 - **Focus lock** — the tab never reports being unfocused
 - **Anti-adblock banners removed**, right-click/copy/select restored

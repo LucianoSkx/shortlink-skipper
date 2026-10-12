@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.1
+// @version      1.13.2
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -608,6 +608,12 @@
   const BOOST_MIN_DELAY = 400;
   const BOOST_MAX_DELAY = 90000;
   const BOOST_FLOOR_MS = 30;
+  // Fast tier for pages without any captcha widget: countdowns are the only
+  // thing standing between the user and the destination, so run them hot.
+  const BOOST_FAST_FACTOR = 60;
+  const BOOST_FAST_MIN_DELAY = 100;
+  const BOOST_FAST_MAX_DELAY = 600000;
+  const BOOST_FAST_FLOOR_MS = 10;
   const NET_CAPTURE_MAX_LENGTH = 500000;
   const SHADOW_DEEP_MAX_DEPTH = 10;
   const SHADOW_DEEP_MAX_ELEMENTS = 5000;
@@ -911,6 +917,13 @@
         // Challenge still present: stay out of its way but keep watching in
         // case it clears later (the one-shot timers below bound the cost).
         return false;
+      }
+      // A non-Cloudflare captcha injected late would run under the (possibly
+      // aggressive) boost and break -- drop timers back to real time. Other
+      // hooks stay; only the speed-up disturbs widget telemetry.
+      if (boostEnabled && captchaPresent()) {
+        disableBoost();
+        log('late captcha detected -- boost off');
       }
       return false;
     };
@@ -1980,10 +1993,18 @@
 
   function prepareBoost(factor = BOOST_FACTOR) {
     if (boostWrap || cfQuiet || cfStandby) return;
+    // Two tiers, decided once at install: without any captcha widget the
+    // countdowns can run much hotter; with one present stay conservative --
+    // widget timing telemetry breaks under aggressive speed-up.
+    const aggressive = !captchaPresent();
+    const f = aggressive ? BOOST_FAST_FACTOR : factor;
+    const minDelay = aggressive ? BOOST_FAST_MIN_DELAY : BOOST_MIN_DELAY;
+    const maxDelay = aggressive ? BOOST_FAST_MAX_DELAY : BOOST_MAX_DELAY;
+    const floorMs = aggressive ? BOOST_FAST_FLOOR_MS : BOOST_FLOOR_MS;
     const originalTimeout = PAGE.setTimeout.bind(PAGE);
     const originalInterval = PAGE.setInterval.bind(PAGE);
     const speedUp = (delay) =>
-      typeof delay === 'number' && delay > BOOST_MIN_DELAY && delay <= BOOST_MAX_DELAY ? Math.max(BOOST_FLOOR_MS, Math.floor(delay / factor)) : delay;
+      typeof delay === 'number' && delay > minDelay && delay <= maxDelay ? Math.max(floorMs, Math.floor(delay / f)) : delay;
     const wrappedTimeout = (handler, delay, ...rest) =>
       originalTimeout(handler, boostEnabled && !cfQuiet ? speedUp(delay) : delay, ...rest);
     const wrappedInterval = (handler, delay, ...rest) =>

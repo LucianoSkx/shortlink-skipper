@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.13.2 — 2026-10-12
+
+### Added
+- **Two-tier timer boost**: pages without any captcha widget run countdowns at 60× (100ms–10min window, 10ms floor) instead of 15× — a 30s wait drops to ~0.5s. Pages with a widget keep the conservative 15× tier, and the watchdog drops the boost back to real time if a captcha is injected late (other hooks stay).
+
 ## 1.13.1 — 2026-10-11
 
 ### Fixed
