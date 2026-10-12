@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.13.1 — 2026-10-11
+
+### Fixed
+- **`main()` morria no document-start real**: `interstitialChallenging()`, `looksLikeTaskWall()` e o observer de `removeAdblockBanners()` acessavam `document.documentElement` sem guarda — nulo antes do parser criar `<html>`. Qualquer exceção abortava o `main()` inteiro (só logava `main() took`), sem regras e sem recovery. Encontrado em teste real em `dev.encurta.app/lp1` via CDP (`addScriptToEvaluateOnNewDocument`): 4 runs, 0 regras. Em managers o race quase nunca dispara (injeção microssegundos depois), por isso os testes mock nunca pegaram. Guards `?.` + `try/catch`, 3 testes de regressão (falham sem o fix).
+- `handleMboost` também blindado contra raiz nula.
+
 ## 1.13.0 — 2026-10-11
 
 ### Added

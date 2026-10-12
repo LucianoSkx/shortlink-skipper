@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.0
+// @version      1.13.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -449,7 +449,7 @@
   function looksLikeTaskWall(doc = document) {
     const text = doc.body?.innerText || '';
     if (TASK_WALL_HINTS.test(text)) return true;
-    return TASK_WALL_HINTS.test(doc.documentElement.outerHTML.slice(0, 200000));
+    return TASK_WALL_HINTS.test((doc.documentElement?.outerHTML || '').slice(0, 200000));
   }
 
   function extractDestFromParams() {
@@ -817,7 +817,7 @@
   function interstitialChallenging() {
     if (document.getElementById('cf-challenge-running')) return true;
     if (document.getElementById('challenge-running')) return true;
-    const cls = (document.documentElement.className + ' ' + (document.body?.className || '')).toLowerCase();
+    const cls = ((document.documentElement?.className || '') + ' ' + (document.body?.className || '')).toLowerCase();
     if (/(^| )(cf-challenge-running|challenge-running|cf-challenge)( |$)/.test(cls)) return true;
     if (/just a moment|verifying you are human|verify you are human|attention required|checking your browser/i.test(document.title)) return true;
     if (document.querySelector('iframe[src*="challenges.cloudflare.com"]')) return true;
@@ -1100,7 +1100,7 @@
   async function handleMboost() {
     if (!MBOOST_HOST.test(location.host)) return false;
     log('mboost detected, extracting targeturl from page source');
-    const match = document.documentElement.outerHTML.match(/"targeturl\\":\\"(https?:\/\/[^\\"]+)/);
+    const match = (document.documentElement?.outerHTML || '').match(/"targeturl\\":\\"(https?:\/\/[^\\"]+)/);
     return match ? goto(match[1]) : false;
   }
 
@@ -2151,7 +2151,9 @@
     // or the page is an SPA that won't fire it again).
     sweep();
     PAGE.addEventListener('DOMContentLoaded', sweep, { once: true });
-    new MutationObserver(sweep).observe(document.documentElement, { childList: true, subtree: true });
+    try {
+      if (document.documentElement) new MutationObserver(sweep).observe(document.documentElement, { childList: true, subtree: true });
+    } catch {}
   }
 
   let lootInspect = null;

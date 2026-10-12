@@ -637,3 +637,29 @@ test('seulink.digital (same EncurtaNet family) opens the gate, captcha left to m
   // down and captcha-manual/adlinkfly-captcha take over after you solve.
   assert.strictEqual(await h.api.handleEncurta(), false);
 });
+
+// --- null documentElement (true document-start race) ---
+
+test('looksLikeTaskWall survives a null documentElement', () => {
+  const h = load({ href: 'https://example.com/x' });
+  h.doc.documentElement = null;
+  assert.strictEqual(h.api.looksLikeTaskWall(), false);
+});
+
+test('handleMboost survives a null documentElement', async () => {
+  const h = load({ href: 'https://mboost.me/abc' });
+  h.doc.documentElement = null;
+  assert.strictEqual(await h.api.handleMboost(), false);
+});
+
+test('main() survives a null documentElement and the rule still acts', async () => {
+  const btn = visibleBtn({ innerText: 'Clique aqui para prosseguir' });
+  const form = { querySelector: () => btn };
+  const h = load({
+    href: 'https://dev.encurta.app/lp1',
+    querySelector: (sel) => (sel.includes('form-continue') ? form : null),
+  });
+  h.doc.documentElement = null;
+  await h.api.main();
+  assert.strictEqual(h.api.trace.rule, 'encurta', 'gate + rule must work even pre-root');
+});
