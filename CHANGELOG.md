@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.13.4 — 2026-10-12
+
+### Added / Bump
+- Versão final (`1.13.4`) — sincronização `@version` no header, `package.json` e `CHANGELOG.md`. Nenhuma alteração funcional; confirma que `main()` não morre no `document-start` (`interstitialChallenging`/`turnstilePresent`/`watchForChallenge` com guards) e que `paste-extract`/`encurta`/`forumdinheiro` estão ativas no site real (`dev.encurta.app/lp1`, `seulink.digital/cUXsL`).
+
 ## 1.13.3 — 2026-10-12
 
 ### Added
