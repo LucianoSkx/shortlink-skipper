@@ -110,6 +110,7 @@ share the same templates.
 | `go-linkify` | Extracts the `/get/` URL from page scripts (`go.linkify.ru`) |
 | `network-loop` | Follows the shadow-DOM button (`network-loop.com`) |
 | `get-click2` | Enables and clicks `#gotolink` (`get-click2.blogspot.com`) |
+| `encurta` | Submits `form#form-continue` (`encurta.app`, `seulink.digital`; ad decoys ignored, captcha stage left to manual) |
 
 </details>
 

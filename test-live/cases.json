@@ -547,5 +547,14 @@
     "expect": "pastebin.com/def456",
     "family": "paste",
     "note": "live: paste-extract stays put without URL (no navigation)"
+  },
+  {
+    "id": "encurta-1",
+    "host": "dev.encurta.app",
+    "path": "/lp1",
+    "html": "<form id=\"form-continue\" method=\"post\" action=\"/lp1\" onsubmit=\"event.preventDefault();\"><input type=\"hidden\" name=\"action\" value=\"continue\"/><button class=\"btn btn-primary\" type=\"submit\">Clique aqui para prosseguir</button></form><script>document.querySelector('#form-continue button').addEventListener('click',()=>{document.title='CLICKED-encurta-1';});</script>",
+    "expect": "CLICKED-encurta-1",
+    "family": "encurta",
+    "note": "live: encurta submits form-continue, ignores ad decoys"
   }
 ]

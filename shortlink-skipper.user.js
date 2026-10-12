@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.12.4
+// @version      1.13.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -113,10 +113,16 @@
     /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com|shrinkbixby\.com)$/;
   const TOKEN_HOST = /(^|\.)(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
+  // EncurtaNet (encurta.app, seulink.digital, BR): CakePHP form-continue POST
+  // flow. The visible "CLIQUE AQUI PARA CONTINUAR" / "CONTINUE LINK" anchors
+  // are ad decoys (minhab.io, ferramentaseo/meulink.ai blogs) -- only the
+  // form submit advances. The captcha stage (form#link-view,
+  // #invisibleCaptchaShortlink) is left to captcha-manual/adlinkfly-captcha.
+  const ENCURTA_HOST = /(^|\.)(encurta\.app|seulink\.digital)$/;
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|encurta\.app|seulink\.digital)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|giphy\.com|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgflip\.com|imgfrost\.net|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|prnt\.sc|rintor\.space|shotcan\.com|tenor\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -1556,6 +1562,23 @@
     return true;
   }
 
+  async function handleEncurta() {
+    if (!ENCURTA_HOST.test(location.host)) return false;
+    const form = await waitFor('form#form-continue', 8000);
+    if (!form) return false;
+    log('encurta.app detected, submitting form-continue');
+    const btn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (btn && visible(btn)) {
+      fireClick(btn);
+      return true;
+    }
+    if (typeof form.submit === 'function') {
+      form.submit();
+      return true;
+    }
+    return false;
+  }
+
   function decodeTokenValue(raw) {
     const tryB64 = (value) => {
       try {
@@ -2394,6 +2417,7 @@
     { name: 'go-linkify', when: () => /^go\.linkify\.ru$/.test(location.host), run: handleGoLinkify },
     { name: 'network-loop', when: () => /(^|\.)network-loop\.com$/.test(location.host), run: handleNetworkLoop },
     { name: 'get-click2', when: () => /^get-click2\.blogspot\.com$/.test(location.host), run: handleGetClick2 },
+    { name: 'encurta', when: () => ENCURTA_HOST.test(location.host), run: handleEncurta },
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
     { name: 'wp-content-lock', when: () => WP_CONTENT_LOCK_HOST.test(location.host), run: handleWpContentLock },
     { name: 'zafree-link-view', when: () => ZAFREE_HOST.test(location.host), run: handleZafree },
@@ -2724,6 +2748,7 @@
       handleGoLinkify,
       handleNetworkLoop,
       handleGetClick2,
+      handleEncurta,
       clickSelectorWhen,
       openSelectorHref,
       queryShadowDeep,

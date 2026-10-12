@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.13.0 — 2026-10-11
+
+### Added
+- **New rule `encurta`** (EncurtaNet family: `encurta.app`, `seulink.digital`, BR): submits `form#form-continue` POST. The visible "CLIQUE AQUI PARA CONTINUAR" / "CONTINUE LINK" anchors are ad decoys (minhab.io, ferramentaseo/meulink.ai) and are never touched; the captcha stage (`form#link-view`, `#invisibleCaptchaShortlink`) is left to `captcha-manual` / `adlinkfly-captcha` after you solve.
+- Live case `encurta-1`; 5 unit tests (gate, submit sequence, stand-down, seulink).
+
 ## 1.12.4 — 2026-10-11
 
 ### Fixed
