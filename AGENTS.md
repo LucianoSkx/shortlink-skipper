@@ -10,7 +10,8 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
   truthy vence e encerra o loop. Regras específicas de host vêm antes das
   genéricas (`network-capture` em diante).
 - O loop só roda se a página parecer shortener (`looksLikeShortlink()`),
-  for host conhecido (`knownShortener()` / `knownMediaHost()`) ou bypass.tools.
+  for host conhecido (`knownShortener()` / `knownMediaHost()`), host de
+  paste (`PASTE_HOSTS`, regra dedicada `paste-extract`) ou bypass.tools.
 - Toda navegação passa por `goto()` — validação centralizada, anti-loop
   (10 hops) e recusa sob stand-by do Cloudflare. Nunca usar `location.href`
   direto em regra nova.
@@ -29,7 +30,9 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
 5. Gate: adicionar o host a `EXTRA_SHORTENER_HOSTS` (shorteners),
    `IMAGE_HOSTS` ou `FILE_HOSTS` (mídia) — **exceto** homes de uso geral
    (lição `spaste.com`: pastebin home gerou falsos positivos; só o path
-   `/site/` tem regra).
+   `/site/` tem regra). Hosts de paste (`PASTE_HOSTS`) abrem o gate por
+   categoria própria no `main()` e usam `when` direto no host, sem hooks
+   de ambiente.
 6. Teste em `tests/` (ver `tests/ports.test.js` como modelo): caminho feliz
    com mocks + `false` em outro host. `waitFor` resolve de imediato com mock
    presente, então testes ficam rápidos.

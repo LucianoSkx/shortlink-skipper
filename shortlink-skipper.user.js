@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.12.3
+// @version      1.12.4
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -2423,7 +2423,7 @@
     { name: 'final-button', when: () => looksLikeShortlink(), run: handleButtons },
     { name: 'service-last-resort', when: () => /^bypass\.tools$/.test(location.host), run: handleServiceLastResort },
     { name: 'bypass-city', when: genericGate, run: handleBypassCity },
-    { name: 'paste-extract', when: genericGate, run: handlePasteExtract },
+    { name: 'paste-extract', when: () => PASTE_HOSTS.test(location.host), run: handlePasteExtract },
     { name: 'captcha-manual', when: genericGate, run: handleManualCaptcha },
     { name: 'single-external-link', when: genericGate, run: runSingleExternalLink },
   ];
@@ -2571,8 +2571,11 @@
       const taskWall = shortish && looksLikeTaskWall();
       const knownShort = knownShortener();
       const media = knownMediaHost();
+      // Paste hosts are not shorteners, but own a dedicated rule
+      // (paste-extract) that must run on their pages.
+      const pasteHost = PASTE_HOSTS.test(location.host);
 
-      if (!shortish && !delegated && !knownShort && !media) {
+      if (!shortish && !delegated && !knownShort && !media && !pasteHost) {
         log('not a shortlink page -- leaving the page untouched');
         return;
       }
@@ -2586,7 +2589,7 @@
       // Live challenge watchdog, only where the script actually acts: a
       // challenge showing up later must silence the hooks already installed
       // (and stop goto()/rules) without costing normal pages an observer.
-      if (shortish || knownShort || media || delegated) watchForChallenge();
+      if (shortish || knownShort || media || delegated || pasteHost) watchForChallenge();
 
       // Re-check: a challenge widget may have been injected while waiting for
       // DOMContentLoaded. Installing the timer boost / focus spoof underneath

@@ -565,3 +565,24 @@ test('paste-extract covers pasteebins and spacebin', async () => {
     assert.ok(h.navs.includes('https://dest.example/file'), href);
   }
 });
+
+test('main() reaches paste-extract on a paste host (gate + rule)', async () => {
+  const h = load({
+    href: 'https://pastebin.com/abc',
+    querySelector: () => null,
+    bodyText: 'mirror: https://dest.example/file',
+  });
+  await h.api.main();
+  assert.ok(h.navs.includes('https://dest.example/file'), 'main() must navigate via paste-extract');
+  assert.strictEqual(h.api.trace.rule, 'paste-extract');
+});
+
+test('main() leaves a paste host alone when there is no URL', async () => {
+  const h = load({
+    href: 'https://pastebin.com/abc',
+    querySelector: () => null,
+    bodyText: 'just some text, nothing to follow',
+  });
+  await h.api.main();
+  assert.strictEqual(h.navs.length, 0);
+});

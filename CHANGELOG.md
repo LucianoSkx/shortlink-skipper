@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.12.4 — 2026-10-11
+
+### Fixed
+- **`paste-extract` era regra morta em produção**: `main()` saía cedo em hosts de paste (`pastebin.com` etc. não abrem nenhum gate) e o `when: genericGate` da regra também dava falso — os testes unitários passavam porque chamam o handler direto. Agora hosts `PASTE_HOSTS` abrem o gate por categoria própria (sem hooks de ambiente) e a regra usa `when` direto no host.
+- **2 testes de regressão end-to-end** via `main()`: navega numa página de paste com URL, e não toca numa página de paste sem URL.
+
 ## 1.12.3 — 2026-10-01
 
 ### Fixed
