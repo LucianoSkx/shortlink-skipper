@@ -287,4 +287,7 @@ rule format. See [Credits](#credits).
 | [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | bypass.tools as second-level resolver for hardened links |
 | Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
-| [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported) |
+| [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported); techniques used for `forumdinheiro` port (tRPC stage chain, `cur_url` body observation) also BSD-2-Clause |
+| Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
+| Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
+| [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | `service-last-resort` delegation cascade; `cur_url` observation technique (reimplemented, no dependency) |
