@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.13.5 — 2026-10-13
+
+### Fixed
+- **Infinite reload loop on `encurta.app`'s first phase.** The `encurta` rule clicked `form#form-continue`, which POSTs back to the very same URL (`action="/lp1" method="post"`). The server returned the same page, the rule fired again on every load, and the tab reloaded dozens of times without ever reaching the captcha stage. Confirmed with a CDP probe: 3+ reloads of `/lp1` in 12s with the userscript, a single clean exit with the site alone.
+  - The rule now leaves the page alone when it already exits through its own `meta http-equiv="refresh"` escape (checked after the form appears, so `<head>` is parsed) — the countdown is the site's job.
+  - A form that re-posts the current path is submitted only once per path per tab session (`sl_encurta_submit_<path>` in `sessionStorage`).
+  - Verified live: `https://dev.encurta.app/lp1` now makes zero script-initiated navigations and exits through the site's own meta refresh to the destination.
+
+### Added
+- 3 regression tests for `encurta` (meta-refresh escape, once-per-path self-post, existing host gate).
+
 ## 1.13.4 — 2026-10-12
 
 ### Added / Bump

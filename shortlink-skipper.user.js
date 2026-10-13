@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.4
+// @version      1.13.5
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -1576,10 +1576,37 @@
     return true;
   }
 
+  // dev.encurta.app's landing page leaves by itself: a meta refresh fires after
+  // the countdown, while form#form-continue posts back to the very same URL.
+  // Clicking that form re-renders the same page and the rule clicks again on
+  // every load, so the tab reloads forever and never reaches the captcha stage.
+  function encurtaSelfExit() {
+    const meta = document.querySelector('meta[http-equiv="refresh" i][content*="url=" i]');
+    if (!meta) return null;
+    return String(meta.getAttribute('content') || '');
+  }
+
   async function handleEncurta() {
     if (!ENCURTA_HOST.test(location.host)) return false;
     const form = await waitFor('form#form-continue', 8000);
     if (!form) return false;
+    // Checked after the form appears so <head> is already parsed.
+    if (encurtaSelfExit()) {
+      log('encurta.app exits through its own meta refresh, leaving it alone');
+      return false;
+    }
+    // A form that re-posts the current path renders the same page again, so the
+    // click is only worth doing once per path in this tab session.
+    const key = 'sl_encurta_submit_' + location.pathname;
+    let already = false;
+    try {
+      already = !!sessionStorage.getItem(key);
+      if (!already) sessionStorage.setItem(key, '1');
+    } catch {}
+    if (already) {
+      log('encurta.app form-continue already submitted for this path, not repeating');
+      return false;
+    }
     log('encurta.app detected, submitting form-continue');
     const btn = form.querySelector('button[type="submit"], input[type="submit"]');
     if (btn && visible(btn)) {

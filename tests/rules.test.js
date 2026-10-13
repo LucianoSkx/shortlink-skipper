@@ -623,6 +623,35 @@ test('encurta ignores other hosts', async () => {
   assert.strictEqual(await h.api.handleEncurta(), false);
 });
 
+test('encurta stays out when the page exits through its own meta refresh', async () => {
+  const meta = {
+    getAttribute: (n) => (n === 'content' ? "20; URL='https://meulink.ai/AB-DEVENCURTAAPP'" : 'refresh'),
+  };
+  const form = { querySelector: () => null, submit: () => { throw new Error('must not submit'); } };
+  const h = load({
+    href: 'https://dev.encurta.app/lp1',
+    querySelector: (sel) => (sel.includes('meta') ? meta : sel.includes('form-continue') ? form : null),
+  });
+  assert.strictEqual(await h.api.handleEncurta(), false);
+});
+
+test('encurta submits a self-posting form only once per path', async () => {
+  const seen = [];
+  const btn = visibleBtn({
+    innerText: 'Clique aqui para prosseguir',
+    dispatchEvent: () => true,
+  });
+  const form = { querySelector: () => btn, submit: () => { throw new Error('should click'); } };
+  const h = load({
+    href: 'https://dev.encurta.app/lp1',
+    querySelector: (sel) => (sel.includes('form-continue') ? form : null),
+  });
+  h.sandbox.PointerEvent = function (t) { seen.push(t); };
+  h.sandbox.MouseEvent = function (t) { seen.push(t); };
+  assert.strictEqual(await h.api.handleEncurta(), true, 'first submit clicks the button');
+  assert.strictEqual(await h.api.handleEncurta(), false, 'second pass on the same path does not re-click');
+});
+
 test('encurta.app opens the shortener gate', () => {
   const h = load({ href: 'https://dev.encurta.app/lp1', querySelector: () => null });
   assert.strictEqual(h.api.knownShortener(), true);

@@ -110,7 +110,7 @@ share the same templates.
 | `go-linkify` | Extracts the `/get/` URL from page scripts (`go.linkify.ru`) |
 | `network-loop` | Follows the shadow-DOM button (`network-loop.com`) |
 | `get-click2` | Enables and clicks `#gotolink` (`get-click2.blogspot.com`) |
-| `encurta` | Submits `form#form-continue` (`encurta.app`, `seulink.digital`, `monetiza.link`; ad decoys ignored, captcha stage left to manual) |
+| `encurta` | Submits `form#form-continue` (`encurta.app`, `seulink.digital`, `monetiza.link`; ad decoys ignored, captcha stage left to manual). Pages that already exit through their own `meta refresh` are left alone, and a self-posting form is submitted once per path so the tab cannot reload in a loop |
 | `forumdinheiro` | Walks the tRPC stage chain server-side (port of adsbypasser `link/forumdinheiro.com.js`; `forumdinheiro.com`, `guis2.com`, `tarviral.com`, `umconto.com`) |
 
 </details>
