@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.5
+// @version      1.13.6
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -99,9 +99,9 @@
     /(^|\.)(adfoc\.us|adf\.ly|clk\.sh|shrink\.pe)$/;
   const AYLINK_HOST =
     /(^|\.)(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
-  const BCVC_HOST = /(^|\.)bcvc\.(live|xyz|go)$|(bcvcgo)\.xyz$/;
+  const BCVC_HOST = /(^|\.)(bcvc\.(live|xyz|go)|bcvcgo\.xyz)$/;
   const SKIP_BUTTON_HOST = /(^|\.)(hurirk\.net|usfinf\.net|xervoo\.net)$/;
-  const CLOSE_INTERSTITIAL_HOST = /(^|\.)?(doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
+  const CLOSE_INTERSTITIAL_HOST = /(^|\.)(doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
   const REKONISE_HOST = /(^|\.)rekonise\.com$/;
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
@@ -123,9 +123,9 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|encurta\.app|seulink\.digital|monetiza\.link|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cutpaid\.com|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|encurta\.app|seulink\.digital|monetiza\.link|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
   const IMAGE_HOSTS =
-    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|giphy\.com|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgflip\.com|imgfrost\.net|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|prnt\.sc|rintor\.space|shotcan\.com|tenor\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
+    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
     /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com|mega4upload\.net|uploady\.io|upfilesgo\.com|upfiles\.app|modsfire\.com|dailyuploads\.net|jioupload\.link|jioupload\.com|jioupload\.icu|cloudfam\.io|frdl\.io|freedl\.ink|fredl\.ru|frdl\.is|rapidgator\.net)$/;
   const WP_CONTENT_LOCK_HOST =
@@ -133,8 +133,18 @@
   const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
     /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|paster\.gg|gplinks\.in)\/.+)/;
+  // Matches whole host labels, never substrings: "x.com" must not catch
+  // netflix.com/dropbox.com/box.com, which a bare substring alternation did.
   const INFRA_HOST =
-    /googleapis|gstatic|jsdelivr|unpkg|cdnjs|cloudflare|fontawesome|jquery|bootstrapcdn|w3\.org|schema\.org|gravatar|recaptcha|hcaptcha|youtube|youtu\.be|vimeo|dailymotion|twitch|spotify|soundcloud|doubleclick|googlesyndication|googletagmanager|google-analytics|adservice|adsystem|amazon-adsystem|facebook|fbcdn|instagram|cdninstagram|twitter|x\.com|twimg|tiktok|pinterest|reddit|telegram|t\.me|discord|whatsapp|github|gitlab|codepen|stackexchange|wikipedia|trustpilot|patreon|ko-fi|buymeacoffee|opencollective|gumroad|wordpress/i;
+    /(^|\.)(googleapis|gstatic|jsdelivr|unpkg|cdnjs|cloudflare|fontawesome|jquery|bootstrapcdn|w3\.org|schema\.org|gravatar|recaptcha|hcaptcha|youtube|youtu\.be|vimeo|dailymotion|twitch|spotify|soundcloud|doubleclick|googlesyndication|googletagmanager|google-analytics|adservice|adsystem|amazon-adsystem|facebook|fbcdn|instagram|cdninstagram|twitter|x\.com|twimg|tiktok|pinterest|reddit|telegram|t\.me|discord|whatsapp|github|gitlab|codepen|stackexchange|wikipedia|trustpilot|patreon|ko-fi|buymeacoffee|opencollective|gumroad|wordpress)(\.|$)/i;
+
+  function isInfraHost(value) {
+    let host = String(value || '');
+    try {
+      host = new URL(host).host;
+    } catch {}
+    return INFRA_HOST.test(host.toLowerCase());
+  }
 
   const SOCIAL_HOST =
     /(^|\.)(twitter\.com|x\.com|facebook\.com|fb\.me|instagram\.com|tiktok\.com|youtube\.com|youtu\.be|discord\.gg|discord\.com|t\.me|telegram\.me|linkedin\.com|reddit\.com|pinterest\.com|bsky\.app)$/;
@@ -302,7 +312,7 @@
       return { valid: false, confidence: 0, reason: 'unparseable URL' };
     }
     if (EXCLUDE_HOSTS.some((re) => re.test(host))) return { valid: false, confidence: 0, reason: 'excluded service as destination' };
-    if (INFRA_HOST.test(host)) return { valid: false, confidence: 0, reason: 'infrastructure/tracking domain' };
+    if (isInfraHost(host)) return { valid: false, confidence: 0, reason: 'infrastructure/tracking domain' };
     if (SOCIAL_HOST.test(host)) return { valid: false, confidence: 0, reason: 'social/review domain' };
     return { valid: true, confidence: 0.9, reason: 'plausible external destination' };
   }
@@ -1101,7 +1111,7 @@
       });
       const data = await res.json();
       const dest = data?.link;
-      if (typeof dest === 'string' && !INFRA_HOST.test(dest) && !/\.(png|jpe?g|gif|svg|webp|ico)(\?|$)/i.test(dest)) {
+      if (typeof dest === 'string' && !isInfraHost(dest) && !/\.(png|jpe?g|gif|svg|webp|ico)(\?|$)/i.test(dest)) {
         return goto(dest);
       }
       return false;
@@ -1877,12 +1887,15 @@
       return originalOpen.apply(this, args);
     };
     // Restore original open after 5 minutes to avoid leaking the hook
-    setTimeout(() => {
+    const restore = setTimeout(() => {
       if (XMLHttpRequest.prototype.open !== originalOpen) {
         XMLHttpRequest.prototype.open = originalOpen;
         PAGE.__slBstlarHooked = false;
       }
     }, 300000);
+    try {
+      if (restore && typeof restore.unref === 'function') restore.unref();
+    } catch {}
   }
 
   async function handleBstlar() {
@@ -1961,7 +1974,7 @@
         u.host &&
         host !== location.host.toLowerCase() &&
         !EXCLUDE_HOSTS.some((re) => re.test(host)) &&
-        !INFRA_HOST.test(host)
+        !isInfraHost(host)
       ) {
         TRACE.candidates.push({ url: u.href, source: 'network-capture', field, confidence });
         if (confidence > capturedDestConfidence) {
@@ -2274,12 +2287,15 @@
       return res;
     };
     // Restore original fetch after 5 minutes to avoid leaking the hook
-    setTimeout(() => {
+    const restore = setTimeout(() => {
       if (window.fetch && window.fetch !== origFetch) {
         window.fetch = origFetch;
         PAGE.__slLootCapInstalled = false;
       }
     }, 300000);
+    try {
+      if (restore && typeof restore.unref === 'function') restore.unref();
+    } catch {}
   }
 
   async function handleLootLinkLocal() {
@@ -2638,9 +2654,10 @@
   async function main() {
     const t0 = nowMs();
     try {
+      if (PAGE.self !== PAGE.top) return;
       registerMenu();
       TRACE.host = location.host;
-      if (PAGE.self !== PAGE.top || excluded() || disabled()) return;
+      if (excluded() || disabled()) return;
       installEarlyHooks();
       // Early generic capture for known shortener hosts: many pages fire their
       // resolving request before DOMContentLoaded, which the late rule-loop
