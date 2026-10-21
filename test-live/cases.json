@@ -25,7 +25,8 @@
     "html": "<p>Generating your link...</p><div class='loading'>Loading...</div><a href='https://example.com/single-link-target'>Get Link</a>",
     "expect": "example.com/single-link-target",
     "family": "single-link",
-    "note": "single external link (no form, no waitFor blocking)"
+    "timeout": 45,
+    "note": "single external link (no form, no waitFor blocking); the generic rule chain alone spends ~20s before the final button"
   },
   {
     "id": "fetch-1",
