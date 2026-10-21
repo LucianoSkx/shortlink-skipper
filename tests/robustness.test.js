@@ -44,6 +44,28 @@ test('enableInteractions registers each capture listener once', () => {
   }
 });
 
+test('rule stats are buffered and written once', () => {
+  const h = load({ querySelector: () => null });
+  let writes = 0;
+  const store = {};
+  h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
+  h.sandbox.GM_setValue = (k, v) => {
+    store[k] = v;
+    writes += 1;
+  };
+  h.api.bumpStat('rule-a', 'ok');
+  h.api.bumpStat('rule-a', 'ok');
+  h.api.bumpStat('rule-b', 'fail');
+  assert.strictEqual(writes, 0, 'no storage write per rule');
+  h.api.flushStats();
+  assert.strictEqual(writes, 1, 'one write per flush');
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(store.sl_stats)), {
+    rules: { 'rule-a': { ok: 2, fail: 0 }, 'rule-b': { ok: 0, fail: 1 } },
+  });
+  h.api.flushStats();
+  assert.strictEqual(writes, 1, 'empty flush is a no-op');
+});
+
 test('removeAdblockBanners installs one observer and skips oversized wrappers', async () => {
   let removed = 0;
   const banner = {
