@@ -558,5 +558,33 @@
     "expect": "giphy.com/gifs/gallery-home",
     "family": "gate",
     "note": "normal gallery home must not be treated as a media shortener"
+  },
+  {
+    "id": "go-link-form-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><form id=\"go-link\" action=\"/next\" onsubmit=\"return false\"><button class=\"get-link\" type=\"submit\">Get Link</button></form><script>document.querySelector('form#go-link button').addEventListener('click',function(){document.title='GOLINK-CLICKED';});</script>",
+    "expect": "GOLINK-CLICKED",
+    "family": "go-link-form",
+    "note": "generic go-link-form rule: clicks the submit button instead of submitting the form"
+  },
+  {
+    "id": "math-captcha-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><p>What is 12 + 7?</p><form><input type=\"text\" name=\"captcha_answer\"><button type=\"submit\">Submit</button></form><script>var i=document.querySelector('input[name=\"captcha_answer\"]');i.addEventListener('input',function(){document.title='MATH-'+i.value;});</script>",
+    "expect": "MATH-19",
+    "family": "math-captcha",
+    "note": "generic math-captcha rule fills the arithmetic answer locally"
+  },
+  {
+    "id": "popup-guard-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><a id=\"pop\" href=\"https://example.com/popup\" target=\"_blank\">popup</a><script>setTimeout(function(){var a=document.getElementById('pop');var e=new MouseEvent('click',{bubbles:true,cancelable:true});a.dispatchEvent(e);document.title=e.defaultPrevented?'POPUP-GUARD-BLOCKED':'POPUP-GUARD-OPEN';},3000);</script>",
+    "expect": "POPUP-GUARD-BLOCKED",
+    "family": "popup-guard",
+    "note": "boost path: target=_blank click is cancelled on a shortish page"
+  },
+  {
+    "id": "adblock-banner-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><div id=\"adblock-banner\">Please disable your adblocker to continue.</div><script>new MutationObserver(function(){if(!document.getElementById('adblock-banner'))document.title='BANNER-REMOVED';}).observe(document.body,{childList:true,subtree:true});</script>",
+    "expect": "BANNER-REMOVED",
+    "family": "adblock-banner",
+    "note": "boost path: the anti-adblock banner is swept without a challenge present"
   }
 ]

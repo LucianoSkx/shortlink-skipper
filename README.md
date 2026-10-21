@@ -221,8 +221,9 @@ node test-live/live.js <html> <expect> [host] [path] [query]
 ```
 
 Click-only rules report through `document.title`; navigating rules through the
-final URL. Cases can pin a fake host, path and query string. The suite is not
-part of CI (it needs a browser); CI only syntax-checks the harness files.
+final URL. Cases can pin a fake host, path and query string. PR CI only
+syntax-checks the harness files; the suite runs on demand from
+**Actions → Live harness → Run workflow**.
 `node test-live/upstream-gap.js` diffs adsbypasser's `@domain` coverage and the
 `Upstream sync` workflow refreshes a tracking issue with the result.
 

@@ -1,0 +1,47 @@
+name: Live harness
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Start headless Chrome
+        run: |
+          google-chrome --headless=new --no-sandbox --disable-gpu \
+            --remote-debugging-port=9222 \
+            --user-data-dir="$RUNNER_TEMP/chrome-live" \
+            about:blank >"$RUNNER_TEMP/chrome.log" 2>&1 &
+          ready=
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:9222/json/version >/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ -z "$ready" ]; then
+            echo "Chrome did not expose the DevTools endpoint"
+            cat "$RUNNER_TEMP/chrome.log"
+            exit 1
+          fi
+
+      - run: npm run test:live
+
+      - name: Upload Chrome log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-log
+          path: ${{ runner.temp }}/chrome.log
