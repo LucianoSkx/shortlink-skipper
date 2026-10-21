@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.9 — 2026-10-21
+
+### Fixed
+- **`readGlobal` left the serialized value on `<html>`.** The injected script writes `data-rg-<name>`; the attribute is now removed as soon as it is read instead of staying in the DOM.
+
+### Tests
+- 1 new test for the attribute cleanup.
+
 ## 1.13.8 — 2026-10-21
 
 ### Changed
