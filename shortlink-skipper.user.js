@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.7
+// @version      1.13.8
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -2667,13 +2667,28 @@
   // --- local telemetry ----------------------------------------------------
   // Everything stays on-device (GM storage): per-rule outcome counts and the
   // false-positive reports filed from the menu. Nothing is ever sent anywhere.
+  // Stats are buffered and flushed once per main() run instead of a
+  // read/modify/write of the whole object for every rule evaluated.
+  const pendingStats = {};
+
   function bumpStat(name, field) {
+    pendingStats[name] = pendingStats[name] || { ok: 0, fail: 0 };
+    pendingStats[name][field] += 1;
+  }
+
+  function flushStats() {
+    const names = Object.keys(pendingStats);
+    if (!names.length) return;
     try {
       const stats = GM_getValue('sl_stats', {});
       stats.rules = stats.rules || {};
-      stats.rules[name] = stats.rules[name] || { ok: 0, fail: 0 };
-      stats.rules[name][field] += 1;
+      for (const name of names) {
+        const rule = (stats.rules[name] = stats.rules[name] || { ok: 0, fail: 0 });
+        rule.ok += pendingStats[name].ok;
+        rule.fail += pendingStats[name].fail;
+      }
       GM_setValue('sl_stats', stats);
+      for (const name of names) delete pendingStats[name];
     } catch {}
   }
 
@@ -2824,6 +2839,7 @@
       log('[SKIPPER] decision trace:', JSON.stringify(TRACE));
     } finally {
       TRACE.durationMs = Math.round((nowMs() - t0) * 100) / 100;
+      flushStats();
       log('main() took', TRACE.durationMs, 'ms');
     }
   }
@@ -2924,6 +2940,8 @@
       enableInteractions,
       removeAdblockBanners,
       cleanupInteractions,
+      bumpStat,
+      flushStats,
       trace: TRACE,
       main,
       standbyState,

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.8 — 2026-10-21
+
+### Changed
+- **Rule stats are buffered per run.** `bumpStat` accumulated a read/modify/write of the whole `sl_stats` object for every rule evaluated; the counts are now collected in memory and written once in `main()`'s `finally`.
+
+### Tests
+- 1 new test for the buffered stats (one write per flush, empty flush is a no-op).
+
 ## 1.13.7 — 2026-10-21
 
 ### Changed
