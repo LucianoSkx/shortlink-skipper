@@ -20,7 +20,7 @@ function getJSON(url) {
   });
 }
 
-const GM_MOCKS = (testHost, testPath = '/test/', testSearch = '') => `
+const GM_MOCKS = (testHost, testPath = '/test/', testSearch = '', mockRoutes = {}) => `
 'use strict';
 if (typeof unsafeWindow === 'undefined') var unsafeWindow = globalThis;
 if (typeof GM_getValue === 'undefined')  var GM_getValue  = (k, d) => { if (k === 'verbose') return true; return d ?? false; };
@@ -29,6 +29,20 @@ if (typeof GM_registerMenuCommand === 'undefined') var GM_registerMenuCommand = 
 if (typeof GM_openInTab === 'undefined')  var GM_openInTab  = () => {};
 if (typeof GM_setClipboard === 'undefined') var GM_setClipboard = () => {};
 if (typeof GM_xmlhttpRequest === 'undefined') var GM_xmlhttpRequest = (o) => { try { o.onerror?.({}); } catch(_){} };
+${Object.keys(mockRoutes).length ? `
+// Fixture-only fetch shim: template rules POST to fixed endpoints.
+var __sl_mock_routes = ${JSON.stringify(mockRoutes)};
+var __sl_real_fetch = typeof fetch === 'function' ? fetch.bind(globalThis) : null;
+var fetch = function (url, opts) {
+  var target = String(url);
+  for (var suffix in __sl_mock_routes) {
+    if (target.endsWith(suffix)) {
+      return Promise.resolve(new Response(JSON.stringify(__sl_mock_routes[suffix]), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    }
+  }
+  return __sl_real_fetch ? __sl_real_fetch(url, opts) : Promise.reject(new Error('fetch unavailable'));
+};
+` : ''}
 ${testHost ? `
 // Test host override for host-gated rules (about:blank has empty host).
 // Shadow the global 'location' with a local var inside this IIFE so the
@@ -61,6 +75,8 @@ async function main() {
   const testHost  = process.argv[4] || '';  // optional fake host for host-gated rules
   const testPath  = process.argv[5] || '/test/';
   const testSearch = process.argv[6] || '';
+  let mockRoutes = {};
+  try { mockRoutes = process.argv[7] ? JSON.parse(process.argv[7]) : {}; } catch {}
   const timeoutMs = parseInt(process.env.LIVE_TIMEOUT_MS || '25000', 10);
   const hardKill  = setTimeout(() => { console.error('HARD_TIMEOUT'); process.exit(3); }, timeoutMs);
 
@@ -100,7 +116,7 @@ async function main() {
 
   // Inject GM mocks + userscript via Runtime.evaluate
   const userscriptCode = fs.readFileSync(SCRIPT_PATH, 'utf8');
-  const wrappedCode = `(function(){\ntry{\n${GM_MOCKS(testHost, testPath, testSearch)}\n${userscriptCode}\n}catch(e){console.log('INJECT_ERR:'+e.message);}\n})();`;
+  const wrappedCode = `(function(){\ntry{\n${GM_MOCKS(testHost, testPath, testSearch, mockRoutes)}\n${userscriptCode}\n}catch(e){console.log('INJECT_ERR:'+e.message);}\n})();`;
   await S('Runtime.evaluate', { expression: wrappedCode, returnByValue: true });
 
   // Poll final URL

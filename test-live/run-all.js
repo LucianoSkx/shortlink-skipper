@@ -16,7 +16,7 @@ function runCase(c) {
     const start = Date.now();
     const hostArg = c.host || '';
     const caseTimeout = c.timeout || TIMEOUT_S;
-    execFile(process.execPath, [LIVE_JS, c.html, c.expect, hostArg, c.path || '/test/', c.search || ''], {
+    execFile(process.execPath, [LIVE_JS, c.html, c.expect, hostArg, c.path || '/test/', c.search || '', c.mock ? JSON.stringify(c.mock) : ''], {
       timeout: (caseTimeout + 10) * 1000,
       maxBuffer: 1024 * 1024,
       env: { ...process.env, LIVE_TIMEOUT_MS: String(caseTimeout * 1000), CDP_URL: process.env.CDP_URL || 'http://127.0.0.1:9222' },
