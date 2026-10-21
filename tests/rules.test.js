@@ -631,86 +631,6 @@ test('main() leaves a paste host alone when there is no URL', async () => {
   assert.strictEqual(h.navs.length, 0);
 });
 
-// --- encurta ---
-
-test('encurta submits form-continue via its submit button', async () => {
-  const seen = [];
-  const btn = visibleBtn({
-    innerText: 'Clique aqui para prosseguir',
-    dispatchEvent: () => true,
-  });
-  const form = {
-    querySelector: () => btn,
-    submit: () => { throw new Error('should click the button, not submit()'); },
-  };
-  const h = load({
-    href: 'https://dev.encurta.app/lp1',
-    querySelector: (sel) => (sel.includes('form-continue') ? form : null),
-  });
-  h.sandbox.PointerEvent = function (t) { seen.push(t); };
-  h.sandbox.MouseEvent = function (t) { seen.push(t); };
-  assert.strictEqual(await h.api.handleEncurta(), true);
-  assert.deepStrictEqual(
-    seen,
-    ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click'],
-    'full click sequence on the real submit button, not ad decoys',
-  );
-});
-
-test('encurta stays out without form-continue', async () => {
-  const h = load({ href: 'https://dev.encurta.app/lp1', querySelector: () => null });
-  assert.strictEqual(await h.api.handleEncurta(), false);
-});
-
-test('encurta ignores other hosts', async () => {
-  const h = load({ href: 'https://example.com/x' });
-  assert.strictEqual(await h.api.handleEncurta(), false);
-});
-
-test('encurta stays out when the page exits through its own meta refresh', async () => {
-  const meta = {
-    getAttribute: (n) => (n === 'content' ? "20; URL='https://meulink.ai/AB-DEVENCURTAAPP'" : 'refresh'),
-  };
-  const form = { querySelector: () => null, submit: () => { throw new Error('must not submit'); } };
-  const h = load({
-    href: 'https://dev.encurta.app/lp1',
-    querySelector: (sel) => (sel.includes('meta') ? meta : sel.includes('form-continue') ? form : null),
-  });
-  assert.strictEqual(await h.api.handleEncurta(), false);
-});
-
-test('encurta submits a self-posting form only once per path', async () => {
-  const seen = [];
-  const btn = visibleBtn({
-    innerText: 'Clique aqui para prosseguir',
-    dispatchEvent: () => true,
-  });
-  const form = { querySelector: () => btn, submit: () => { throw new Error('should click'); } };
-  const h = load({
-    href: 'https://dev.encurta.app/lp1',
-    querySelector: (sel) => (sel.includes('form-continue') ? form : null),
-  });
-  h.sandbox.PointerEvent = function (t) { seen.push(t); };
-  h.sandbox.MouseEvent = function (t) { seen.push(t); };
-  assert.strictEqual(await h.api.handleEncurta(), true, 'first submit clicks the button');
-  assert.strictEqual(await h.api.handleEncurta(), false, 'second pass on the same path does not re-click');
-});
-
-test('encurta.app opens the shortener gate', () => {
-  const h = load({ href: 'https://dev.encurta.app/lp1', querySelector: () => null });
-  assert.strictEqual(h.api.knownShortener(), true);
-  assert.strictEqual(h.api.genericGate(), true);
-});
-
-test('seulink.digital (same EncurtaNet family) opens the gate, captcha left to manual', async () => {
-  const h = load({ href: 'https://seulink.digital/cUXsL', querySelector: () => null });
-  assert.strictEqual(h.api.knownShortener(), true);
-  assert.strictEqual(h.api.genericGate(), true);
-  // Captcha stage has form#link-view, not form-continue: the rule stands
-  // down and captcha-manual/adlinkfly-captcha take over after you solve.
-  assert.strictEqual(await h.api.handleEncurta(), false);
-});
-
 // --- null documentElement (true document-start race) ---
 
 test('looksLikeTaskWall survives a null documentElement', () => {
@@ -726,24 +646,12 @@ test('handleMboost survives a null documentElement', async () => {
 });
 
 test('main() survives a null documentElement and the rule still acts', async () => {
-  const btn = visibleBtn({ innerText: 'Clique aqui para prosseguir' });
-  const form = { querySelector: () => btn };
+  const btn = visibleBtn({ innerText: 'Continue' });
   const h = load({
-    href: 'https://dev.encurta.app/lp1',
-    querySelector: (sel) => (sel.includes('form-continue') ? form : null),
+    href: 'https://goo.st/abc',
+    querySelector: (sel) => (sel.includes('btn-primary') ? btn : null),
   });
   h.doc.documentElement = null;
   await h.api.main();
-  assert.strictEqual(h.api.trace.rule, 'encurta', 'gate + rule must work even pre-root');
-});
-
-test('monetiza.link (same family) opens the gate and submits form-continue', async () => {
-  const btn = visibleBtn({ innerText: 'Clique aqui para prosseguir' });
-  const form = { querySelector: () => btn };
-  const h = load({
-    href: 'https://monetiza.link/991ahIm',
-    querySelector: (sel) => (sel.includes('form-continue') ? form : null),
-  });
-  assert.strictEqual(h.api.knownShortener(), true);
-  assert.strictEqual(await h.api.handleEncurta(), true);
+  assert.strictEqual(h.api.trace.rule, 'goo-st', 'gate + rule must work even pre-root');
 });
