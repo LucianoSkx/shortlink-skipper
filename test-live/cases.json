@@ -586,5 +586,19 @@
     "expect": "BANNER-REMOVED",
     "family": "adblock-banner",
     "note": "boost path: the anti-adblock banner is swept without a challenge present"
+  },
+  {
+    "id": "task-wall-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><p>Complete the actions and unlock the link: steps completed 1/3</p><div class=\"loader\"></div><script>setTimeout(function(){setTimeout(function(){document.title='TASK-SLOW';},4000);},2000);</script>",
+    "expect": "TASK-SLOW",
+    "family": "task-wall",
+    "note": "safety: an engagement task wall steps back, timers stay real (a boosted inner timer would set TASK-FAST)"
+  },
+  {
+    "id": "turnstile-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><div class=\"cf-turnstile\"></div><script>setTimeout(function(){setTimeout(function(){document.title='CF-SLOW';},4000);},2000);</script>",
+    "expect": "CF-SLOW",
+    "family": "challenge",
+    "note": "safety: a Turnstile widget silences the environment hooks, timers stay real"
   }
 ]
