@@ -72,7 +72,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `boost-ink` | Fetches own source, decodes payload behind internal marker key |
 | `linkvertise-easy` | Extracts destination from Linkvertise `?r=` / `#r=` (base64) |
 | `adlinkfly-hosts` | Host-gated AdLinkFly family: serializes hidden fields, POSTs `/links/go` |
-| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat bypass API for an instant destination, falling back to [bypass.tools](https://bypass.tools) resolver |
+| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat API for an instant destination, then [bypass.tools](https://bypass.tools) |
 | `network-capture` | Hooks fetch/XHR; follows destination-shaped JSON responses |
 | `url-destination` | Base64/hex destinations in query params *and* path segments (`/goto/<b64>`) |
 | `adlinkfly` | Serializes hidden fields, POSTs `/links/go` with adaptive retries |
@@ -88,7 +88,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `imgtraffic` | Rewrites `/a-1/`, `/i-1/`, `/n-1/`, `/z-1/` to the direct jpeg (`imgtraffic.com`) |
 | `imgair` | Reads `imgbg.src` from inline scripts (`cloudgallery.net`, `imgair.net`, `imgblaze.net`, `imgfira.cc`, `imgfrost.net`) |
 | `captcha-manual` | Watches hCaptcha/reCAPTCHA/Turnstile; auto-submits **after you solve** |
-| `paste-extract` | Follows the first valid external URL found in paste content (`pastebin.com`, `rentry.co`, `pastelink.com`, `justpaste.it`, `paste.ee`, `hastebin.com`, `ghostbin.co`, `controlc.com`, `paste.org`, `spacebin.in`) |
+| `paste-extract` | First valid external URL in the paste content (`pastebin.com`, `rentry.co`, `pastelink.com`, `justpaste.it`, `paste.ee`, `hastebin.com`, `ghostbin.co`, `controlc.com`, `paste.org`, `spacebin.in`) |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
 | `goo-st` | Clicks `.btn-primary` (`goo.st`, `swzz.xyz`) |
 | `1ink` | Follows `#countingbtn` (`1ink.cc`) |
@@ -123,7 +123,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `go-linkify` | Extracts the `/get/` URL from page scripts (`go.linkify.ru`) |
 | `network-loop` | Follows the shadow-DOM button (`network-loop.com`) |
 | `get-click2` | Enables and clicks `#gotolink` (`get-click2.blogspot.com`) |
-| `encurta` | Submits `form#form-continue` (`encurta.app`, `seulink.digital`, `monetiza.link`; ad decoys ignored, captcha stage left to manual). Pages that already exit through their own `meta refresh` are left alone, and a self-posting form is submitted once per path so the tab cannot reload in a loop |
+| `encurta` | Submits `form#form-continue` (`encurta.app`, `seulink.digital`, `monetiza.link`); ad decoys ignored, captcha left to manual, meta-refresh exits and self-posting forms left to the site |
 | `forumdinheiro` | Walks the tRPC stage chain server-side (port of adsbypasser `link/forumdinheiro.com.js`; `forumdinheiro.com`, `guis2.com`, `tarviral.com`, `umconto.com`) |
 
 </details>
