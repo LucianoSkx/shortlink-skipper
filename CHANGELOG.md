@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.13.7 — 2026-10-21
+
+### Changed
+- **Cheaper shortlink detection.** The cache signature no longer reads `innerText` (forces layout) or `innerHTML` (serializes the body) on every rule probe; it uses text length plus element count, preferring `textContent`.
+- **`enableInteractions()` is idempotent.** Capture listeners are installed once and reused across calls instead of leaking a new anonymous listener per invocation.
+- **`removeAdblockBanners()` is bounded.** One observer per page, capped at 30 sweeps and disconnected afterwards; the layout-forcing reads now run only for small text candidates instead of every `div`/`section` on each mutation.
+
+### Tests
+- 4 new tests: no `innerHTML` read in the cache signature, cache invalidation, single listener registration, single observer and banner sweep.
+
 ## 1.13.6 — 2026-10-21
 
 ### Fixed

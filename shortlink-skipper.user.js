@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.6
+// @version      1.13.7
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -380,10 +380,22 @@
 
   let _shortishCache = null;
   let _shortishCacheSig = null;
+  // Change detector for the cache: text length plus element count. Reading
+  // innerText forces layout and innerHTML serializes the whole body, and this
+  // runs for every rule's when() on a shortish page.
+  function shortishSignature(doc) {
+    const body = doc.body;
+    if (!body) return '0|0';
+    const text = body.textContent !== undefined ? body.textContent : body.innerText;
+    const nodes = body.getElementsByTagName
+      ? body.getElementsByTagName('*').length
+      : doc.querySelectorAll('*').length;
+    return `${(text || '').length}|${nodes}`;
+  }
+
   function looksLikeShortlink(doc = document) {
     if (doc === document && _shortishCache !== null) {
-      const sig = (doc.body?.innerText || '').length + '|' + (doc.body?.innerHTML || '').length;
-      if (sig === _shortishCacheSig) return _shortishCache;
+      if (shortishSignature(doc) === _shortishCacheSig) return _shortishCache;
       _shortishCache = null;
     }
     const hits = [];
@@ -412,7 +424,7 @@
       if (doc === document) TRACE.score = score;
     }
     if (doc === document) {
-      _shortishCacheSig = (doc.body?.innerText || '').length + '|' + (doc.body?.innerHTML || '').length;
+      _shortishCacheSig = shortishSignature(doc);
       _shortishCache = result;
       TRACE.detected = result;
       TRACE.detectionHits = hits;
@@ -2206,19 +2218,28 @@
     focusLock = null;
   }
 
+  let interactionGuard = null;
+
   function enableInteractions() {
-    for (const type of ['contextmenu', 'copy', 'cut', 'selectstart', 'dragstart']) {
-      document.addEventListener(type, (event) => event.stopPropagation(), true);
+    if (!interactionGuard) {
+      interactionGuard = {
+        types: ['contextmenu', 'copy', 'cut', 'selectstart', 'dragstart'],
+        listener: (event) => event.stopPropagation(),
+        installed: new Set(),
+        domReadyHooked: false,
+      };
+    }
+    for (const type of interactionGuard.types) {
+      if (interactionGuard.installed.has(type)) continue;
+      document.addEventListener(type, interactionGuard.listener, true);
+      interactionGuard.installed.add(type);
     }
     // Clean up immediately (handles SPAs and re-navigations).
     cleanupInteractions();
-    PAGE.addEventListener(
-      'DOMContentLoaded',
-      () => {
-        cleanupInteractions();
-      },
-      { once: true },
-    );
+    if (!interactionGuard.domReadyHooked) {
+      interactionGuard.domReadyHooked = true;
+      PAGE.addEventListener('DOMContentLoaded', () => cleanupInteractions(), { once: true });
+    }
   }
 
   function cleanupInteractions() {
@@ -2238,22 +2259,43 @@
     }
   }
 
+  // One observer per page, capped: ad-heavy pages mutate constantly and the
+  // old code re-scanned every div/section/aside/dialog on each mutation batch,
+  // forcing layout for every element forever.
+  let bannerSweeper = null;
+
   function removeAdblockBanners() {
-    let sweeping = false;
+    if (bannerSweeper) return;
+    const state = { sweeps: 0, maxSweeps: 30, timer: null, observer: null };
+    bannerSweeper = state;
+    const stop = () => {
+      try {
+        if (state.observer) state.observer.disconnect();
+      } catch {}
+      state.observer = null;
+      state.timer = null;
+    };
     const sweep = () => {
-      if (sweeping || cfQuiet || cfStandby) return;
-      sweeping = true;
-      setTimeout(() => {
-        sweeping = false;
-        const banners = [...document.querySelectorAll('div, section, aside, dialog')].filter((el) => {
-          if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') return false;
+      if (state.timer || cfQuiet || cfStandby) return;
+      state.timer = setTimeout(() => {
+        state.timer = null;
+        if (cfQuiet || cfStandby) return;
+        state.sweeps += 1;
+        const banners = [];
+        for (const el of document.querySelectorAll('div, section, aside, dialog')) {
+          // Cheap prefilter before the layout-forcing reads below.
+          const raw = el.textContent || '';
+          if (raw.length === 0 || raw.length > 2000) continue;
           const text = (el.innerText || '').trim();
-          return text.length > 0 && text.length < 600 && ADBLOCK_BANNER.test(text);
-        });
+          if (text.length === 0 || text.length >= 600 || !ADBLOCK_BANNER.test(text)) continue;
+          if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') continue;
+          banners.push(el);
+        }
         for (const banner of banners) {
           log('anti-adblock banner removed');
           banner.remove();
         }
+        if (state.sweeps >= state.maxSweeps) stop();
       }, 500);
     };
     // Sweep immediately on first call (DOMContentLoaded may already have fired
@@ -2261,7 +2303,10 @@
     sweep();
     PAGE.addEventListener('DOMContentLoaded', sweep, { once: true });
     try {
-      if (document.documentElement) new MutationObserver(sweep).observe(document.documentElement, { childList: true, subtree: true });
+      if (document.documentElement) {
+        state.observer = new MutationObserver(sweep);
+        state.observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
     } catch {}
   }
 
@@ -2876,6 +2921,9 @@
       handleBoostInk,
       handleButtons,
       handleManualCaptcha,
+      enableInteractions,
+      removeAdblockBanners,
+      cleanupInteractions,
       trace: TRACE,
       main,
       standbyState,

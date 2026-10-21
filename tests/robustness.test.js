@@ -1,0 +1,77 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert');
+const { load } = require('./helpers/harness');
+
+test('shortish cache signature never serializes innerHTML', () => {
+  const h = load({ href: 'https://spa.example/view', querySelector: () => null });
+  let reads = 0;
+  Object.defineProperty(h.doc.body, 'innerHTML', {
+    configurable: true,
+    get() {
+      reads += 1;
+      return '<p>x</p>';
+    },
+  });
+  h.doc.body.innerText = 'Loading your link';
+  h.api.looksLikeShortlink();
+  h.api.looksLikeShortlink();
+  h.api.looksLikeShortlink();
+  assert.strictEqual(reads, 0, 'signature must not read innerHTML');
+});
+
+test('shortish cache still invalidates when the body changes', () => {
+  const h = load({ href: 'https://spa.example/view', querySelector: () => null });
+  h.doc.body.innerText = 'short';
+  assert.strictEqual(h.api.looksLikeShortlink(), false);
+  h.doc.body.innerText = 'a much longer body with new text';
+  assert.strictEqual(h.api.looksLikeShortlink(), false);
+  assert.strictEqual(h.api.trace.detected, false);
+});
+
+test('enableInteractions registers each capture listener once', () => {
+  const h = load({ querySelector: () => null });
+  const counts = {};
+  h.doc.addEventListener = (type) => {
+    counts[type] = (counts[type] || 0) + 1;
+  };
+  h.api.enableInteractions();
+  h.api.enableInteractions();
+  h.api.enableInteractions();
+  for (const type of ['contextmenu', 'copy', 'cut', 'selectstart', 'dragstart']) {
+    assert.strictEqual(counts[type], 1, `${type} listener must be registered once`);
+  }
+});
+
+test('removeAdblockBanners installs one observer and skips oversized wrappers', async () => {
+  let removed = 0;
+  const banner = {
+    textContent: 'Please disable your adblocker to continue',
+    innerText: 'Please disable your adblocker to continue',
+    offsetParent: {},
+    remove() {
+      removed += 1;
+    },
+  };
+  const wrapper = {
+    textContent: 'x'.repeat(2500),
+    innerText: 'Please disable your adblocker to continue',
+    offsetParent: {},
+    remove() {
+      removed += 1;
+    },
+  };
+  const h = load({ querySelector: () => null, querySelectorAllOverride: [banner, wrapper] });
+  let observers = 0;
+  const OrigMO = h.sandbox.MutationObserver;
+  h.sandbox.MutationObserver = function (cb) {
+    observers += 1;
+    return new OrigMO(cb);
+  };
+  h.api.removeAdblockBanners();
+  h.api.removeAdblockBanners();
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  assert.strictEqual(observers, 1, 'one observer per page');
+  assert.strictEqual(removed, 1, 'only the real banner is removed');
+});
