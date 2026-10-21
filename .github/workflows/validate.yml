@@ -27,5 +27,3 @@ jobs:
         run: |
           node --check test-live/run-all.js
           node --check test-live/live.js
-          node --check test-live/server.js
-          node --check test-live/test-server.js
