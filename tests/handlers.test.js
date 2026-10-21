@@ -138,6 +138,18 @@ test('validateDestination rejects infrastructure/social/excluded targets (live b
   }
 });
 
+test('validateDestination allows hosts that merely end in an infrastructure label (x.com substring bug)', () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  for (const url of [
+    'https://www.dropbox.com/s/abc/file.zip',
+    'https://www.netflix.com/br/title/1',
+    'https://box.com/s/x',
+  ]) {
+    const v = h.api.validateDestination(url);
+    assert.ok(v.valid, `${url} must not be treated as infrastructure`);
+  }
+});
+
 test('goto() refuses excluded destinations and records them on the trace', () => {
   const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
   const ok = h.api.goto('https://mail.google.com/mail/u/0/');

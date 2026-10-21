@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.13.6 — 2026-10-21
+
+### Fixed
+- **Legitimate destinations refused by a substring `INFRA_HOST`.** The regex had no label boundary, so `x.com` matched `netflix.com`, `dropbox.com` and `box.com` (and `t.me` matched any host ending that way), and `goto()` refused the destination. Each token now matches a whole label (`(^|\.)token(\.|$)`) through `isInfraHost()`.
+- **The 5-minute hook timers kept the suite alive.** `installLootLinkFetchCapture` and `installBstlarXhrHook` scheduled the restore without `unref()`, making local `npm test` (and the Validate job) take ~5m30s. The restore timer is now unref'd where the runtime supports it.
+- **Dead rules from an incomplete gate.** `croea.com`, `imgouhmde.sbs` and `imgouskel.sbs` were missing from `IMAGE_HOSTS`; `doaipomer.com`, `ppcnt.net`, `lnkparts.com` and `zunsoach.com` were missing from `EXTRA_SHORTENER_HOSTS`. The former never reached their handlers and `close-interstitial` never ran.
+- **Host boundary in `BCVC_HOST` and `CLOSE_INTERSTITIAL_HOST`.** `notbcvcgo.xyz` and `notdoaipomer.com` matched by bare suffix; both now require `(^|\.)` and `$`.
+
+### Changed
+- **Media gate no longer includes general-purpose gallery homes.** `giphy.com`, `tenor.com`, `imgflip.com` and `prnt.sc` left `IMAGE_HOSTS`: on a normal page of those sites `image-host` followed `og:image` and navigated to the raw file (same class as the `spaste.com` incident).
+
+### Docs
+- README: rule count (74) and the `paste-extract` row; the "captchas never solved" claim now separates interactive widgets from template challenges solved locally. AGENTS.md aligned, plus a note that every handler host must also be in a gate list.
+
 ## 1.13.5 — 2026-10-13
 
 ### Fixed

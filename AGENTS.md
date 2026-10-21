@@ -1,6 +1,6 @@
 # Shortlink Skipper — instruções do projeto
 
-Userscript em **arquivo único** (`shortlink-skipper.user.js`, ~2500 linhas).
+Userscript em **arquivo único** (`shortlink-skipper.user.js`, ~2900 linhas).
 Nunca reintroduzir estrutura multi-arquivo, build ou `dist/` — houve uma
 migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
 
@@ -15,8 +15,10 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
 - Toda navegação passa por `goto()` — validação centralizada, anti-loop
   (10 hops) e recusa sob stand-by do Cloudflare. Nunca usar `location.href`
   direto em regra nova.
-- Captchas nunca são resolvidos nem adulterados — só observados
-  (`captcha-manual` age depois que o usuário resolve).
+- Widgets de captcha (reCAPTCHA/hCaptcha/Turnstile) nunca são resolvidos nem
+  adulterados — só observados (`captcha-manual` age depois que o usuário
+  resolve). Desafios de template com resposta local (aritmética em
+  `math-captcha`, coordenadas do za.gl) são preenchidos pelas regras dedicadas.
 
 ## Receita para novo site
 
@@ -32,7 +34,9 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
    (lição `spaste.com`: pastebin home gerou falsos positivos; só o path
    `/site/` tem regra). Hosts de paste (`PASTE_HOSTS`) abrem o gate por
    categoria própria no `main()` e usam `when` direto no host, sem hooks
-   de ambiente.
+   de ambiente. O host precisa estar nos **dois lugares** — regex do handler
+   e lista do gate. Só no handler = regra morta (ex.: `croea.com` antes da
+   1.13.6).
 6. Teste em `tests/` (ver `tests/ports.test.js` como modelo): caminho feliz
    com mocks + `false` em outro host. `waitFor` resolve de imediato com mock
    presente, então testes ficam rápidos.

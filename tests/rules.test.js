@@ -19,6 +19,44 @@ function visibleBtn(extra = {}) {
   };
 }
 
+// --- gate coverage: a handler whose host is not in a gate list is dead code ---
+
+test('media gate includes every host the image handlers claim', () => {
+  for (const href of [
+    'https://croea.com/x',
+    'https://imgouhmde.sbs/x',
+    'https://imgouskel.sbs/x',
+  ]) {
+    assert.strictEqual(load({ href }).api.knownMediaHost(), true, `${href} must open the media gate`);
+  }
+});
+
+test('interstitial-only hosts open the gate so the tab can be closed', () => {
+  for (const href of [
+    'https://doaipomer.com/x',
+    'https://ppcnt.net/x',
+    'https://lnkparts.com/x',
+    'https://zunsoach.com/x',
+  ]) {
+    assert.strictEqual(load({ href }).api.knownShortener(), true, `${href} must open the shortener gate`);
+  }
+});
+
+test('host regexes require a label boundary instead of a bare suffix', async () => {
+  assert.strictEqual(load({ href: 'https://notbcvcgo.xyz/x' }).api.knownShortener(), false);
+  assert.strictEqual(load({ href: 'https://bcvcgo.xyz/x' }).api.knownShortener(), true);
+  assert.strictEqual(load({ href: 'https://notdoaipomer.com/x' }).api.knownShortener(), false);
+  assert.strictEqual(await load({ href: 'https://notdoaipomer.com/x' }).api.handleCloseInterstitial(), false);
+});
+
+test('gallery homes are not treated as image hosts', async () => {
+  for (const href of ['https://giphy.com/gifs/x', 'https://tenor.com/view/x', 'https://imgflip.com/i/x', 'https://prnt.sc/x']) {
+    const h = load({ href, querySelector: (sel) => (sel.includes('og:image') ? { content: 'https://media.example/x.gif' } : null) });
+    assert.strictEqual(h.api.knownMediaHost(), false, `${href} must not open the media gate`);
+    assert.strictEqual(await h.api.handleImageHost(), false, `${href} must be left untouched`);
+  }
+});
+
 // --- close-interstitial ---
 
 test('close-interstitial closes the tab on interstitial hosts', async () => {
@@ -54,6 +92,12 @@ test('rekonise extracts a destination from the unlock API', async () => {
 
 test('rekonise ignores other hosts', async () => {
   const h = load({ href: 'https://example.com/x' });
+  assert.strictEqual(await h.api.handleRekonise(), false);
+});
+
+test('rekonise rejects an infrastructure destination given as a full URL', async () => {
+  const h = load({ href: 'https://rekonise.com/some-unlock' });
+  h.setFetch(() => Promise.resolve({ json: () => Promise.resolve({ link: 'https://cdn.jsdelivr.net/npm/x' }) }));
   assert.strictEqual(await h.api.handleRekonise(), false);
 });
 

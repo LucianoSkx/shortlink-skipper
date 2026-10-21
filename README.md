@@ -35,7 +35,7 @@ small engine of **generic techniques** that cover most shorteners — they all
 share the same templates.
 
 <details open>
-<summary><b>The 71 rules</b></summary>
+<summary><b>The 74 rules</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -76,6 +76,7 @@ share the same templates.
 | `imgtraffic` | Rewrites `/a-1/`, `/i-1/`, `/n-1/`, `/z-1/` to the direct jpeg (`imgtraffic.com`) |
 | `imgair` | Reads `imgbg.src` from inline scripts (`cloudgallery.net`, `imgair.net`, `imgblaze.net`, `imgfira.cc`, `imgfrost.net`) |
 | `captcha-manual` | Watches hCaptcha/reCAPTCHA/Turnstile; auto-submits **after you solve** |
+| `paste-extract` | Follows the first valid external URL found in paste content (`pastebin.com`, `rentry.co`, `pastelink.com`, `justpaste.it`, `paste.ee`, `hastebin.com`, `ghostbin.co`, `controlc.com`, `paste.org`, `spacebin.in`) |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
 | `goo-st` | Clicks `.btn-primary` (`goo.st`, `swzz.xyz`) |
 | `1ink` | Follows `#countingbtn` (`1ink.cc`) |
@@ -136,7 +137,7 @@ server-side and cannot be skipped locally.
 
 - Top frame only; iframes never touched
 - Google, YouTube, hCaptcha/reCAPTCHA and Cloudflare are hard-excluded
-- Captcha widgets are never solved or tampered with — only observed
+- Captcha widgets (reCAPTCHA, hCaptcha, Turnstile) are never solved or tampered with — only observed. Template challenges whose answer is computed locally (arithmetic questions, za.gl's coordinate form) are filled by their dedicated rules.
 - Per-domain on/off switch in the userscript menu
 - Cloudflare challenges pass untouched (verified live)
 - If a challenge clears without navigating away, the page reloads once so the script resumes on the real page
