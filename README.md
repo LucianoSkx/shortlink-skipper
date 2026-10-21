@@ -47,7 +47,7 @@ unlockers) are detected and left alone — they validate server-side.
 - Circular redirects abort via session history.
 
 <details>
-<summary><b>Rule reference (74)</b></summary>
+<summary><b>Rule reference (73)</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -123,8 +123,8 @@ unlockers) are detected and left alone — they validate server-side.
 | `go-linkify` | Extracts the `/get/` URL from page scripts (`go.linkify.ru`) |
 | `network-loop` | Follows the shadow-DOM button (`network-loop.com`) |
 | `get-click2` | Enables and clicks `#gotolink` (`get-click2.blogspot.com`) |
-| `encurta` | Submits `form#form-continue` (`encurta.app`, `seulink.digital`, `monetiza.link`); ad decoys ignored, captcha left to manual, meta-refresh exits and self-posting forms left to the site |
 | `forumdinheiro` | Walks the tRPC stage chain server-side (port of adsbypasser `link/forumdinheiro.com.js`; `forumdinheiro.com`, `guis2.com`, `tarviral.com`, `umconto.com`) |
+| `setc-form` | Follows the `form#setc` action, or decodes the `#landing` `go` field (any host) |
 
 </details>
 
@@ -146,8 +146,8 @@ Implementation details worth knowing:
 ## Privacy — what leaves your device
 
 Local only, in the manager's storage: `verbose`, `disabled_hosts`, `sl_stats`,
-`sl_fp_reports`, `sl_resolver_breakers`; plus `sessionStorage` flags for
-once-per-path form submissions.
+`sl_fp_reports`, `sl_resolver_breakers`; plus `sessionStorage` keys for
+redirect-loop history and the Cloudflare reload guard.
 
 Third-party calls, only when the matching rule fires:
 

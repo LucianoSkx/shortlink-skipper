@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.10 — 2026-10-21
+
+### Removed
+- **`encurta` support removed** (`encurta.app`, `seulink.digital`, `monetiza.link`): the rule, its host-gate entries and the `sl_encurta_submit_*` session flag are gone. These hosts are no longer treated as shorteners, so no rule acts on them.
+
+### Tests
+- Dropped 6 unit tests and 2 live cases; the null-`documentElement` `main()` test now runs on `goo.st`.
+
 ## 1.13.9 — 2026-10-21
 
 ### Fixed
