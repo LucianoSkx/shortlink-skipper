@@ -600,5 +600,32 @@
     "expect": "CF-SLOW",
     "family": "challenge",
     "note": "safety: a Turnstile widget silences the environment hooks, timers stay real"
+  },
+  {
+    "id": "adlinkfly-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><div class=\"loader\"></div><form id=\"adform\" action=\"/links/go\" method=\"post\"><input type=\"hidden\" name=\"ad_form_data\" value=\"token123\"><input type=\"hidden\" name=\"_csrf\" value=\"abc\"></form>",
+    "expect": "example.com/adl-dest",
+    "family": "adlinkfly-template",
+    "mock": {
+      "/links/go": {
+        "url": "https://example.com/adl-dest"
+      }
+    },
+    "note": "template path: hidden fields are POSTed and the JSON url is followed (fetch shim)"
+  },
+  {
+    "id": "adlinkfly-captcha-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><div class=\"loader\"></div><button id=\"invisibleCaptchaShortlink\" disabled>Verify</button><script>setTimeout(function(){var b=document.getElementById('invisibleCaptchaShortlink');b.disabled=false;b.addEventListener('click',function(){document.title='ADL-CAPTCHA-CLICKED';});},800);</script>",
+    "expect": "ADL-CAPTCHA-CLICKED",
+    "family": "adlinkfly-template",
+    "note": "the invisible captcha button is clicked once it enables"
+  },
+  {
+    "id": "wpsafelink-1",
+    "html": "<p>Please wait 5 seconds. Generating your link.</p><div class=\"loader\"></div><input type=\"hidden\" name=\"newwpsafelink\" value=\"eyJsaW5rciI6Imh0dHBzOi8vZXhhbXBsZS5jb20vd3BzLWRlc3QifQ==\">",
+    "expect": "example.com/wps-dest",
+    "family": "wpsafelink",
+    "note": "JSON variant: the base64 payload is decoded locally",
+    "timeout": 35
   }
 ]
