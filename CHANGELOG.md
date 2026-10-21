@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.13.12 — 2026-10-21
+
+### Removed
+- **`cutpaid.com` dropped from the shortener host list.** The domain is NXDOMAIN on the system resolver, Cloudflare DoH and Google DNS, and adsbypasser retired its rule.
+
 ## 1.13.11 — 2026-10-21
 
 ### Fixed
