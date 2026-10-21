@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.10
+// @version      1.13.11
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -2403,7 +2403,7 @@
     if (!FILE_HOSTS.test(location.host)) return false;
     const findDownload = () =>
       findByText(/^(free\s+)?(download|generate\s+link)(\s+now)?$/i) ||
-      document.querySelector('#downloadbtn, #download-button, #download, #btnproceedsubmit, .btn-download, .secondary, a[download], form[action*="download"] button[type="submit"]');
+      document.querySelector('#downloadbtn, #download-button, #download, #btnproceedsubmit, .btn-download, .secondary, a[download], a[id="dlink"][href], form[action*="download"] button[type="submit"]');
     let target = findDownload();
     if (!target) {
       log('file-host: waiting for the download control');
