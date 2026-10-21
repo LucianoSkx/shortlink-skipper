@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.8
+// @version      1.13.9
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -186,8 +186,10 @@
         return null;
       }
       try {
-        const raw = document.documentElement.getAttribute(`data-rg-${name}`);
+        const attr = `data-rg-${name}`;
+        const raw = document.documentElement.getAttribute(attr);
         if (raw) {
+          document.documentElement.removeAttribute(attr);
           const v = JSON.parse(raw);
           if (valid ? valid(v) : v) return v;
         }
@@ -2847,6 +2849,7 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       isPlausibleUrl,
+      readGlobal,
       validateDestination,
       decodeMaybe,
       extractDestFromParams,

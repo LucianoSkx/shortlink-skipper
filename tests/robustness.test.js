@@ -66,6 +66,28 @@ test('rule stats are buffered and written once', () => {
   assert.strictEqual(writes, 1, 'empty flush is a no-op');
 });
 
+test('readGlobal removes the data attribute after reading', async () => {
+  const h = load({ querySelector: () => null });
+  const attrs = {};
+  h.doc.documentElement.getAttribute = (k) => (k in attrs ? attrs[k] : null);
+  h.doc.documentElement.setAttribute = (k, v) => {
+    attrs[k] = v;
+  };
+  h.doc.documentElement.removeAttribute = (k) => {
+    delete attrs[k];
+  };
+  h.doc.documentElement.appendChild = () => {};
+  h.doc.createElement = () => ({
+    set textContent(_v) {
+      attrs['data-rg-p'] = JSON.stringify({ ok: 1 });
+    },
+    remove() {},
+  });
+  const value = await h.api.readGlobal('p', () => true);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(value)), { ok: 1 });
+  assert.deepStrictEqual(attrs, {}, 'no data-rg attribute left on <html>');
+});
+
 test('removeAdblockBanners installs one observer and skips oversized wrappers', async () => {
   let removed = 0;
   const banner = {
