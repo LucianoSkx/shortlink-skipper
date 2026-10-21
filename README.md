@@ -241,7 +241,7 @@ Before bumping `@version` and merging:
 
 1. `node --check shortlink-skipper.user.js`
 2. `npm test`
-3. `npm install && npm run test:live` with Chromium/Chrome listening on `:9222` — all cases must pass.
+3. `npm install && npm run test:live` with Chromium/Chrome listening on `:9222`, or run **Actions → Live harness** — all cases must pass.
 4. Spot-check one real shortener chain if a host list or gate changed.
 5. Bump `@version` (keep `package.json` in sync) and merge.
 
