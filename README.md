@@ -2,16 +2,16 @@
 
 # Shortlink Skipper
 
-**Skip link shorteners automatically — countdowns, captchas, popups and all.**
+**Skip link shorteners automatically — countdowns, popups, anti-adblock banners and all.**
 
-A lean, extensible userscript that distills the best techniques from
-eight bypass projects into one clean rule engine.
+A single-file userscript built on one small rule engine, distilled from eight
+bypass projects.
 
 [![Validate](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml/badge.svg)](https://github.com/LucianoSkx/shortlink-skipper/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Userscript managers](https://img.shields.io/badge/Violentmonkey%20·%20Tampermonkey-compatible-blue)
 
-[**Install**](#install) · [How it works](#how-it-works) · [Safety](#built-in-safety) · [Privacy](#privacy--what-leaves-your-device) · [Extending](#adding-a-site-specific-rule) · [Credits](#credits)
+[**Install**](#install) · [How it works](#how-it-works) · [Safety](#safety-and-security) · [Privacy](#privacy--what-leaves-your-device) · [Development](#development) · [Credits](#credits)
 
 </div>
 
@@ -20,22 +20,34 @@ eight bypass projects into one clean rule engine.
 ## Install
 
 1. Install [Violentmonkey](https://violentmonkey.github.io/) or [Tampermonkey](https://www.tampermonkey.net/).
-2. Click the install link below — your manager picks it up automatically:
+2. Open the install link and confirm in your manager:
 
 ➡️ **[Install Shortlink Skipper](https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js)**
 
-> `https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js`
+Raw file: `https://github.com/LucianoSkx/shortlink-skipper/raw/main/shortlink-skipper.user.js`
 
-Updates are automatic: every push to `main` reaches installed users.
+Updates are automatic: managers poll the raw file on `main`.
 
 ## How it works
 
-Instead of thousands of hardcoded per-site handlers, Shortlink Skipper runs a
-small engine of **generic techniques** that cover most shorteners — they all
-share the same templates.
+The engine applies generic techniques shared by most shorteners instead of one
+hardcoded handler per site. Rules run in order; the first one that acts wins.
 
-<details open>
-<summary><b>The 74 rules</b></summary>
+A page counts as a shortener when a strong structural marker exists
+(`form#go-link`, `ad_form_data`, invisible captchas) or when at least two soft
+indicators match: countdown text, action buttons, URL shape, meta refresh,
+loader/timer elements. Engagement task-walls ("spend N minutes", social
+unlockers) are detected and left alone — they validate server-side.
+
+**Global protections**
+
+- Countdowns run up to 60× faster on pages without a captcha widget; 15× while one is present, and back to real time if one appears late.
+- Popups are blocked and the tab never reports being unfocused.
+- Anti-adblock banners are removed; right-click, copy and selection are restored.
+- Circular redirects abort via session history.
+
+<details>
+<summary><b>Rule reference (74)</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -116,58 +128,28 @@ share the same templates.
 
 </details>
 
-### Global protections
+## Safety and security
 
-- **Timer boost** — countdowns run up to 60× faster on captcha-free pages (conservative 15× tier while a captcha widget is present; boost drops to real time if one appears late)
-- **Popup shield** — `window.open` is neutralized
-- **Focus lock** — the tab never reports being unfocused
-- **Anti-adblock banners removed**, right-click/copy/select restored
-- **Anti-loop** — circular redirects abort via session history
-
-### Detection engine
-
-A page counts as a shortener when strong structural markers exist
-(`form#go-link`, `ad_form_data`, invisible captchas...) **or** when at least
-two soft indicators match: countdown text, action buttons, URL patterns,
-meta refresh, loader/timer elements. Engagement task-walls ("spend N minutes",
-social unlockers) are detected and deliberately left alone — they validate
-server-side and cannot be skipped locally.
-
-## Built-in safety
-
-- Top frame only; iframes never touched
-- Google, YouTube, hCaptcha/reCAPTCHA and Cloudflare are hard-excluded
+- Top frame only; iframes are never touched.
+- Google, YouTube, hCaptcha/reCAPTCHA and Cloudflare are hard-excluded.
 - Captcha widgets (reCAPTCHA, hCaptcha, Turnstile) are never solved or tampered with — only observed. Template challenges whose answer is computed locally (arithmetic questions, za.gl's coordinate form) are filled by their dedicated rules.
-- Per-domain on/off switch in the userscript menu
-- Cloudflare challenges pass untouched (verified live)
-- If a challenge clears without navigating away, the page reloads once so the script resumes on the real page
+- Cloudflare challenges pass untouched. If one clears without navigating away, the page reloads once so the script resumes on the real page.
+- Per-domain on/off switch in the userscript menu.
 
-## Security considerations
+Implementation details worth knowing:
 
-- **`unsafeWindow` access** — the script uses `unsafeWindow` to read page globals
-  (e.g. `linkDestUrl`, `click_url`, `p`). This is necessary for the bypass
-  techniques but means the script runs with full page context access. A
-  compromised page could theoretically interfere with the script's logic.
-- **Script injection for global reads** — `readGlobal()` injects a `<script>`
-  tag into the page to read global variables. The variable name is validated
-  against `/^[A-Za-z0-9_$]+$/` to prevent injection, but the mechanism is
-  inherently fragile and could break on pages with strict CSP.
-- **`fetch` with credentials** — `handleBoostInk` fetches the current page
-  with `credentials: 'include'` to extract the embedded payload. This sends
-  the site's own cookies back to the same origin (expected behavior).
-- **Hook restoration** — `handleAcortalink`, `installBstlarXhrHook` and
-  `installLootLinkFetchCapture` temporarily override `PAGE.open`,
-  `XMLHttpRequest.prototype.open` and `window.fetch`. All hooks are restored
-  after a timeout (5 minutes) to avoid leaking into subsequent navigations.
+- **Page globals** — read through `unsafeWindow` (e.g. `linkDestUrl`, `click_url`, `p`). This grants full page-context access, so a compromised page could interfere with the script.
+- **Injected reads** — `readGlobal()` injects a `<script>` tag. The variable name is validated against `/^[A-Za-z0-9_$]+$/`; the mechanism can still break under strict CSP.
+- **Same-origin fetch** — `handleBoostInk` fetches the current page with `credentials: 'include'`, sending the site's own cookies back to that origin.
+- **Temporary hooks** — `handleAcortalink`, `installBstlarXhrHook` and `installLootLinkFetchCapture` override `PAGE.open`, `XMLHttpRequest.prototype.open` and `fetch`; each is restored after at most 5 minutes.
 
 ## Privacy — what leaves your device
 
-Local storage (never uploaded): `verbose`, `disabled_hosts`, `sl_stats`,
-`sl_fp_reports`, `sl_resolver_breakers` — all in the userscript manager's GM
-storage on this machine only.
+Local only, in the manager's storage: `verbose`, `disabled_hosts`, `sl_stats`,
+`sl_fp_reports`, `sl_resolver_breakers`; plus `sessionStorage` flags for
+once-per-path form submissions.
 
-Network calls that **can send the current page URL** (or a payload derived
-from it) to a third party, only when the matching rule fires:
+Third-party calls, only when the matching rule fires:
 
 | Destination | When | What is sent |
 | --- | --- | --- |
@@ -179,13 +161,12 @@ from it) to a third party, only when the matching rule fires:
 | Loot-link action/sync endpoints | `lootlink-local` (site's own ad network) | Bypass bookkeeping expected by that site |
 | [bypass.link](https://bypass.link) | Menu command only (manual) | You paste the URL yourself after the tab opens |
 
-Ordinary pages never call any of the above: the gate exits before rules run.
-Turn off a site with **Disable on this site** if you do not want outbound
-requests from that domain.
+Ordinary pages never call any of them: the gate exits before rules run. Use
+**Disable on this site** to stop outbound requests from a domain.
 
 ## Menu commands
 
-Right-click the userscript icon (or open the manager's script menu) to access:
+Right-click the userscript icon (or open the manager's script menu):
 
 | Command | What it does |
 | --- | --- |
@@ -213,71 +194,59 @@ The first rule that acts wins — order specific rules first.
 ## Development
 
 ```bash
-npm test                          # run the unit tests (node --test tests/*.test.js)
-node --check shortlink-skipper.user.js   # syntax check (also run by CI)
+npm test                          # node --test tests/*.test.js
+node --check shortlink-skipper.user.js
 ```
 
 The unit tests load the userscript in a `vm` sandbox with mocked
-`location`/`document` (no headless browser needed for most cases):
+`location`/`document` — no browser needed:
 
-- `tests/shortlink-skipper.test.js` — loads without error, registers the menu, does not interfere with Cloudflare challenges
-- `tests/handlers.test.js` — exercises `handleLinkvertiseEasy`, `handleAdLinkFly`, `handleBypassCity` and `BYPASS_SERVICE_URL`
-- `tests/lean.test.js` — confirms `main()` does not install heavy hooks on normal pages and that `setc-form` no longer triggers a 4s wait
+- `tests/shortlink-skipper.test.js` — boot, menu registration, Cloudflare pass-through
+- `tests/handlers.test.js` — rule handlers and destination validation
+- `tests/lean.test.js` — ordinary pages stay untouched (no heavy hooks)
+- `tests/robustness.test.js` — cache signature, interaction listeners, adblock sweeper, stats buffer, `readGlobal` cleanup
 
-CI runs the syntax check, the metadata check, a syntax check of the live
-harness files and `npm test` on every push to `main` and on every pull request.
+CI runs `node --check`, the metadata check, `npm test` and a syntax check of
+the live harness on every push and pull request.
 
 ### Live integration harness
 
-`test-live/` ships mock shortlink pages plus a CDP client for end-to-end
-validation in a real browser with Violentmonkey:
+`test-live/` runs mock shortlink pages in a real browser over CDP. It injects
+the userscript itself, so no userscript manager is required.
 
 ```bash
-npm run test:live             # run all cases (needs CDP on :9222)
-node test-live/run-all.js     # same runner; filter: node test-live/run-all.js ports
-node test-live/live.js        # single case under the hood (html, expect, [host], [path], [query])
-node test-live/server.js      # optional host-based mock (skiplink.io / linkvertise)
-node test-live/test-server.js # optional route-based mock on :18999
+npm run test:live                # all cases (needs CDP on :9222)
+node test-live/run-all.js ports  # one family
+node test-live/live.js <html> <expect> [host] [path] [query]
 ```
 
-Click-only rules are validated through `document.title` markers (`TITLE=`),
-navigating rules through the final URL. Cases can pin a fake host, path and
-query string for host-gated rules.
-
-Upstream drift is tracked monthly: `node test-live/upstream-gap.js` diffs
-adsbypasser's `@domain` coverage against our host lists (or set
-`ADSBYPASSER_DIR` to a local checkout), and the `Upstream sync` workflow
-refreshes a tracking issue with the result.
-
-Live tests are **not** part of the required CI job (they need a local browser
-with CDP). CI only syntax-checks the harness so it cannot rot silently.
+Click-only rules report through `document.title`; navigating rules through the
+final URL. Cases can pin a fake host, path and query string. The suite is not
+part of CI (it needs a browser); CI only syntax-checks the harness files.
+`node test-live/upstream-gap.js` diffs adsbypasser's `@domain` coverage and the
+`Upstream sync` workflow refreshes a tracking issue with the result.
 
 ### Branch flow
 
 - `main` is protected: PRs only, `Validate` must pass.
-- Prefer short PRs into `main` (matches how the project has been shipping).
-- Long-running work may use `dev`; after each merge to `main`, fast-forward
-  `dev` so it never falls behind (`git push origin main:dev`).
+- Prefer short PRs; long-running work may use `dev` (`git push origin main:dev` after each merge).
 
-### Releasing (manual smoke required)
+### Releasing
 
-There is no GitHub Releases pipeline (the old auto-release workflow was removed
-in `d80a521`). Installed users update by polling `@updateURL`/`@downloadURL`
-(raw file on `main`).
+There is no GitHub Releases pipeline. Installed users poll
+`@updateURL`/`@downloadURL`, so `main` is the release.
 
-Before bumping `@version` and merging to `main`:
+Before bumping `@version` and merging:
 
 1. `node --check shortlink-skipper.user.js`
 2. `npm test`
-3. With Chrome/Chromium + Violentmonkey and CDP on `:9222`:
-   `npm install && npm run test:live` — all cases must pass.
-4. Spot-check one real shortener chain if you changed a host list or gate.
-5. Bump `@version` in the userscript header (keep `package.json` in sync) and merge.
-
-Techniques are distilled from other projects, reimplemented in this codebase's
-rule format. See [Credits](#credits).
+3. `npm install && npm run test:live` with Chromium/Chrome listening on `:9222` — all cases must pass.
+4. Spot-check one real shortener chain if a host list or gate changed.
+5. Bump `@version` (keep `package.json` in sync) and merge.
 
 ## Credits
+
+Techniques are reimplemented in this codebase's rule format.
 
 | Source | License | What was taken |
 | --- | --- | --- |
@@ -285,10 +254,7 @@ rule format. See [Credits](#credits).
 | [ugiBypass v2.1.0](https://greasyfork.org/en/scripts/584507) by ugilabs | MIT | token-link, zafree-link-view, setc-form, bcvc flow, `#y` fallback |
 | [bypass-all-shortlinks-debloated](https://codeberg.org/Amm0ni4/bypass-all-shortlinks-debloated) by Amm0ni4 | mixed | acortalink, bstlar, linkvertise-easy, external-service concepts (AdGuard/FastForward lineage) |
 | [nOneCode4u/bypass-shortlinks](https://github.com/nOneCode4u/bypass-shortlinks) | Unlicense | network capture technique |
-| [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | bypass.tools as second-level resolver for hardened links |
+| [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | bypass.tools as second-level resolver and `service-last-resort` cascade; `cur_url` observation technique (reimplemented) |
 | Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
-| [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported); techniques used for `forumdinheiro` port (tRPC stage chain, `cur_url` body observation) also BSD-2-Clause |
-| Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
-| Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
-| [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | `service-last-resort` delegation cascade; `cur_url` observation technique (reimplemented, no dependency) |
+| [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported); `forumdinheiro` port (tRPC stage chain, `cur_url` body observation) |
