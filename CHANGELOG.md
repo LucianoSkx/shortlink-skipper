@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.11 — 2026-10-21
+
+### Fixed
+- **`katfile.vip` download link ignored.** The generic file-host rule looked for download text and a fixed set of ids, but the page exposes the file as `a[id="dlink"][href]`; the selector is now part of `findDownload`.
+
+### Tests
+- 1 new test for the `a#dlink` control.
+
 ## 1.13.10 — 2026-10-21
 
 ### Removed

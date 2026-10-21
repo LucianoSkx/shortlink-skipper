@@ -297,6 +297,16 @@ test('file-host finds #download-button controls', async () => {
   assert.ok(h.navs.includes('https://gofile.download/d/abc'));
 });
 
+test('file-host follows a#dlink controls', async () => {
+  const link = clickable({ tagName: 'A', href: 'https://katfile.vip/abc/file.rar' });
+  const h = load({
+    href: 'https://katfile.vip/xyz',
+    querySelector: (sel) => (sel.includes('dlink') ? link : null),
+  });
+  assert.strictEqual(await h.api.handleFileHost(), true);
+  assert.ok(h.navs.includes('https://katfile.vip/abc/file.rar'));
+});
+
 // --- forumdinheiro (adsbypasser port: tRPC stage chain) ---
 
 function forumdinheiroFetch(seen) {
