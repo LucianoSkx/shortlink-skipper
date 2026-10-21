@@ -230,7 +230,7 @@ syntax-checks the harness files; the suite runs on demand from
 ### Branch flow
 
 - `main` is protected: PRs only, `Validate` must pass.
-- Prefer short PRs; long-running work may use `dev` (`git push origin main:dev` after each merge).
+- Prefer short PRs.
 
 ### Releasing
 
