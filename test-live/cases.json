@@ -565,5 +565,15 @@
     "expect": "CLICKED-monetiza-1",
     "family": "encurta",
     "note": "live: monetiza.link submits form-continue (same family template)"
+  },
+  {
+    "id": "gallery-home-1",
+    "host": "giphy.com",
+    "path": "/gifs/gallery-home",
+    "search": "",
+    "html": "<meta property=\"og:image\" content=\"https://media.giphy.com/media/abc/giphy.gif\"><img src=\"https://media.giphy.com/media/abc/giphy.gif\"><h1>Giphy</h1><p>A normal gallery page.</p>",
+    "expect": "giphy.com/gifs/gallery-home",
+    "family": "gate",
+    "note": "normal gallery home must not be treated as a media shortener"
   }
 ]
