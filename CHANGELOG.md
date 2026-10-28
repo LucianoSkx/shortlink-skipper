@@ -1,3 +1,11 @@
+## 1.13.14 — 2026-10-28
+
+### Added
+- **Another pahe batch:** `devuploads`, `pndk` (invest.../crm.../go.fakta), `up-4ever` hosts as dedicated rules.
+
+### Tests
+- Unit tests for each new handler (happy path and host guard).
+
 ## 1.13.13 — 2026-10-28
 
 ### Added
