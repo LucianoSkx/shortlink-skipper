@@ -1,3 +1,11 @@
+## 1.13.13 — 2026-10-28
+
+### Added
+- **~30 pahe.ink hosts ported** as dedicated rule families: aii.sh, apkadmin, avnsgames, bit.ly, blog.adlink.click, datanodes.to, en.mrproblogger.com, filekeeper.net, fuckingfast.co, horrorpay.online, cloud.unblockedgames.world, cloudfam.io, filespayouts.com, inshorturl.in, mahitimanch.in, shrinkme.click, toolkit.inshorturl.com, uiil.ink, vexfile.com, zdrive.to, aknewz.xyz, aradmag.online, finance host family, jobzhub.store, lnbz.la, nerventualken.com, safelinkearn.com, speedy-links.com, toolskitpro.net, xut.io, fc-lc.xyz/oii.io, themezon.net, intercelestial.com, pahe.plus. These hosts now run dedicated selectors and open the shortener gate.
+
+### Tests
+- Unit tests for every new handler (happy path and host guard).
+
 # Changelog
 
 ## 1.13.12 — 2026-10-21

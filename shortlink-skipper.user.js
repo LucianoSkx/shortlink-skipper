@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.12
+// @version      1.13.13
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -116,7 +116,7 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -1598,6 +1598,40 @@
   // tRPC stage chain server-side (the server does not check the countdown),
   // same logic as src/sites/link/forumdinheiro.com.js.
   const FORUMDINHEIRO_HOST = /(^|\.)(forumdinheiro|guis2|tarviral|umconto)\.com$/;
+  const AII_SH_HOST = /(^|\.)aii\.sh$/;
+  const APKADMIN_HOST = /(^|\.)apkadmin\.com$/;
+  const AVNSGAMES_HOST = /(^|\.)avnsgames\.com$/;
+  const BITLY_HOST = /(^|\.)bit\.ly$/;
+  const BLOG_ADLINK_CLICK_HOST = /(^|\.)blog\.adlink\.click$/;
+  const DATANODES_HOST = /(^|\.)datanodes\.to$/;
+  const EN_MRPROBLOGGER_HOST = /(^|\.)en\.mrproblogger\.com$/;
+  const FILEKEEPER_HOST = /(^|\.)filekeeper\.net$/;
+  const FUCKINGFAST_HOST = /(^|\.)fuckingfast\.co$/;
+  const HORRORPAY_HOST = /(^|\.)horrorpay\.online$/;
+  const INTERCELESTIAL_HOST = /(^|\.)intercelestial\.com$/;
+  const PAHE_PLUS_HOST = /(^|\.)pahe\.plus$/;
+  const FCLC_HOST = /(^|\.)((fc-lc\.xyz)|oii\.io)$/;
+  const THEMEZON_HOST = /(^|\.)themezon\.net$/;
+  const AKNEWZ_HOST = /(^|\.)aknewz\.xyz$/;
+  const ARADMAG_HOST = /(^|\.)aradmag\.online$/;
+  const FINANCE_HOST = /(^|\.)((financeehelp|cloudhostt|financeguidz|techbixby|loanbixby)\.com)$/;
+  const JOBBZHUB_HOST = /(^|\.)jobzhub\.store$/;
+  const LNBZ_HOST = /(^|\.)lnbz\.la$/;
+  const NERVENTUALKEN_HOST = /(^|\.)nerventualken\.com$/;
+  const SAFELINKEARN_HOST = /(^|\.)safelinkearn\.com$/;
+  const SPEEDY_LINKS_HOST = /(^|\.)speedy-links\.com$/;
+  const TOOLSKITPRO_HOST = /(^|\.)toolskitpro\.net$/;
+  const XUT_HOST = /(^|\.)xut\.io$/;
+  const CLOUD_UNBLOCKED_GAMES_HOST = /(^|\.)cloud\.unblockedgames\.world$/;
+  const CLOUdfAM_HOST = /(^|\.)cloudfam\.io$/;
+  const FILESPAYOUTS_HOST = /(^|\.)filespayouts\.com$/;
+  const INSHORTURL_IN_HOST = /(^|\.)inshorturl\.in$/;
+  const MAHITIMANCH_HOST = /(^|\.)mahitimanch\.in$/;
+  const SHRINKME_CLICK_HOST = /(^|\.)shrinkme\.click$/;
+  const TOOLKIT_INSHORTURL_HOST = /(^|\.)toolkit\.inshorturl\.com$/;
+  const UIIL_INK_HOST = /(^|\.)uiil\.ink$/;
+  const VEXFILE_HOST = /(^|\.)vexfile\.com$/;
+  const ZDRIVE_HOST = /(^|\.)zdrive\.to$/;
   async function handleForumdinheiro() {
     if (!FORUMDINHEIRO_HOST.test(location.host)) return false;
     log('forumdinheiro family detected, walking stage chain');
@@ -1656,6 +1690,252 @@
     return tail ? tryB64(tail[0]) : null;
   }
 
+  async function handleAiiSh() {
+    if (!AII_SH_HOST.test(location.host)) return false;
+    log('aii.sh detected, solving turnstile then following final button');
+    await clickSelectorWhen('button#continue', 9000);
+    return openSelectorHref('.btn-primary[href]:not(.disabled)', 9000);
+  }
+
+  async function handleApkadmin() {
+    if (!APKADMIN_HOST.test(location.host)) return false;
+    return clickSelectorWhen('#downloadbtn', 9000);
+  }
+
+  async function handleAvnsgames() {
+    if (!AVNSGAMES_HOST.test(location.host)) return false;
+    return clickSelectorWhen('#getnewlink', 9000);
+  }
+
+  async function handleBitly() {
+    if (!BITLY_HOST.test(location.host)) return false;
+    return clickSelectorWhen('[id="action:continue"]', 9000);
+  }
+
+  async function handleBlogAdlinkClick() {
+    if (!BLOG_ADLINK_CLICK_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.btn.get-link', 9000);
+  }
+
+  async function handleDatanodes() {
+    if (!DATANODES_HOST.test(location.host)) return false;
+    log('datanodes detected, walking download stages');
+    let acted = await clickSelectorWhen('#method_free:not([disabled])', 9000);
+    const free = await waitFor(() => findByText(/Free Download/i), 2000);
+    if (free) { fireClick(free); acted = true; }
+    const start = await waitFor(() => findByText(/Start Download/i), 2000);
+    if (start) { fireClick(start); acted = true; }
+    return acted;
+  }
+
+  async function handleEnMrproblogger() {
+    if (!EN_MRPROBLOGGER_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.get-link:not(.disabled)', 9000);
+  }
+
+  async function handleFilekeeper() {
+    if (!FILEKEEPER_HOST.test(location.host)) return false;
+    return clickSelectorWhen('#download-button', 9000);
+  }
+
+  async function handleFuckingFast() {
+    if (!FUCKINGFAST_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.link-button', 9000);
+  }
+
+  async function handleHorrorpay() {
+    if (!HORRORPAY_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.get-link:not(.disabled)', 9000);
+  }
+
+  async function handleCloudUnblockedGames() {
+    if (!CLOUD_UNBLOCKED_GAMES_HOST.test(location.host)) return false;
+    let acted = false;
+    const start = await waitFor(() => findByText(/Start Verification/i), 1000);
+    if (start) { fireClick(start); acted = true; }
+    if (await clickSelectorWhen('#verify_button2', 9000)) acted = true;
+    if (await clickSelectorWhen('#verify_button', 9000)) acted = true;
+    if (await openSelectorHref('#two_steps_btn[href]', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleCloudfam() {
+    if (!CLOUdfAM_HOST.test(location.host)) return false;
+    let acted = false;
+    for (const sel of ['#btn-clean-continue[href]', '#cf-btn-free[href]', '#free-btn[href]', '#cf-dl-btn[href]']) {
+      if (await openSelectorHref(sel, 5000)) acted = true;
+    }
+    return acted;
+  }
+
+  async function handleFilespayouts() {
+    if (!FILESPAYOUTS_HOST.test(location.host)) return false;
+    return clickSelectorWhen('#method_free', 9000);
+  }
+
+  async function handleInshorturlIn() {
+    if (!INSHORTURL_IN_HOST.test(location.host)) return false;
+    return openSelectorHref('#ts-get-link[href^="https"]', 9000);
+  }
+
+  async function handleMahitimanch() {
+    if (!MAHITIMANCH_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('#link', 9000)) acted = true;
+    if (await clickSelectorWhen('#linkx', 9000)) acted = true;
+    if (await openSelectorHref('#gtelinkbtn', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleShrinkmeClick() {
+    if (!SHRINKME_CLICK_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('.btn-primary:not([disabled])', 9000)) acted = true;
+    if (await clickSelectorWhen('.get-link:not(.disabled)', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleToolkitInshorturl() {
+    if (!TOOLKIT_INSHORTURL_HOST.test(location.host)) return false;
+    return openSelectorHref('#lkActions a[href]', 9000);
+  }
+
+  async function handleUiilInk() {
+    if (!UIIL_INK_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('#form-continue [type="submit"]', 9000)) acted = true;
+    if (await clickSelectorWhen('#multiLinkBtn:not(.disabled)', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleVexfile() {
+    if (!VEXFILE_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.generate-link:not(.blocked)', 9000);
+  }
+
+  async function handleZdrive() {
+    if (!ZDRIVE_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('#freeBtn', 9000)) acted = true;
+    if (await clickSelectorWhen('#down_1Form button', 9000)) acted = true;
+    if (await clickSelectorWhen('#down_2Form button', 9000)) acted = true;
+    if (await clickSelectorWhen('.btn-download:not(.disabled)', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleAknewz() {
+    if (!AKNEWZ_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('#next', 9000)) acted = true;
+    if (await clickSelectorWhen('#scroll:not(.hidden)', 9000)) acted = true;
+    if (await clickSelectorWhen('#scroll:not(.hidden)', 9000)) acted = true;
+    if (await clickSelectorWhen('[id="surl"]', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleAradmag() {
+    if (!ARADMAG_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('[id^="ow_step"]:last-of-type button', 9000)) acted = true;
+    if (await clickSelectorWhen('#offerContinueBtn', 9000)) acted = true;
+    if (await clickSelectorWhen('#continueBtn:not([disabled])', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleFinanceHost() {
+    if (!FINANCE_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('#startButton', 9000)) acted = true;
+    if (await clickSelectorWhen('a[href="#getmylink"]', 9000)) acted = true;
+    if (await clickSelectorWhen('#getnewlink', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleJobzhub() {
+    if (!JOBBZHUB_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('#next', 9000)) acted = true;
+    if (await clickSelectorWhen('#scroll', 9000)) acted = true;
+    if (await clickSelectorWhen('#glink', 9000)) acted = true;
+    if (await clickSelectorWhen('[id="surl"]', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleLnbz() {
+    if (!LNBZ_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('[id="continue"]', 9000)) acted = true;
+    if (await openSelectorHref('.get-link:not(.disabled)', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleNerventualken() {
+    if (!NERVENTUALKEN_HOST.test(location.host)) return false;
+    return clickSelectorWhen('[id="go"]', 9000);
+  }
+
+  async function handleSafelinkearn() {
+    if (!SAFELINKEARN_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.open-btn', 9000);
+  }
+
+  async function handleSpeedyLinks() {
+    if (!SPEEDY_LINKS_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('[data-task]', 9000)) acted = true;
+    if (await clickSelectorWhen('.d31-unlock-btn.enabled', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleToolskitpro() {
+    if (!TOOLSKITPRO_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('.show #afterBtn', 9000)) acted = true;
+    if (await clickSelectorWhen('#nxt', 9000)) acted = true;
+    if (await clickSelectorWhen('#getl', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleXut() {
+    if (!XUT_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('#sl-primary:not([disabled])', 9000)) acted = true;
+    if (await openSelectorHref('.get-link:not(.disabled)', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleFclc() {
+    if (!FCLC_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('button#hCaptchaShortlink', 9000)) acted = true;
+    if (await clickSelectorWhen('button#submitBtn', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handleThemezon() {
+    if (!THEMEZON_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('button#smg-arm:not([disabled])', 9000)) acted = true;
+    if (await clickSelectorWhen('form:not([hidden]) .smg-go:not([disabled])', 9000)) acted = true;
+    return acted;
+  }
+  async function handleIntercelestial() {
+    if (!INTERCELESTIAL_HOST.test(location.host)) return false;
+    let acted = false;
+    for (let i = 0; i < 3; i++) {
+      if (await clickSelectorWhen('.myButton', 9000)) acted = true;
+    }
+    if (await openSelectorHref('#xxc[href]', 9000)) acted = true;
+    return acted;
+  }
+
+  async function handlePahePlus() {
+    if (!PAHE_PLUS_HOST.test(location.host)) return false;
+    let acted = false;
+    if (await clickSelectorWhen('[id="invisibleCaptchaShortlink"]:not([disabled])', 9000)) acted = true;
+    if (await openSelectorHref('.get-link[href^="https://"]:not(.disabled)', 9000)) acted = true;
+    return acted;
+  }
   async function handleTokenLink() {
     if (!TOKEN_HOST.test(location.host)) return false;
     log('token shortener detected');
@@ -2528,6 +2808,40 @@
     { name: 'go-linkify', when: () => /^go\.linkify\.ru$/.test(location.host), run: handleGoLinkify },
     { name: 'network-loop', when: () => /(^|\.)network-loop\.com$/.test(location.host), run: handleNetworkLoop },
     { name: 'get-click2', when: () => /^get-click2\.blogspot\.com$/.test(location.host), run: handleGetClick2 },
+    { name: 'aii-sh', when: () => AII_SH_HOST.test(location.host), run: handleAiiSh },
+    { name: 'apkadmin', when: () => APKADMIN_HOST.test(location.host), run: handleApkadmin },
+    { name: 'avnsgames', when: () => AVNSGAMES_HOST.test(location.host), run: handleAvnsgames },
+    { name: 'bitly', when: () => BITLY_HOST.test(location.host), run: handleBitly },
+    { name: 'blog-adlink-click', when: () => BLOG_ADLINK_CLICK_HOST.test(location.host), run: handleBlogAdlinkClick },
+    { name: 'datanodes', when: () => DATANODES_HOST.test(location.host), run: handleDatanodes },
+    { name: 'en-mrproblogger', when: () => EN_MRPROBLOGGER_HOST.test(location.host), run: handleEnMrproblogger },
+    { name: 'filekeeper', when: () => FILEKEEPER_HOST.test(location.host), run: handleFilekeeper },
+    { name: 'fucking-fast', when: () => FUCKINGFAST_HOST.test(location.host), run: handleFuckingFast },
+    { name: 'horrorpay', when: () => HORRORPAY_HOST.test(location.host), run: handleHorrorpay },
+    { name: 'cloud-unblockedgames', when: () => CLOUD_UNBLOCKED_GAMES_HOST.test(location.host), run: handleCloudUnblockedGames },
+    { name: 'cloudfam', when: () => CLOUdfAM_HOST.test(location.host), run: handleCloudfam },
+    { name: 'filespayouts', when: () => FILESPAYOUTS_HOST.test(location.host), run: handleFilespayouts },
+    { name: 'inshorturl-in', when: () => INSHORTURL_IN_HOST.test(location.host), run: handleInshorturlIn },
+    { name: 'mahitimanch', when: () => MAHITIMANCH_HOST.test(location.host), run: handleMahitimanch },
+    { name: 'shrinkme-click', when: () => SHRINKME_CLICK_HOST.test(location.host), run: handleShrinkmeClick },
+    { name: 'toolkit-inshorturl', when: () => TOOLKIT_INSHORTURL_HOST.test(location.host), run: handleToolkitInshorturl },
+    { name: 'uiil-ink', when: () => UIIL_INK_HOST.test(location.host), run: handleUiilInk },
+    { name: 'vexfile', when: () => VEXFILE_HOST.test(location.host), run: handleVexfile },
+    { name: 'zdrive', when: () => ZDRIVE_HOST.test(location.host), run: handleZdrive },
+    { name: 'aknewz', when: () => AKNEWZ_HOST.test(location.host), run: handleAknewz },
+    { name: 'aradmag', when: () => ARADMAG_HOST.test(location.host), run: handleAradmag },
+    { name: 'finance-host', when: () => FINANCE_HOST.test(location.host), run: handleFinanceHost },
+    { name: 'jobzhub', when: () => JOBBZHUB_HOST.test(location.host), run: handleJobzhub },
+    { name: 'lnbz', when: () => LNBZ_HOST.test(location.host), run: handleLnbz },
+    { name: 'nerventualken', when: () => NERVENTUALKEN_HOST.test(location.host), run: handleNerventualken },
+    { name: 'safelinkearn', when: () => SAFELINKEARN_HOST.test(location.host), run: handleSafelinkearn },
+    { name: 'speedy-links', when: () => SPEEDY_LINKS_HOST.test(location.host), run: handleSpeedyLinks },
+    { name: 'toolskitpro', when: () => TOOLSKITPRO_HOST.test(location.host), run: handleToolskitpro },
+    { name: 'xut', when: () => XUT_HOST.test(location.host), run: handleXut },
+    { name: 'fclc', when: () => FCLC_HOST.test(location.host), run: handleFclc },
+    { name: 'themezon', when: () => THEMEZON_HOST.test(location.host), run: handleThemezon },
+    { name: 'intercelestial', when: () => INTERCELESTIAL_HOST.test(location.host), run: handleIntercelestial },
+    { name: 'pahe-plus', when: () => PAHE_PLUS_HOST.test(location.host), run: handlePahePlus },
     { name: 'forumdinheiro', when: () => FORUMDINHEIRO_HOST.test(location.host), run: handleForumdinheiro },
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
     { name: 'wp-content-lock', when: () => WP_CONTENT_LOCK_HOST.test(location.host), run: handleWpContentLock },
@@ -2878,6 +3192,40 @@
       handleNetworkLoop,
       handleGetClick2,
       handleForumdinheiro,
+      handleAiiSh,
+      handleApkadmin,
+      handleAvnsgames,
+      handleBitly,
+      handleBlogAdlinkClick,
+      handleDatanodes,
+      handleEnMrproblogger,
+      handleFilekeeper,
+      handleFuckingFast,
+      handleHorrorpay,
+      handleIntercelestial,
+      handlePahePlus,
+      handleFclc,
+      handleThemezon,
+      handleCloudUnblockedGames,
+      handleCloudfam,
+      handleFilespayouts,
+      handleInshorturlIn,
+      handleMahitimanch,
+      handleShrinkmeClick,
+      handleToolkitInshorturl,
+      handleUiilInk,
+      handleVexfile,
+      handleZdrive,
+      handleAknewz,
+      handleAradmag,
+      handleFinanceHost,
+      handleJobzhub,
+      handleLnbz,
+      handleNerventualken,
+      handleSafelinkearn,
+      handleSpeedyLinks,
+      handleToolskitpro,
+      handleXut,
       clickSelectorWhen,
       openSelectorHref,
       queryShadowDeep,

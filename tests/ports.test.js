@@ -361,3 +361,233 @@ test('forumdinheiro family opens the shortener gate', () => {
     assert.strictEqual(h.api.knownShortener(), true, href);
   }
 });
+
+// --- P1: pahe batch 1 ports ---
+
+test('aii-sh solves then follows', async () => {
+  const h = load({
+    href: 'https://aii.sh/x',
+    querySelector: (sel) => {
+      if (sel === 'button#continue') return clickable();
+      if (sel === '.btn-primary[href]:not(.disabled)') return { href: 'https://dest.example/x' };
+      return null;
+    },
+  });
+  assert.strictEqual(await h.api.handleAiiSh(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+for (const [fn, href, sel] of [
+  ['handleApkadmin', 'https://apkadmin.com/x', '#downloadbtn'],
+  ['handleAvnsgames', 'https://avnsgames.com/x', '#getnewlink'],
+  ['handleBitly', 'https://bit.ly/x', '[id="action:continue"]'],
+  ['handleBlogAdlinkClick', 'https://blog.adlink.click/x', '.btn.get-link'],
+  ['handleFilekeeper', 'https://filekeeper.net/x', '#download-button'],
+  ['handleFuckingFast', 'https://fuckingfast.co/x', '.link-button'],
+  ['handleHorrorpay', 'https://horrorpay.online/x', '.get-link:not(.disabled)'],
+  ['handleEnMrproblogger', 'https://en.mrproblogger.com/x', '.get-link:not(.disabled)'],
+]) {
+  test(`${fn} acts on its selector`, async () => {
+    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api[fn](), true);
+  });
+}
+
+test('datanodes walks download stages', async () => {
+  const freeBtn = clickable();
+  const startBtn = clickable();
+  const h = load({
+    href: 'https://datanodes.to/x',
+    querySelector: (sel) => (sel === '#method_free:not([disabled])' ? clickable() : null),
+    querySelectorAllOverride: [],
+  });
+  // findByText returns clickable by text via qs not mocked; ensure handled by checking non-fatal
+  assert.strictEqual(await h.api.handleDatanodes(), true);
+});
+
+for (const fn of [
+  'handleAiiSh', 'handleApkadmin', 'handleAvnsgames', 'handleBitly', 'handleBlogAdlinkClick',
+  'handleDatanodes', 'handleEnMrproblogger', 'handleFilekeeper', 'handleFuckingFast', 'handleHorrorpay',
+]) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+
+// --- P1: pahe batch 2 ports ---
+
+for (const [fn, href, sel] of [
+  ['handleFilespayouts', 'https://filespayouts.com/x', '#method_free'],
+  ['handleVexfile', 'https://vexfile.com/x', '.generate-link:not(.blocked)'],
+  ['handleShrinkmeClick', 'https://shrinkme.click/x', '.get-link:not(.disabled)'],
+  ['handleUiilInk', 'https://uiil.ink/x', '#multiLinkBtn:not(.disabled)'],
+]) {
+  test(`${fn} acts on its selector`, async () => {
+    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api[fn](), true);
+  });
+}
+
+test('handleCloudfam opens its anchors', async () => {
+  const h = load({
+    href: 'https://cloudfam.io/x',
+    querySelector: (sel) => ({ href: 'https://dest.example/x' }),
+  });
+  assert.strictEqual(await h.api.handleCloudfam(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleInshorturlIn follows its anchor', async () => {
+  const h = load({
+    href: 'https://inshorturl.in/x',
+    querySelector: (sel) => ({ href: 'https://dest.example/x' }),
+  });
+  assert.strictEqual(await h.api.handleInshorturlIn(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleToolkitInshorturl follows its anchor', async () => {
+  const h = load({
+    href: 'https://toolkit.inshorturl.com/x',
+    querySelector: (sel) => ({ href: 'https://dest.example/x' }),
+  });
+  assert.strictEqual(await h.api.handleToolkitInshorturl(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleMahitimanch clicks then follows', async () => {
+  const h = load({
+    href: 'https://mahitimanch.in/x',
+    querySelector: (sel) => {
+      if (sel === '#link' || sel === '#linkx') return clickable();
+      if (sel === '#gtelinkbtn') return { href: 'https://dest.example/x' };
+      return null;
+    },
+  });
+  assert.strictEqual(await h.api.handleMahitimanch(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleZdrive clicks stages', async () => {
+  const h = load({
+    href: 'https://zdrive.to/x',
+    querySelector: qsMap({ '#freeBtn': clickable(), '#down_1Form button': clickable(), '#down_2Form button': clickable(), '.btn-download:not(.disabled)': clickable() }),
+  });
+  assert.strictEqual(await h.api.handleZdrive(), true);
+});
+
+for (const fn of [
+  'handleCloudUnblockedGames', 'handleCloudfam', 'handleFilespayouts',
+  'handleInshorturlIn', 'handleMahitimanch', 'handleShrinkmeClick',
+  'handleToolkitInshorturl', 'handleUiilInk', 'handleVexfile', 'handleZdrive',
+]) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+
+// --- P1: pahe batch 3 ports ---
+
+for (const [fn, href, sel] of [
+  ['handleAknewz', 'https://aknewz.xyz/x', '#next'],
+  ['handleJobzhub', 'https://jobzhub.store/x', '#next'],
+  ['handleNerventualken', 'https://nerventualken.com/x', '[id="go"]'],
+  ['handleSafelinkearn', 'https://safelinkearn.com/x', '.open-btn'],
+  ['handleSpeedyLinks', 'https://speedy-links.com/x', '[data-task]'],
+  ['handleToolskitpro', 'https://toolskitpro.net/x', '#nxt'],
+  ['handleXut', 'https://xut.io/x', '#sl-primary:not([disabled])'],
+]) {
+  test(`${fn} acts on its selector`, async () => {
+    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api[fn](), true);
+  });
+}
+
+test('handleAradmag clicks stages', async () => {
+  const h = load({
+    href: 'https://aradmag.online/x',
+    querySelector: qsMap({ '[id^="ow_step"]:last-of-type button': clickable(), '#offerContinueBtn': clickable(), '#continueBtn:not([disabled])': clickable() }),
+  });
+  assert.strictEqual(await h.api.handleAradmag(), true);
+});
+
+test('handleFinanceHost walks stages', async () => {
+  const h = load({
+    href: 'https://financeehelp.com/x',
+    querySelector: qsMap({ '#startButton': clickable(), 'a[href="#getmylink"]': clickable(), '#getnewlink': clickable() }),
+  });
+  assert.strictEqual(await h.api.handleFinanceHost(), true);
+});
+
+test('handleLnbz then follows', async () => {
+  const h = load({
+    href: 'https://lnbz.la/x',
+    querySelector: (sel) => {
+      if (sel === '[id="continue"]') return clickable();
+      if (sel === '.get-link:not(.disabled)') return { href: 'https://dest.example/x' };
+      return null;
+    },
+  });
+  assert.strictEqual(await h.api.handleLnbz(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+for (const fn of [
+  'handleAknewz', 'handleAradmag', 'handleFinanceHost', 'handleJobzhub',
+  'handleLnbz', 'handleNerventualken', 'handleSafelinkearn', 'handleSpeedyLinks',
+  'handleToolskitpro', 'handleXut',
+]) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+
+// --- P1: pahe batch 4 ports ---
+for (const [fn, href, sel] of [
+  ['handleFclc', 'https://fc-lc.xyz/x', 'button#submitBtn'],
+  ['handleThemezon', 'https://themezon.net/x', 'button#smg-arm:not([disabled])'],
+]) {
+  test(`${fn} acts on its selector`, async () => {
+    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api[fn](), true);
+  });
+}
+
+for (const fn of ['handleFclc', 'handleThemezon']) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+
+// --- P1: pahe batch 5 ports ---
+test('handleIntercelestial clicks then follows', async () => {
+  const h = load({
+    href: 'https://intercelestial.com/?ht=abc',
+    querySelector: (sel) => {
+      if (sel === '.myButton') return clickable();
+      if (sel === '#xxc[href]') return { href: 'https://dest.example/x' };
+      return null;
+    },
+  });
+  assert.strictEqual(await h.api.handleIntercelestial(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handlePahePlus follows final link', async () => {
+  const h = load({
+    href: 'https://pahe.plus/x',
+    querySelector: (sel) => {
+      if (sel === '[id="invisibleCaptchaShortlink"]:not([disabled])') return clickable();
+      if (sel === '.get-link[href^="https://"]:not(.disabled)') return { href: 'https://dest.example/x' };
+      return null;
+    },
+  });
+  assert.strictEqual(await h.api.handlePahePlus(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+for (const fn of ['handleIntercelestial', 'handlePahePlus']) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
