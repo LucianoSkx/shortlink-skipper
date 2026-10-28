@@ -608,3 +608,16 @@ for (const fn of ['handleDevuploads', 'handlePndk', 'handleUp4Ever']) {
     assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
   });
 }
+
+// --- P1: pahe batch 7 (coinclix / geekgrove) ---
+for (const [fn, href] of [
+  ['handleCoinclix', 'https://coinclix.co/x'],
+  ['handleGeekgrove', 'https://geekgrove.net/x'],
+]) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+test('handleGeekgrove ignores other hosts already (placeholder)', async () => {
+  assert.strictEqual(await load({ href: 'https://example.com/' }).api.handleGeekgrove(), false);
+});

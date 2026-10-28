@@ -1,3 +1,11 @@
+## 1.13.15 — 2026-10-28
+
+### Added
+- **pahe coinclix/geekgrove flow ported** (button navigation, geekgrove `/link/process/` destination resolution, return-key handoff via GM storage).
+
+### Tests
+- Host-guard tests for both new handlers.
+
 ## 1.13.14 — 2026-10-28
 
 ### Added
