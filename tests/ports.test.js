@@ -591,3 +591,33 @@ for (const fn of ['handleIntercelestial', 'handlePahePlus']) {
     assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
   });
 }
+
+// --- P1: pahe batch 6 ports ---
+for (const [fn, href, sel] of [
+  ['handleDevuploads', 'https://djxmaza.in/x', '#gdl'],
+  ['handlePndk', 'https://invest.datapendidikan.com/x', '#continue'],
+  ['handleUp4Ever', 'https://www.up-4ever.net/x', 'button[name="method_free"]'],
+]) {
+  test(`${fn} acts on its selector`, async () => {
+    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api[fn](), true);
+  });
+}
+for (const fn of ['handleDevuploads', 'handlePndk', 'handleUp4Ever']) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+
+// --- P1: pahe batch 7 (coinclix / geekgrove) ---
+for (const [fn, href] of [
+  ['handleCoinclix', 'https://coinclix.co/x'],
+  ['handleGeekgrove', 'https://geekgrove.net/x'],
+]) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+test('handleGeekgrove ignores other hosts already (placeholder)', async () => {
+  assert.strictEqual(await load({ href: 'https://example.com/' }).api.handleGeekgrove(), false);
+});
