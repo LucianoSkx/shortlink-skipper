@@ -621,3 +621,19 @@ for (const [fn, href] of [
 test('handleGeekgrove ignores other hosts already (placeholder)', async () => {
   assert.strictEqual(await load({ href: 'https://example.com/' }).api.handleGeekgrove(), false);
 });
+
+// --- P1: pahe batch 8 ---
+for (const [fn, href, sel] of [
+  ['handleFileUploadOrg', 'https://www.file-upload.org/x', 'button[name="method_free"]'],
+  ['handleUpfilesgo', 'https://upfilesgo.com/x', '#link-button-free:not([disabled])'],
+]) {
+  test(`${fn} acts on its selector`, async () => {
+    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api[fn](), true);
+  });
+}
+for (const fn of ['handleFileUploadOrg', 'handleUpfilesgo']) {
+  test(`${fn} ignores other hosts`, async () => {
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}

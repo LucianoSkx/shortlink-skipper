@@ -1,3 +1,11 @@
+## 1.13.16 — 2026-10-29
+
+### Added
+- **pahe file-upload hosts:** `www.file-upload.org`, `upfilesgo.com` as dedicated rules.
+
+### Tests
+- Unit tests for both new handlers.
+
 ## 1.13.15 — 2026-10-28
 
 ### Added
