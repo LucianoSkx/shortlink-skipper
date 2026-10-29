@@ -126,6 +126,11 @@ unlockers) are detected and left alone — they validate server-side.
 | `forumdinheiro` | Walks the tRPC stage chain server-side (port of adsbypasser `link/forumdinheiro.com.js`; `forumdinheiro.com`, `guis2.com`, `tarviral.com`, `umconto.com`) |
 | `setc-form` | Follows the `form#setc` action, or decodes the `#landing` `go` field (any host) |
 
+### Pahe-ported families
+
+Dedicated rules were added for pahe.ink and related hosts (see changelog 1.13.13+):
+aii.sh, apkadmin.com, avnsgames.com, bit.ly, blog.adlink.click, datanodes.to, en.mrproblogger.com, filekeeper.net, fuckingfast.co, horrorpay.online, cloud.unblockedgames.world, cloudfam.io, filespayouts.com, inshorturl.in, mahitimanch.in, shrinkme.click, toolkit.inshorturl.com, uiil.ink, vexfile.com, zdrive.to, aknewz.xyz, aradmag.online, finance host family, jobzhub.store, lnbz.la, nerventualken.com, safelinkearn.com, speedy-links.com, toolskitpro.net, xut.io, fc-lc.xyz/oii.io, themezon.net, intercelestial.com, pahe.plus, devuploads family, pndk family, www.up-4ever.net, coinclix.co, geekgrove.net, www.file-upload.org, upfilesgo.com.
+
 </details>
 
 ## Safety and security
