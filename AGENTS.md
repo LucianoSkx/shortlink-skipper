@@ -38,8 +38,10 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
    e lista do gate. Só no handler = regra morta (ex.: `croea.com` antes da
    1.13.6).
 6. Teste em `tests/` (ver `tests/ports.test.js` como modelo): caminho feliz
-   com mocks + `false` em outro host. `waitFor` resolve de imediato com mock
-   presente, então testes ficam rápidos.
+   com mocks + `false` em outro host. `waitFor` resolve de imediato apenas para
+   o seletor mockado — handler que encadeia estágios precisa de **todos** eles
+   no mock, senão cada estágio ausente custa 9s de timeout (foi o que deixou a
+   suíte em 211s).
 7. Docs: linha na tabela de regras do `README.md` + entrada no `CHANGELOG.md`.
 
 ## Restrições duras
