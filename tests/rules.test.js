@@ -317,10 +317,16 @@ test('zafree fills the link-view coordinates and submits', async () => {
   };
   const h = load({
     href: 'https://za.gl/abc',
-    querySelector: (sel) => (sel === 'form#link-view' ? form : null),
+    querySelector: (sel) => {
+      if (sel === 'form#link-view') return form;
+      // Destination shown after submit: avoids the 10s post-submit wait.
+      if (sel === 'a[href^="http"]') return { href: 'https://dest.example/x' };
+      return null;
+    },
   });
   const ok = await h.api.handleZafree();
   assert.ok(ok);
+  assert.ok(h.navs.includes('https://dest.example/x'), 'follows the destination after submit');
   assert.strictEqual(inputs['#x'].value, '192');
   assert.strictEqual(inputs['input[name="givenX"]'].value, 'VFl0utOEF6a7BiS8YJdqTg==');
 });

@@ -416,14 +416,16 @@ for (const fn of [
 
 // --- P1: pahe batch 2 ports ---
 
-for (const [fn, href, sel] of [
-  ['handleFilespayouts', 'https://filespayouts.com/x', '#method_free'],
-  ['handleVexfile', 'https://vexfile.com/x', '.generate-link:not(.blocked)'],
-  ['handleShrinkmeClick', 'https://shrinkme.click/x', '.get-link:not(.disabled)'],
-  ['handleUiilInk', 'https://uiil.ink/x', '#multiLinkBtn:not(.disabled)'],
+// Stage chains: the mock answers every selector the handler walks, so no step
+// burns its 9s waitFor timeout (each miss used to add 9s to this file).
+for (const [fn, href, sels] of [
+  ['handleFilespayouts', 'https://filespayouts.com/x', ['#method_free']],
+  ['handleVexfile', 'https://vexfile.com/x', ['.generate-link:not(.blocked)']],
+  ['handleShrinkmeClick', 'https://shrinkme.click/x', ['.btn-primary:not([disabled])', '.get-link:not(.disabled)']],
+  ['handleUiilInk', 'https://uiil.ink/x', ['#form-continue [type="submit"]', '#multiLinkBtn:not(.disabled)']],
 ]) {
   test(`${fn} acts on its selector`, async () => {
-    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    const h = load({ href, querySelector: qsMap(Object.fromEntries(sels.map((sel) => [sel, clickable()]))) });
     assert.strictEqual(await h.api[fn](), true);
   });
 }
@@ -488,17 +490,17 @@ for (const fn of [
 
 // --- P1: pahe batch 3 ports ---
 
-for (const [fn, href, sel] of [
-  ['handleAknewz', 'https://aknewz.xyz/x', '#next'],
-  ['handleJobzhub', 'https://jobzhub.store/x', '#next'],
-  ['handleNerventualken', 'https://nerventualken.com/x', '[id="go"]'],
-  ['handleSafelinkearn', 'https://safelinkearn.com/x', '.open-btn'],
-  ['handleSpeedyLinks', 'https://speedy-links.com/x', '[data-task]'],
-  ['handleToolskitpro', 'https://toolskitpro.net/x', '#nxt'],
-  ['handleXut', 'https://xut.io/x', '#sl-primary:not([disabled])'],
+for (const [fn, href, sels] of [
+  ['handleAknewz', 'https://aknewz.xyz/x', ['#next', '#scroll:not(.hidden)', '[id="surl"]']],
+  ['handleJobzhub', 'https://jobzhub.store/x', ['#next', '#scroll', '#glink', '[id="surl"]']],
+  ['handleNerventualken', 'https://nerventualken.com/x', ['[id="go"]']],
+  ['handleSafelinkearn', 'https://safelinkearn.com/x', ['.open-btn']],
+  ['handleSpeedyLinks', 'https://speedy-links.com/x', ['[data-task]', '.d31-unlock-btn.enabled']],
+  ['handleToolskitpro', 'https://toolskitpro.net/x', ['.show #afterBtn', '#nxt', '#getl']],
+  ['handleXut', 'https://xut.io/x', ['#sl-primary:not([disabled])', '.get-link:not(.disabled)']],
 ]) {
   test(`${fn} acts on its selector`, async () => {
-    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    const h = load({ href, querySelector: qsMap(Object.fromEntries(sels.map((sel) => [sel, clickable()]))) });
     assert.strictEqual(await h.api[fn](), true);
   });
 }
@@ -543,12 +545,12 @@ for (const fn of [
 }
 
 // --- P1: pahe batch 4 ports ---
-for (const [fn, href, sel] of [
-  ['handleFclc', 'https://fc-lc.xyz/x', 'button#submitBtn'],
-  ['handleThemezon', 'https://themezon.net/x', 'button#smg-arm:not([disabled])'],
+for (const [fn, href, sels] of [
+  ['handleFclc', 'https://fc-lc.xyz/x', ['button#hCaptchaShortlink', 'button#submitBtn']],
+  ['handleThemezon', 'https://themezon.net/x', ['button#smg-arm:not([disabled])', 'form:not([hidden]) .smg-go:not([disabled])']],
 ]) {
   test(`${fn} acts on its selector`, async () => {
-    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    const h = load({ href, querySelector: qsMap(Object.fromEntries(sels.map((sel) => [sel, clickable()]))) });
     assert.strictEqual(await h.api[fn](), true);
   });
 }
@@ -593,13 +595,13 @@ for (const fn of ['handleIntercelestial', 'handlePahePlus']) {
 }
 
 // --- P1: pahe batch 6 ports ---
-for (const [fn, href, sel] of [
-  ['handleDevuploads', 'https://djxmaza.in/x', '#gdl'],
-  ['handlePndk', 'https://invest.datapendidikan.com/x', '#continue'],
-  ['handleUp4Ever', 'https://www.up-4ever.net/x', 'button[name="method_free"]'],
+for (const [fn, href, sels] of [
+  ['handleDevuploads', 'https://djxmaza.in/x', ['#gdl', '#gdlf', '#dln']],
+  ['handlePndk', 'https://invest.datapendidikan.com/x', ['#continue', '#next-btn button']],
+  ['handleUp4Ever', 'https://www.up-4ever.net/x', ['button[name="method_free"]', '#downloadbtn', '[type="submit"]:not([disabled])', '#dl2btn']],
 ]) {
   test(`${fn} acts on its selector`, async () => {
-    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    const h = load({ href, querySelector: qsMap(Object.fromEntries(sels.map((sel) => [sel, clickable()]))) });
     assert.strictEqual(await h.api[fn](), true);
   });
 }
@@ -623,12 +625,12 @@ test('handleGeekgrove ignores other hosts already (placeholder)', async () => {
 });
 
 // --- P1: pahe batch 8 ---
-for (const [fn, href, sel] of [
-  ['handleFileUploadOrg', 'https://www.file-upload.org/x', 'button[name="method_free"]'],
-  ['handleUpfilesgo', 'https://upfilesgo.com/x', '#link-button-free:not([disabled])'],
+for (const [fn, href, sels] of [
+  ['handleFileUploadOrg', 'https://www.file-upload.org/x', ['button[name="method_free"]', '#downloadbtn:not([disabled])']],
+  ['handleUpfilesgo', 'https://upfilesgo.com/x', ['#link-button-free:not([disabled])', '#file-captcha #link-button:not([disabled])']],
 ]) {
   test(`${fn} acts on its selector`, async () => {
-    const h = load({ href, querySelector: qsMap({ [sel]: clickable() }) });
+    const h = load({ href, querySelector: qsMap(Object.fromEntries(sels.map((sel) => [sel, clickable()]))) });
     assert.strictEqual(await h.api[fn](), true);
   });
 }
@@ -637,3 +639,56 @@ for (const fn of ['handleFileUploadOrg', 'handleUpfilesgo']) {
     assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
   });
 }
+
+// --- handlers that were missing from module.exports (unreachable from the harness) ---
+for (const fn of ['handleOuo', 'handleAdFoc', 'handleLootlabs', 'handleSetcForm']) {
+  test(`${fn} is exported and ignores other hosts`, async () => {
+    assert.strictEqual(typeof load({ href: 'https://example.com/' }).api[fn], 'function');
+    if (fn === 'handleSetcForm') return; // when()-only rule: no host guard to assert
+    assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
+  });
+}
+
+test('handleOuo follows the nextUrl global on ouo.today', async () => {
+  const h = load({ href: 'https://ouo.today/x' });
+  h.sandbox.nextUrl = 'https://dest.example/x';
+  assert.strictEqual(await h.api.handleOuo(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleAdFoc follows the click_url global', async () => {
+  const h = load({ href: 'https://adfoc.us/123' });
+  h.sandbox.click_url = 'https://dest.example/x';
+  assert.strictEqual(await h.api.handleAdFoc(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleAdFoc falls back to the hidden #y field', async () => {
+  const h = load({ href: 'https://adfoc.us/123' });
+  h.doc.getElementById = (id) => (id === 'y' ? { value: 'https://dest.example/x' } : null);
+  assert.strictEqual(await h.api.handleAdFoc(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleSetcForm follows the #setc form action', async () => {
+  const h = load({
+    href: 'https://example.com/x',
+    querySelector: (sel) => (sel === 'form#setc' ? { action: 'https://dest.example/x' } : null),
+  });
+  assert.strictEqual(await h.api.handleSetcForm(), true);
+  assert.ok(h.navs.includes('https://dest.example/x'));
+});
+
+test('handleSetcForm decodes the #landing go field', async () => {
+  const dest = 'https://dest.example/x';
+  const encoded = 'zz' + Buffer.from(dest).toString('base64');
+  const h = load({
+    href: 'https://example.com/x',
+    querySelector: (sel) =>
+      sel === 'form#landing'
+        ? { querySelector: () => ({ value: encoded }) }
+        : null,
+  });
+  assert.strictEqual(await h.api.handleSetcForm(), true);
+  assert.ok(h.navs.includes(dest));
+});

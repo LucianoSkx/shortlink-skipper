@@ -162,7 +162,13 @@ test('goto() refuses excluded destinations and records them on the trace', () =>
 test('decision trace records detection, winning rule and navigation', async () => {
   const h = load({
     href: 'https://imagetwist.com/abc/file.jpg',
-    querySelector: (sel) => (sel === 'a.direct-link' ? { href: 'https://img.imagetwist.com/i/abc.jpg' } : null),
+    querySelector: (sel) => {
+      // img.pic without src: the imagetwist rule declines at once instead of
+      // sitting on its 10s wait, leaving image-host to win the cascade.
+      if (sel === 'img.pic') return { src: null };
+      if (sel === 'a.direct-link') return { href: 'https://img.imagetwist.com/i/abc.jpg' };
+      return null;
+    },
   });
   await h.api.main();
   const t = h.api.trace;
@@ -317,7 +323,11 @@ test('circuit breaker skips a resolver after repeated failures', async () => {
 test('rule outcomes are counted locally when a rule acts', async () => {
   const h = load({
     href: 'https://imagetwist.com/abc/file.jpg',
-    querySelector: (sel) => (sel === 'a.direct-link' ? { href: 'https://img.imagetwist.com/i/abc.jpg' } : null),
+    querySelector: (sel) => {
+      if (sel === 'img.pic') return { src: null };
+      if (sel === 'a.direct-link') return { href: 'https://img.imagetwist.com/i/abc.jpg' };
+      return null;
+    },
   });
   const store = {};
   h.sandbox.GM_getValue = (k, d) => (k in store ? store[k] : d);
@@ -514,7 +524,11 @@ test('genericGate opens for shortener families, not for media hosts', () => {
 test('main() lets media hosts reach their dedicated rules', async () => {
   const h = load({
     href: 'https://imagetwist.com/abc/file.jpg',
-    querySelector: (sel) => (sel === 'a.direct-link' ? { href: 'https://img.imagetwist.com/i/abc.jpg' } : null),
+    querySelector: (sel) => {
+      if (sel === 'img.pic') return { src: null };
+      if (sel === 'a.direct-link') return { href: 'https://img.imagetwist.com/i/abc.jpg' };
+      return null;
+    },
   });
   await h.api.main();
   assert.ok(
@@ -724,15 +738,17 @@ test('host regex matches subdomains for 4 fixed families in knownShortener', () 
   }
 });
 
-test('SKIP_BUTTON_HOST regex matches subdomains (direct check)', () => {
-  // SKIP_BUTTON_HOST is not in knownShortener; validate handler still triggers via its rule
-  // We verify the destination extraction works on subdomains by exercising the same regex indirectly
-  // through a minimal page that would use the skip-button rule's host check
-  const re = /(^|\.)(hurirk\.net|usfinf\.net|xervoo\.net)$/;
-  assert.ok(re.test('hurirk.net'));
-  assert.ok(re.test('sub.hurirk.net'));
-  assert.ok(!re.test('evilhurirk.net'));
-  assert.ok(!re.test('hurirk.net.evil.com'));
+test('skip-button hosts open the gate through knownShortener', () => {
+  // Regression: the rule used to run only when the heuristic happened to score
+  // 2, so its hosts were effectively dead (AGENTS.md "só no handler = regra morta").
+  for (const href of ['https://hurirk.net/x', 'https://sub.usfinf.net/x', 'https://xervoo.net/x']) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownShortener(), true, href + ' must open the gate');
+  }
+  for (const href of ['https://evilhurirk.net/x', 'https://hurirk.net.evil.com/x']) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownShortener(), false, href + ' must not open the gate');
+  }
 });
 
 // --- A3: SPA late-hydration, task wall, malformed inputs ---

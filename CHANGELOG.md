@@ -1,3 +1,18 @@
+## 1.13.17 — 2026-11-19
+
+### Fixed
+- **`skip-button-dest` era regra morta:** `hurirk.net`, `usfinf.net` e `xervoo.net`
+  entraram em `EXTRA_SHORTENER_HOSTS` — sem isso o `main()` saía antes do loop a
+  menos que a heurística pontuasse sozinha.
+- **`handleAknewz` clicava `#scroll:not(.hidden)` duas vezes** (linha duplicada).
+
+### Changed
+- **Suíte de testes: 211s → 13s.** Os mocks passaram a cobrir a cadeia inteira de
+  estágios; cada seletor ausente custava 9s de `waitFor`. O único tempo restante
+  é o `sleep(5000)` real do `service-last-resort`.
+- `handleOuo`, `handleAdFoc`, `handleLootlabs` e `handleSetcForm` exportados para
+  o harness (antes nenhum teste conseguia alcançá-los).
+
 ## 1.13.16 — 2026-10-29
 
 ### Added
