@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.17
+// @version      1.13.18
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -116,7 +116,7 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|usfinf\.net|xervoo\.net|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|coinclix\.co|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|usfinf\.net|xervoo\.net|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|coinclix\.co|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -2699,6 +2699,49 @@
     } catch {}
   }
 
+  // LootLabs link-view: the destination rides in `?cc=` as base64url JSON
+  // ({link: "..."}), occasionally wrapped in a second base64 layer. Decoded
+  // locally, so the destination never has to go through a resolver API.
+  // Technique from nazarhktwitch/lootlabs-bypass (MIT).
+  const LOOT_REWARD_HOST = /(^|\.)loot-reward\.com$/;
+
+  function decodeLootRewardCc(raw) {
+    let current = String(raw || '').trim();
+    if (!current) return null;
+    for (let i = 0; i < 3; i++) {
+      let text;
+      try {
+        const b64 = current.replace(/-/g, '+').replace(/_/g, '/');
+        text = atob(b64.padEnd(Math.ceil(b64.length / 4) * 4, '='));
+      } catch {
+        return null;
+      }
+      let parsed = null;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        current = text;
+        continue;
+      }
+      const link = typeof parsed?.link === 'string' ? parsed.link : null;
+      return link && isPlausibleUrl(link) ? link : null;
+    }
+    return null;
+  }
+
+  async function handleLootReward() {
+    if (!LOOT_REWARD_HOST.test(location.host)) return false;
+    const cc = new URLSearchParams(location.search).get('cc');
+    if (!cc) return false;
+    const dest = decodeLootRewardCc(cc);
+    if (!dest) {
+      log('loot-reward: cc did not decode to a destination');
+      return false;
+    }
+    log('loot-reward: destination decoded locally');
+    return goto(dest);
+  }
+
   async function handleLootLinkLocal() {
     if (!LOOTLINK_HOST.test(location.host)) return false;
     // Local bypass derived from d15c0rdh4ckr's "loot-link.com bypasser" (GreasyFork #483207, MIT).
@@ -2892,6 +2935,7 @@
     { name: 'close-interstitial', when: () => CLOSE_INTERSTITIAL_HOST.test(location.host), run: handleCloseInterstitial },
     { name: 'rekonise', when: () => REKONISE_HOST.test(location.host), run: handleRekonise },
     { name: 'mboost', when: () => MBOOST_HOST.test(location.host), run: handleMboost },
+    { name: 'loot-reward', when: () => LOOT_REWARD_HOST.test(location.host), run: handleLootReward },
     { name: 'lootlink-local', when: () => LOOTLINK_HOST.test(location.host), run: handleLootLinkLocal },
     { name: 'lootlabs', when: () => LOOTLABS_HOST.test(location.host), run: handleLootlabs },
     { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
@@ -3285,6 +3329,8 @@
       handleRekonise,
       handleMboost,
       handleLootLinkLocal,
+      handleLootReward,
+      decodeLootRewardCc,
       handleLootlabs,
       handleAylink,
       handleBcVc,
