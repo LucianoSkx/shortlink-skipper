@@ -58,6 +58,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `close-interstitial` | Closes interstitial-only tabs (doaipomer, ppcnt, lnkparts, zunsoach) |
 | `rekonise` | Calls the social-unlock API directly |
 | `mboost` | Pulls escaped `"targeturl"` from page source |
+| `loot-reward` | Decodes the `?cc=` base64url JSON (`{link}`) into the destination, no network |
 | `lootlink-local` | Local loot-link WebSocket/XHR decode (base64url + XOR), no remote code |
 | `lootlabs` | WebSocket hook at document-start; decodes `r:` payloads (base64url + XOR) |
 | `aylink-family` | Exchanges `_a/_t/_d` for a token at `/get/tk`, finishes at `/links/go2` |
@@ -264,3 +265,4 @@ Techniques are reimplemented in this codebase's rule format.
 | Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
 | [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported); `forumdinheiro` port (tRPC stage chain, `cur_url` body observation) |
+| [lootlabs-bypass](https://github.com/nazarhktwitch/lootlabs-bypass) by NazarHK | MIT | `loot-reward.com` `?cc=` payload format (base64url JSON, optional double wrap); reimplemented as a local decode |

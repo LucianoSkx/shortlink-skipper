@@ -1,3 +1,12 @@
+## 1.13.18 — 2026-11-19
+
+### Added
+- **`loot-reward` rule:** decodes the `?cc=` payload (base64url JSON with a `link`
+  field, sometimes wrapped in a second base64 layer) into the destination, fully
+  local — no resolver API, no page interaction. Technique from
+  [nazarhktwitch/lootlabs-bypass](https://github.com/nazarhktwitch/lootlabs-bypass) (MIT).
+- `loot-reward.com` added to the gate so the host reaches its rule.
+
 ## 1.13.17 — 2026-11-19
 
 ### Fixed

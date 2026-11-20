@@ -634,6 +634,38 @@ for (const [fn, href, sels] of [
     assert.strictEqual(await h.api[fn](), true);
   });
 }
+test('loot-reward decodes the ?cc= destination locally', async () => {
+  const dest = 'https://dest.example/x';
+  const cc = Buffer.from(JSON.stringify({ link: dest })).toString('base64url');
+  const h = load({ href: `https://loot-reward.com/t?cc=${cc}` });
+  assert.strictEqual(await h.api.handleLootReward(), true);
+  assert.ok(h.navs.includes(dest));
+  assert.strictEqual(h.api.decodeLootRewardCc(cc), dest);
+});
+
+test('loot-reward decodes a doubly wrapped cc payload', () => {
+  const dest = 'https://dest.example/y';
+  const inner = Buffer.from(JSON.stringify({ link: dest })).toString('base64');
+  const outer = Buffer.from(inner).toString('base64url');
+  const h = load({ href: 'https://loot-reward.com/t' });
+  assert.strictEqual(h.api.decodeLootRewardCc(outer), dest);
+});
+
+test('loot-reward refuses a payload without a usable link', async () => {
+  const h = load({ href: 'https://loot-reward.com/t?cc=not-base64-at-all!!' });
+  assert.strictEqual(await h.api.handleLootReward(), false);
+  assert.strictEqual(h.navs.length, 0);
+  assert.strictEqual(h.api.decodeLootRewardCc(Buffer.from(JSON.stringify({ link: 'javascript:alert(1)' })).toString('base64url')), null);
+  assert.strictEqual(h.api.decodeLootRewardCc(''), null);
+});
+
+test('loot-reward ignores other hosts', async () => {
+  const cc = Buffer.from(JSON.stringify({ link: 'https://dest.example/x' })).toString('base64url');
+  const h = load({ href: `https://example.com/t?cc=${cc}` });
+  assert.strictEqual(await h.api.handleLootReward(), false);
+  assert.strictEqual(h.navs.length, 0);
+});
+
 for (const fn of ['handleFileUploadOrg', 'handleUpfilesgo']) {
   test(`${fn} ignores other hosts`, async () => {
     assert.strictEqual(await load({ href: 'https://example.com/' }).api[fn](), false);
