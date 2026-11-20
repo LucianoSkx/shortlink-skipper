@@ -53,6 +53,7 @@ unlockers) are detected and left alone — they validate server-side.
 | --- | --- |
 | `image-host` | Image hosters: strips overlays, follows the direct image link/anchor |
 | `file-host` | File hosters: waits out the timer, clicks the free-download control |
+| `katfile` | Clicks `.btn.btn-default` before file-host (`katfile.vip`, `.co`, `.com`) |
 | `ouo` | Submits `#form-captcha` / `#form-go` in a loop until each stage advances (`ouo.today` uses the `nextUrl` global) |
 | `adfoc` | Follows `click_url` / hidden `#y` input (`adfoc.us`, `adf.ly`, `clk.sh`, `shrink.pe`) |
 | `close-interstitial` | Closes interstitial-only tabs (doaipomer, ppcnt, lnkparts, zunsoach) |
@@ -87,7 +88,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `imagetwist-family` | Follows `img.pic` (`imagetwist.com`, `imagehaha.com`, `imagenpic.com`, `imageshimage.com`, `imagexport.com`, `croea.com`) |
 | `fastpic` | Fullview link → `#imglink`/`#imga` → inline script (`fastpic.org`) |
 | `imgtraffic` | Rewrites `/a-1/`, `/i-1/`, `/n-1/`, `/z-1/` to the direct jpeg (`imgtraffic.com`) |
-| `imgair` | Reads `imgbg.src` from inline scripts (`cloudgallery.net`, `imgair.net`, `imgblaze.net`, `imgfira.cc`, `imgfrost.net`) |
+| `imgair` | Reads `imgbg.src` from inline scripts (`cloudgallery.net`, `imgair.net`, `imgblaze.net`, `imgfira.cc`, `imgfrost.net`, `pixsera.net`) |
 | `captcha-manual` | Watches hCaptcha/reCAPTCHA/Turnstile; auto-submits **after you solve** |
 | `paste-extract` | First valid external URL in the paste content (`pastebin.com`, `rentry.co`, `pastelink.com`, `justpaste.it`, `paste.ee`, `hastebin.com`, `ghostbin.co`, `controlc.com`, `paste.org`, `spacebin.in`) |
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
@@ -96,7 +97,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `cpmlink` | Follows `#btn-main` (`cpmlink.net`) |
 | `thinfi` | Follows the content link (`thinfi.com`) |
 | `kimochi` | Follows `a#next` on `/inter` (`kimochi.info`) |
-| `a2zapk` | Follows `#dlbtn li a` (`a2zapk.io`) |
+| `a2zapk` | Follows `#dlbtn li a` (`a2zapk.io`, `a2zapk.dev`) |
 | `blogmado` | Clicks `.btn` (`blogmado.com`) |
 | `mangalist` | Clicks the URL button (`mangalist.org`) |
 | `linegee` | Clicks `.btn-xs` (`linegee.net`) |
@@ -106,9 +107,9 @@ unlockers) are detected and left alone — they validate server-side.
 | `hen-tay` | Follows the download link on `/go/` (`hen-tay.net`) |
 | `wpsafe-anchor` | Follows `#wpsafe-link a` (`otomi-games.com`, `ryuugames.com`) |
 | `tribuntekno` | Clicks the verification buttons (`tribuntekno.com`) |
-| `cuttty` | Clicks `#submit-button` (`cuttty.com`) |
+| `cuttty` | Clicks `#submit-button` (`cuttty.com`, `cuty.io`) |
 | `fir3` | Clicks the get-link button (`fir3.net`) |
-| `gplinks` | Clicks `.get-link` (`gplinks.co`) |
+| `gplinks` | Clicks `.get-link` (`gplinks.co`, `gplinks.com`) |
 | `icutlink` | Follows the get-link href / clicks `.bsub` (`icutlink.com`, `zegtrends.com`) |
 | `turkdown` | Follows the get-link href (`link.turkdown.com`) |
 | `tutwuri` | Clicks the btn-1/2/3 sequence (`tutwuri.id`) |
