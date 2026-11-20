@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.13.18
+// @version      1.14.0
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -110,17 +110,17 @@
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.(com|net)$/;
   const ADLINKFLY_HOSTS =
-    /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.mobi|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com|shrinkbixby\.com)$/;
+    /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.(mobi|co)|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com|shrinkbixby\.com)$/;
   const TOKEN_HOST = /(^|\.)(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.co|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|usfinf\.net|xervoo\.net|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|coinclix\.co|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|a2zapk\.dev|adshnk\.com|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|cuty\.io|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.(co|com)|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|usfinf\.net|xervoo\.net|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|coinclix\.co|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
   const IMAGE_HOSTS =
-    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
+    /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|2i\.(cz|sk)|pixsera\.net|3xpla\.net|3xplanet\.(net|xyz)|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
-    /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.vip|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com|mega4upload\.net|uploady\.io|upfilesgo\.com|upfiles\.app|modsfire\.com|dailyuploads\.net|jioupload\.link|jioupload\.com|jioupload\.icu|cloudfam\.io|frdl\.io|freedl\.ink|fredl\.ru|frdl\.is|rapidgator\.net)$/;
+    /(^|\.)(ak\.sv|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.(vip|co|com)|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com|mega4upload\.net|uploady\.io|upfilesgo\.com|upfiles\.app|modsfire\.com|dailyuploads\.net|jioupload\.link|jioupload\.com|jioupload\.icu|cloudfam\.io|frdl\.io|freedl\.ink|fredl\.ru|frdl\.is|rapidgator\.net)$/;
   const WP_CONTENT_LOCK_HOST =
     /(^|\.)(ssdhostting\.com|rvpaste\.com|shrinkbixby\.com)$/;
   const SETC_FORM = 'form#setc';
@@ -1315,7 +1315,7 @@
   }
 
   async function handleA2zapk() {
-    if (!/(^|\.)a2zapk\.io$/.test(location.host)) return false;
+    if (!/(^|\.)a2zapk\.(io|dev)$/.test(location.host)) return false;
     return openSelectorHref('#dlbtn li a');
   }
 
@@ -1381,7 +1381,7 @@
   }
 
   const IMGAIR_HOST =
-    /(^|\.)(cloudgallery\.net|imgair\.net|imgblaze\.net|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs)$/;
+    /(^|\.)(cloudgallery\.net|imgair\.net|imgblaze\.net|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|pixsera\.net)$/;
   async function handleImgair() {
     if (!IMGAIR_HOST.test(location.host)) return false;
     const scripts = [...document.querySelectorAll('script:not([src])')].map((s) => s.textContent).join('\n');
@@ -1424,7 +1424,7 @@
   }
 
   async function handleCuttty() {
-    if (!/(^|\.)cuttty\.com$/.test(location.host)) return false;
+    if (!/(^|\.)(cuttty\.com|cuty\.io)$/.test(location.host)) return false;
     return clickSelectorWhen('#submit-button', 9000);
   }
 
@@ -1434,7 +1434,7 @@
   }
 
   async function handleGplinks() {
-    if (!/(^|\.)gplinks\.co$/.test(location.host)) return false;
+    if (!/(^|\.)gplinks\.(co|com)$/.test(location.host)) return false;
     return clickSelectorWhen('.get-link', 8000);
   }
 
@@ -2844,6 +2844,16 @@
     return false;
   }
 
+  // katfile's free-download control is `.btn.btn-default`, which the generic
+  // file-host selector list does not cover; if it is absent, file-host still
+  // gets a turn on the same page.
+  const KATFILE_HOST = /(^|\.)katfile\.(vip|co|com)$/;
+
+  async function handleKatfile() {
+    if (!KATFILE_HOST.test(location.host)) return false;
+    return clickSelectorWhen('.btn.btn-default', 8000);
+  }
+
   // File hosts (adsbypasser families): wait out whatever timer the page uses,
   // then click the free-download control.
   async function handleFileHost() {
@@ -2929,6 +2939,7 @@
     { name: 'imgtraffic', when: () => /(^|\.)imgtraffic\.com$/.test(location.host), run: handleImgtraffic },
     { name: 'imgair', when: () => IMGAIR_HOST.test(location.host), run: handleImgair },
     { name: 'image-host', when: () => IMAGE_HOSTS.test(location.host), run: handleImageHost },
+    { name: 'katfile', when: () => KATFILE_HOST.test(location.host), run: handleKatfile },
     { name: 'file-host', when: () => FILE_HOSTS.test(location.host), run: handleFileHost },
     { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
     { name: 'adfoc', when: () => ADFOC_FAMILY.test(location.host), run: handleAdFoc },
@@ -2948,7 +2959,7 @@
     { name: 'cpmlink', when: () => /(^|\.)cpmlink\.net$/.test(location.host), run: handleCpmlink },
     { name: 'thinfi', when: () => /(^|\.)thinfi\.com$/.test(location.host), run: handleThinfi },
     { name: 'kimochi', when: () => /(^|\.)kimochi\.info$/.test(location.host), run: handleKimochi },
-    { name: 'a2zapk', when: () => /(^|\.)a2zapk\.io$/.test(location.host), run: handleA2zapk },
+    { name: 'a2zapk', when: () => /(^|\.)a2zapk\.(io|dev)$/.test(location.host), run: handleA2zapk },
     { name: 'blogmado', when: () => /(^|\.)blogmado\.com$/.test(location.host), run: handleBlogmado },
     { name: 'mangalist', when: () => /(^|\.)mangalist\.org$/.test(location.host), run: handleMangalist },
     { name: 'linegee', when: () => /(^|\.)linegee\.net$/.test(location.host), run: handleLinegee },
@@ -2958,9 +2969,9 @@
     { name: 'hen-tay', when: () => /(^|\.)hen-tay\.net$/.test(location.host), run: handleHenTay },
     { name: 'wpsafe-anchor', when: () => WPSAFE_ANCHOR_HOST.test(location.host), run: handleWpsafeAnchor },
     { name: 'tribuntekno', when: () => /(^|\.)tribuntekno\.com$/.test(location.host), run: handleTribuntekno },
-    { name: 'cuttty', when: () => /(^|\.)cuttty\.com$/.test(location.host), run: handleCuttty },
+    { name: 'cuttty', when: () => /(^|\.)(cuttty\.com|cuty\.io)$/.test(location.host), run: handleCuttty },
     { name: 'fir3', when: () => /(^|\.)fir3\.net$/.test(location.host), run: handleFir3 },
-    { name: 'gplinks', when: () => /(^|\.)gplinks\.co$/.test(location.host), run: handleGplinks },
+    { name: 'gplinks', when: () => /(^|\.)gplinks\.(co|com)$/.test(location.host), run: handleGplinks },
     { name: 'icutlink', when: () => ICUTLINK_HOST.test(location.host), run: handleIcutlink },
     { name: 'turkdown', when: () => /^link\.turkdown\.com$/.test(location.host), run: handleTurkdown },
     { name: 'tutwuri', when: () => /(^|\.)tutwuri\.id$/.test(location.host), run: handleTutwuri },
@@ -3319,6 +3330,8 @@
       reportFalsePositive,
       handleImageHost,
       handleFileHost,
+      handleKatfile,
+      KATFILE_HOST,
       handleImagetwistFamily,
       handleFastpic,
       handleImgtraffic,

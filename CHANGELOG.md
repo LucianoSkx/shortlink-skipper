@@ -1,3 +1,22 @@
+## 1.14.0 — 2026-11-19
+
+### Added
+- **Domain variants** of families that already had rules, taken from the upstream
+  gap report (`npm run test:live` → `test-live/upstream-gap.js`):
+  - `cuty.io` (same `#submit-button` flow as `cuttty.com`)
+  - `a2zapk.dev` (same `#dlbtn li a`)
+  - `gplinks.com` (same `.get-link`)
+  - `katfile.co`, `katfile.com` — new `katfile` rule: its control is
+    `.btn.btn-default`, which the generic `file-host` selector list misses
+  - `sfile.co` (AdLinkFly family, next to `sfile.mobi`)
+  - `2i.cz`, `2i.sk` (Chevereto — handled by the `image-host` fast path)
+  - `pixsera.net` (imgair inline-script technique)
+  - `3xpla.net`, `3xplanet.net`, `3xplanet.xyz` (next to `3xplanet.com`)
+
+### Tests
+- One happy path per variant plus a gate assertion per host, so a host dropped
+  from either the handler regex or the gate list fails the suite.
+
 ## 1.13.18 — 2026-11-19
 
 ### Added

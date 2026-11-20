@@ -672,6 +672,37 @@ for (const fn of ['handleFileUploadOrg', 'handleUpfilesgo']) {
   });
 }
 
+// --- domain variants of families that already have rules (upstream gap report) ---
+for (const [fn, href, sel] of [
+  ['handleCuttty', 'https://cuty.io/x', '#submit-button'],
+  ['handleA2zapk', 'https://a2zapk.dev/x', '#dlbtn li a'],
+  ['handleGplinks', 'https://gplinks.com/x', '.get-link'],
+  ['handleKatfile', 'https://katfile.com/x', '.btn.btn-default'],
+]) {
+  test(`${fn} acts on its new domain variant`, async () => {
+    const h = load({ href, querySelector: qsMap({ [sel]: clickable({ href: 'https://dest.example/x' }) }) });
+    assert.strictEqual(await h.api[fn](), true);
+  });
+}
+
+test('new gate domains open knownShortener / knownMediaHost', () => {
+  for (const href of ['https://cuty.io/x', 'https://a2zapk.dev/x', 'https://gplinks.com/x', 'https://sfile.co/x']) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownShortener(), true, href + ' must open the gate');
+  }
+  for (const href of ['https://katfile.co/x', 'https://katfile.com/x', 'https://2i.cz/x', 'https://2i.sk/x', 'https://pixsera.net/x', 'https://3xpla.net/x', 'https://3xplanet.xyz/x']) {
+    const h = load({ href, querySelector: () => null });
+    assert.strictEqual(h.api.knownMediaHost(), true, href + ' must open the media gate');
+  }
+});
+
+test('pixsera.net follows imgair inline-script technique', async () => {
+  const h = load({ href: 'https://pixsera.net/x' });
+  h.doc.querySelectorAll = () => [{ textContent: 'imgbg.src = "https://img.example/a.jpg";' }];
+  assert.strictEqual(await h.api.handleImgair(), true);
+  assert.ok(h.navs.includes('https://img.example/a.jpg'));
+});
+
 // --- handlers that were missing from module.exports (unreachable from the harness) ---
 for (const fn of ['handleOuo', 'handleAdFoc', 'handleLootlabs', 'handleSetcForm']) {
   test(`${fn} is exported and ignores other hosts`, async () => {
