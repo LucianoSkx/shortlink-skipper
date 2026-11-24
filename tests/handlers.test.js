@@ -150,6 +150,19 @@ test('validateDestination allows hosts that merely end in an infrastructure labe
   }
 });
 
+test('validateDestination rejects denylisted hosts even with an explicit port', () => {
+  const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
+  for (const url of [
+    'https://youtube.com:444/watch?v=x',
+    'http://x.com:8080/status/1',
+    'http://trustpilot.com:99/review/x',
+    'https://mail.google.com:8443/mail/u/0/',
+  ]) {
+    const v = h.api.validateDestination(url);
+    assert.strictEqual(v.valid, false, `${url} must be rejected`);
+  }
+});
+
 test('goto() refuses excluded destinations and records them on the trace', () => {
   const h = load({ href: 'https://short.site.example/abc', querySelector: () => null });
   const ok = h.api.goto('https://mail.google.com/mail/u/0/');

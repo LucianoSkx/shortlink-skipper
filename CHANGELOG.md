@@ -1,3 +1,15 @@
+## 1.14.1 — 2026-11-24
+
+### Fixed
+- **Denylist bypass with an explicit port:** `validateDestination()` used `URL.host` (with port), so `youtube.com:444` and `trustpilot.com:99` passed as destinations. It now uses `hostname`.
+- **`katfile` blind click:** the rule left `a#dlink` to `file-host` and only clicks visible controls, instead of stopping the cascade on any `.btn.btn-default`.
+- **Dead `fastpic` fallback:** the `pp0src` regex was a character class and never matched the real inline assignment.
+- **Loot waits bounded:** local decode no longer holds the `external-service` fallback for up to 210s (30s+180s) or 53s (8s+45s).
+- **Hook cleanup:** LootLabs' WebSocket hook and acortalink's `message` listener / `MutationObserver` are now restored after use or after 5 minutes.
+
+### Docs
+- Dropped the stale rule count and the duplicated `setc-form` row from the README rule table.
+
 ## 1.14.0 — 2026-11-19
 
 ### Added
