@@ -686,18 +686,27 @@ for (const [fn, href, sel] of [
 }
 
 // --- Pahe-family hosts observed on andradeatdev/auto-continue-shortlinks ---
-for (const host of ['cutlink.net', 'cutnet.net', 'cuttlinks.com', 'cety.app']) {
+for (const host of ['cety.app']) {
   test(`cuttty family clicks #submit-button on ${host}`, async () => {
     const h = load({ href: `https://${host}/x`, querySelector: qsMap({ '#submit-button': clickable() }) });
     assert.strictEqual(await h.api.handleCuttty(), true);
   });
 }
 
-test('srnky/clksz click a primary/secondary button', async () => {
+test('cuttty ignores the parked/retired cut-link hosts', async () => {
+  for (const host of ['cutlink.net', 'cutnet.net', 'cuttlinks.com']) {
+    const h = load({ href: `https://${host}/x`, querySelector: qsMap({ '#submit-button': clickable() }) });
+    assert.strictEqual(await h.api.handleCuttty(), false, host + ' must not act');
+  }
+});
+
+test('srnky/clksz click a primary/secondary button on /r/ only', async () => {
   const sel = 'button.btn-primary:not([disabled]):not(.disabled), button.btn-success:not([disabled]):not(.disabled), a.btn-primary[href]:not(.disabled), a.btn-success[href]:not(.disabled)';
   for (const host of ['srnky.com', 'clksz.com']) {
-    const h = load({ href: `https://${host}/r/abc`, querySelector: qsMap({ [sel]: clickable() }) });
+    const h = load({ href: `https://${host}/r/abc/def`, querySelector: qsMap({ [sel]: clickable() }) });
     assert.strictEqual(await h.api.handleSrnky(), true);
+    const root = load({ href: `https://${host}/`, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await root.api.handleSrnky(), false, host + ' root must not act');
   }
 });
 
@@ -724,7 +733,7 @@ test('safefileku clicks the submit control', async () => {
 });
 
 test('new pahe-family hosts open the gate', () => {
-  for (const host of ['srnky.com', 'clksz.com', 'cutlink.net', 'exe.io', 'exe-urls.com', 'textfrog.com', 'simpcity.cr', 'ashnk.com', 'shrink-service.it']) {
+  for (const host of ['exe.io', 'exe-urls.com', 'textfrog.com', 'simpcity.cr', 'ashnk.com', 'shrink-service.it']) {
     const h = load({ href: `https://${host}/x`, querySelector: () => null });
     assert.strictEqual(h.api.knownShortener(), true, host + ' must open the shortener gate');
   }

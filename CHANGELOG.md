@@ -1,3 +1,14 @@
+## 1.14.5 — 2026-11-25
+
+### Fixed
+- **Real-site check caught dead and over-broad hosts from 1.14.2:**
+  - `cutlink.net` is parked (redirects to hugedomains), `cuttlinks.com` has no DNS record and `cutnet.net` lands on a domain-sale `/lander`. All three were dropped from the `cuttty` family and the gate.
+  - `srnky.com` and `clksz.com` now serve a general health blog at the root; only `/r/<slug>/...` is a shortlink. They left `EXTRA_SHORTENER_HOSTS` and the rule checks the path (same pattern as `spaste`), so a blog page is never touched.
+
+### Tests
+- Unit tests assert the retired cut-link hosts are ignored and the srnky/clksz root does not act.
+- Live cases path-scoped to `/r/`; `cutlink-1` removed (76 cases).
+
 ## 1.14.4 — 2026-11-25
 
 ### Fixed
