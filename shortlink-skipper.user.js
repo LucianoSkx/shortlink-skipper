@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.14.0
+// @version      1.14.1
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -302,7 +302,7 @@
     if (!isPlausibleUrl(v)) return { valid: false, confidence: 0, reason: 'not a plausible http(s) URL' };
     let host;
     try {
-      host = new URL(v).host.toLowerCase();
+      host = new URL(v).hostname.toLowerCase();
     } catch {
       return { valid: false, confidence: 0, reason: 'unparseable URL' };
     }
@@ -1185,6 +1185,15 @@
     Object.assign(HookedWebSocket, OriginalWebSocket);
     HookedWebSocket.prototype = OriginalWebSocket.prototype;
     PAGE.WebSocket = HookedWebSocket;
+    const restore = setTimeout(() => {
+      if (PAGE.WebSocket === HookedWebSocket) {
+        PAGE.WebSocket = OriginalWebSocket;
+        PAGE.__slLootHooked = false;
+      }
+    }, 300000);
+    try {
+      if (restore && typeof restore.unref === 'function') restore.unref();
+    } catch {}
     log('lootlabs detected, WebSocket hooked');
   }
 
@@ -1208,14 +1217,15 @@
 
   async function handleLootlabs() {
     if (!LOOTLABS_HOST.test(location.host)) return false;
-    await waitFor(() => document.querySelector('.ind-idle'), 30000, 500);
+    // Bounded: a failed local decode must not hold the external-service fallback for minutes.
+    await waitFor(() => document.querySelector('.ind-idle'), 15000, 500);
     const tasks = [...document.querySelectorAll('.ind-idle')]
       .map((el) => el.parentElement)
       .filter(Boolean);
     for (const [index, task] of tasks.entries()) {
       setTimeout(() => fireClick(task), index * 2000);
     }
-    await waitFor(() => (lootlabsResolved ? true : null), 180000, 500);
+    await waitFor(() => (lootlabsResolved ? true : null), 45000, 500);
     return lootlabsResolved;
   }
 
@@ -1366,7 +1376,7 @@
     if (!url) url = links.find((a) => /fullview/i.test(a.href))?.href;
     if (!url) {
       const scripts = [...document.querySelectorAll('script:not([src])')].map((s) => s.textContent).join('\n');
-      const m = scripts.match(/pp0["sr"+"c"]\s*=\s*"([^"]+)"/);
+      const m = scripts.match(/pp0src\s*=\s*"([^"]+)"/);
       if (m) url = m[1];
     }
     if (!url) url = document.querySelector('#imglink, #imga')?.href;
@@ -2205,16 +2215,13 @@
     PAGE.open = (url) => {
       return goto(url) ? PAGE : null;
     };
-    PAGE.addEventListener(
-      'message',
-      (event) => {
-        if (event.origin !== location.origin) return;
-        if (typeof event.data === 'string' && event.data.includes('__done__') && event.data.length < 9) {
-          Object.defineProperty(event, 'source', { value: '' });
-        }
-      },
-      true,
-    );
+    const onDone = (event) => {
+      if (event.origin !== location.origin) return;
+      if (typeof event.data === 'string' && event.data.includes('__done__') && event.data.length < 9) {
+        Object.defineProperty(event, 'source', { value: '' });
+      }
+    };
+    PAGE.addEventListener('message', onDone, true);
     const observer = new MutationObserver(() => {
       if (document.querySelector('a.button#contador')) {
         observer.disconnect();
@@ -2224,8 +2231,12 @@
     observer.observe(document, { childList: true, subtree: true });
     const btn = await waitFor('#contador', 30000, 300);
     if (btn && visible(btn)) fireClick(btn);
-    // Restore original open after the rule completes
-    setTimeout(() => { PAGE.open = originalOpen; }, 5000);
+    // Restore original open and listeners after the rule completes
+    setTimeout(() => {
+      PAGE.open = originalOpen;
+      PAGE.removeEventListener('message', onDone, true);
+      observer.disconnect();
+    }, 5000);
     return Boolean(btn);
   }
 
@@ -2794,7 +2805,7 @@
     }
     lootInspect = absorb;
     if (resolved) return true;
-    return await waitFor(() => (resolved ? true : null), 45000);
+    return await waitFor(() => (resolved ? true : null), 15000);
   }
 
   // Image hosts (adsbypasser families): strip common overlays, then follow
@@ -2851,7 +2862,10 @@
 
   async function handleKatfile() {
     if (!KATFILE_HOST.test(location.host)) return false;
-    return clickSelectorWhen('.btn.btn-default', 8000);
+    // a#dlink is the final file link: leave it to file-host instead of
+    // clicking a bootstrap button that may only be a modal control.
+    if (document.querySelector('a[id="dlink"][href]')) return false;
+    return clickWhen('.btn.btn-default', 8000);
   }
 
   // File hosts (adsbypasser families): wait out whatever timer the page uses,

@@ -47,7 +47,7 @@ unlockers) are detected and left alone — they validate server-side.
 - Circular redirects abort via session history.
 
 <details>
-<summary><b>Rule reference (73)</b></summary>
+<summary><b>Rule reference</b></summary>
 
 | Rule | Technique |
 | --- | --- |
@@ -126,7 +126,6 @@ unlockers) are detected and left alone — they validate server-side.
 | `network-loop` | Follows the shadow-DOM button (`network-loop.com`) |
 | `get-click2` | Enables and clicks `#gotolink` (`get-click2.blogspot.com`) |
 | `forumdinheiro` | Walks the tRPC stage chain server-side (port of adsbypasser `link/forumdinheiro.com.js`; `forumdinheiro.com`, `guis2.com`, `tarviral.com`, `umconto.com`) |
-| `setc-form` | Follows the `form#setc` action, or decodes the `#landing` `go` field (any host) |
 
 ### Pahe-ported families
 

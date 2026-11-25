@@ -58,6 +58,16 @@ test('fastpic falls back to #imglink', async () => {
   assert.ok(h.navs.includes('https://dest.example/full.jpg'));
 });
 
+test('fastpic decodes the pp0src inline-script fallback', async () => {
+  const h = load({
+    href: 'https://fastpic.org/fullview/abc',
+    querySelector: () => null,
+    querySelectorAllOverride: [{ textContent: 'var pp0src="https://dest.example/from-script.jpg";' }],
+  });
+  assert.strictEqual(await h.api.handleFastpic(), true);
+  assert.ok(h.navs.includes('https://dest.example/from-script.jpg'));
+});
+
 test('fastpic ignores non-view paths', async () => {
   assert.strictEqual(await load({ href: 'https://fastpic.org/' }).api.handleFastpic(), false);
 });

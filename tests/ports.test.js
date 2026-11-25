@@ -685,6 +685,15 @@ for (const [fn, href, sel] of [
   });
 }
 
+test('katfile leaves a#dlink to file-host instead of clicking blindly', async () => {
+  const h = load({
+    href: 'https://katfile.com/x',
+    querySelector: (sel) => (sel === 'a[id="dlink"][href]' ? { href: 'https://dest.example/file.rar' } : null),
+  });
+  assert.strictEqual(await h.api.handleKatfile(), false);
+  assert.strictEqual(h.navs.length, 0);
+});
+
 test('new gate domains open knownShortener / knownMediaHost', () => {
   for (const href of ['https://cuty.io/x', 'https://a2zapk.dev/x', 'https://gplinks.com/x', 'https://sfile.co/x']) {
     const h = load({ href, querySelector: () => null });
