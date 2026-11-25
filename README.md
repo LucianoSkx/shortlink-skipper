@@ -107,18 +107,22 @@ unlockers) are detected and left alone — they validate server-side.
 | `hen-tay` | Follows the download link on `/go/` (`hen-tay.net`) |
 | `wpsafe-anchor` | Follows `#wpsafe-link a` (`otomi-games.com`, `ryuugames.com`) |
 | `tribuntekno` | Clicks the verification buttons (`tribuntekno.com`) |
-| `cuttty` | Clicks `#submit-button` (`cuttty.com`, `cuty.io`) |
+| `cuttty` | Clicks `#submit-button` (`cuttty.com`, `cuty.io`, `cety.app`, `cutlink.net`, `cutnet.net`, `cuttlinks.com`) |
 | `fir3` | Clicks the get-link button (`fir3.net`) |
 | `gplinks` | Clicks `.get-link` (`gplinks.co`, `gplinks.com`) |
 | `icutlink` | Follows the get-link href / clicks `.bsub` (`icutlink.com`, `zegtrends.com`) |
 | `turkdown` | Follows the get-link href (`link.turkdown.com`) |
 | `tutwuri` | Clicks the btn-1/2/3 sequence (`tutwuri.id`) |
 | `exeo-app` | Clicks the three-stage buttons (`exe-links.com`, `exeo.app`, `exeygo.com`) |
+| `exe-urls` | Clicks `#submit-button` across stages (`exe-urls.com`, `exego.app`, `exnion.com`) |
 | `lnk2` | Strips overlays, clicks `#getLink` on `/go/` (`lnk2.cc`) |
 | `spaste` | Submits the contact form on `/site/` (`www.spaste.com`) |
 | `f95zone` | Clicks `.host_link` on `/masked/` (`f95zone.to`) |
 | `rlu-preview` | Follows the long URL (`preview.rlu.ru`) |
-| `adshnk` | Clicks through to `#final_redirect` (`adshnk.com`) |
+| `adshnk` | Clicks through to `#final_redirect` (`adshnk.com`, `ashnk.com`, `shrink-service.it`) |
+| `srnky` | Clicks the primary/secondary button (`srnky.com`, `clksz.com`) |
+| `sl-primary` | Clicks `#sl-primary` or `.get-link` (`textfrog.com`, `eduify.app`, `gamescrate.app`) |
+| `safefileku` | Clicks the submit control after the timer (`safefileku.com`) |
 | `similarsites` | Decodes the `/goto/` path (`similarsites.com`) |
 | `lolinez` | Follows the bare query URL (`www.lolinez.com`) |
 | `urlcash` | Reads the `linkDestUrl` page global (`urlcash.com`) |
@@ -266,3 +270,4 @@ Techniques are reimplemented in this codebase's rule format.
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
 | [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported); `forumdinheiro` port (tRPC stage chain, `cur_url` body observation) |
 | [lootlabs-bypass](https://github.com/nazarhktwitch/lootlabs-bypass) by NazarHK | MIT | `loot-reward.com` `?cc=` payload format (base64url JSON, optional double wrap); reimplemented as a local decode |
+| [auto-continue-shortlinks](https://github.com/andradeatdev/auto-continue-shortlinks) by andradeatdev | GPL-3.0 | flow observation for the pahe-family hosts (srnky, clksz, exe-urls family, cut-link family, sl-primary family, safefileku); **no code copied** |

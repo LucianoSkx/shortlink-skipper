@@ -1,3 +1,17 @@
+## 1.14.2 — 2026-11-25
+
+### Added
+- **adsbypasser variants:** `ashnk.com` and `shrink-service.it` join the `adshnk` rule; `simpcity.cr` joins the gate so its base64 `?to=` resolves through `url-destination`.
+- **Pahe-family hosts** (flow reimplemented from andradeatdev/auto-continue-shortlinks, GPL-3.0, no code copied):
+  - `srnky.com`, `clksz.com` — click the primary/secondary button.
+  - `exe-urls.com`, `exego.app`, `exnion.com` — staged `#submit-button`.
+  - `cutlink.net`, `cutnet.net`, `cuttlinks.com`, `cety.app` — join the `cuttty` rule.
+  - `textfrog.com`, `eduify.app`, `gamescrate.app` — click `#sl-primary` or `.get-link`.
+  - `safefileku.com` — file host, click the submit control after the timer.
+
+### Tests
+- Happy path and gate assertion per new host.
+
 ## 1.14.1 — 2026-11-24
 
 ### Fixed

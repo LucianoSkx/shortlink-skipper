@@ -685,6 +685,74 @@ for (const [fn, href, sel] of [
   });
 }
 
+// --- Pahe-family hosts observed on andradeatdev/auto-continue-shortlinks ---
+for (const host of ['cutlink.net', 'cutnet.net', 'cuttlinks.com', 'cety.app']) {
+  test(`cuttty family clicks #submit-button on ${host}`, async () => {
+    const h = load({ href: `https://${host}/x`, querySelector: qsMap({ '#submit-button': clickable() }) });
+    assert.strictEqual(await h.api.handleCuttty(), true);
+  });
+}
+
+test('srnky/clksz click a primary/secondary button', async () => {
+  const sel = 'button.btn-primary:not([disabled]):not(.disabled), button.btn-success:not([disabled]):not(.disabled), a.btn-primary[href]:not(.disabled), a.btn-success[href]:not(.disabled)';
+  for (const host of ['srnky.com', 'clksz.com']) {
+    const h = load({ href: `https://${host}/r/abc`, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api.handleSrnky(), true);
+  }
+});
+
+test('exe-urls family clicks #submit-button in stages', async () => {
+  const sel = '#submit-button:not([disabled])';
+  for (const host of ['exe-urls.com', 'exego.app', 'exnion.com']) {
+    const h = load({ href: `https://${host}/x`, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api.handleExeUrls(), true);
+  }
+});
+
+test('sl-primary family clicks #sl-primary or .get-link', async () => {
+  const sel = '#sl-primary:not([disabled])';
+  for (const host of ['textfrog.com', 'eduify.app', 'gamescrate.app']) {
+    const h = load({ href: `https://${host}/x`, querySelector: qsMap({ [sel]: clickable() }) });
+    assert.strictEqual(await h.api.handleSlPrimary(), true);
+  }
+});
+
+test('safefileku clicks the submit control', async () => {
+  const sel = 'button[type="submit"]:not([disabled])';
+  const h = load({ href: 'https://safefileku.com/x', querySelector: qsMap({ [sel]: clickable() }) });
+  assert.strictEqual(await h.api.handleSafefileku(), true);
+});
+
+test('new pahe-family hosts open the gate', () => {
+  for (const host of ['srnky.com', 'clksz.com', 'cutlink.net', 'exe-urls.com', 'textfrog.com', 'simpcity.cr', 'ashnk.com', 'shrink-service.it']) {
+    const h = load({ href: `https://${host}/x`, querySelector: () => null });
+    assert.strictEqual(h.api.knownShortener(), true, host + ' must open the shortener gate');
+  }
+  const media = load({ href: 'https://safefileku.com/x', querySelector: () => null });
+  assert.strictEqual(media.api.knownMediaHost(), true, 'safefileku.com must open the media gate');
+});
+
+test('adshnk handles ashnk/shrink-service variants', async () => {
+  for (const host of ['ashnk.com', 'shrink-service.it']) {
+    const h = load({
+      href: `https://${host}/abc`,
+      querySelector: qsMap({
+        'button[class="ui right labeled icon button primary huge fluid"]': clickable(),
+        'a[id="final_redirect"]': { href: 'https://dest.example/file' },
+      }),
+    });
+    assert.strictEqual(await h.api.handleAdshnk(), true);
+    assert.ok(h.navs.includes('https://dest.example/file'));
+  }
+});
+
+test('simpcity.cr base64 ?to= decodes via url-destination', () => {
+  const dest = 'https://dest.example/post/1';
+  const to = Buffer.from(dest).toString('base64url');
+  const h = load({ href: `https://simpcity.cr/redirect?to=${encodeURIComponent(to)}` });
+  assert.strictEqual(h.api.extractDestFromParams(), dest);
+});
+
 test('katfile leaves a#dlink to file-host instead of clicking blindly', async () => {
   const h = load({
     href: 'https://katfile.com/x',
