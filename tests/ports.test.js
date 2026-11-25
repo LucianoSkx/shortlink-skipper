@@ -746,11 +746,14 @@ test('adshnk handles ashnk/shrink-service variants', async () => {
   }
 });
 
-test('simpcity.cr base64 ?to= decodes via url-destination', () => {
+test('simpcity.cr decodes its base64 ?to= redirect', async () => {
   const dest = 'https://dest.example/post/1';
   const to = Buffer.from(dest).toString('base64url');
   const h = load({ href: `https://simpcity.cr/redirect?to=${encodeURIComponent(to)}` });
-  assert.strictEqual(h.api.extractDestFromParams(), dest);
+  assert.strictEqual(await h.api.handleSimpcity(), true);
+  assert.ok(h.navs.includes(dest));
+  const other = load({ href: 'https://simpcity.cr/thread/1' });
+  assert.strictEqual(await other.api.handleSimpcity(), false);
 });
 
 test('katfile leaves a#dlink to file-host instead of clicking blindly', async () => {

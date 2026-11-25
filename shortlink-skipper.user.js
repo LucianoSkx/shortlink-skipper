@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.14.3
+// @version      1.14.4
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -1557,6 +1557,13 @@
     return href ? goto(href) : true;
   }
 
+  async function handleSimpcity() {
+    if (!/(^|\.)simpcity\.cr$/.test(location.host)) return false;
+    if (!/^\/redirect\/?$/.test(location.pathname)) return false;
+    const dest = extractDestFromParams();
+    return isPlausibleUrl(dest) ? goto(dest) : false;
+  }
+
   async function handleSimilarsites() {
     if (!/(^|\.)similarsites\.com$/.test(location.host)) return false;
     const m = location.pathname.match(/^\/goto\/([^?]+)/);
@@ -3033,6 +3040,7 @@
     { name: 'rlu-preview', when: () => /^preview\.rlu\.ru$/.test(location.host), run: handleRlu },
     { name: 'adshnk', when: () => /(^|\.)(adshnk\.com|ashnk\.com|shrink-service\.it)$/.test(location.host), run: handleAdshnk },
     { name: 'similarsites', when: () => /(^|\.)similarsites\.com$/.test(location.host), run: handleSimilarsites },
+    { name: 'simpcity', when: () => /(^|\.)simpcity\.cr$/.test(location.host), run: handleSimpcity },
     { name: 'lolinez', when: () => /^www\.lolinez\.com$/.test(location.host), run: handleLolinez },
     { name: 'urlcash', when: () => /(^|\.)urlcash\.com$/.test(location.host), run: handleUrlcash },
     { name: 'go-linkify', when: () => /^go\.linkify\.ru$/.test(location.host), run: handleGoLinkify },
@@ -3436,6 +3444,7 @@
       handleRlu,
       handleAdshnk,
       handleSimilarsites,
+      handleSimpcity,
       handleLolinez,
       handleUrlcash,
       handleGoLinkify,

@@ -124,6 +124,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `sl-primary` | Clicks `#sl-primary` or `.get-link` (`textfrog.com`, `eduify.app`, `gamescrate.app`) |
 | `safefileku` | Clicks the submit control after the timer (`safefileku.com`) |
 | `similarsites` | Decodes the `/goto/` path (`similarsites.com`) |
+| `simpcity` | Decodes the base64 `?to=` on `/redirect` (`simpcity.cr`) |
 | `lolinez` | Follows the bare query URL (`www.lolinez.com`) |
 | `urlcash` | Reads the `linkDestUrl` page global (`urlcash.com`) |
 | `go-linkify` | Extracts the `/get/` URL from page scripts (`go.linkify.ru`) |
