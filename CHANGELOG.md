@@ -1,3 +1,11 @@
+## 1.14.3 — 2026-11-25
+
+### Added
+- `exe.io` joins the `exe-urls` rule (same staged `#submit-button` flow), closing the last adsbypasser `link` gap.
+
+### Notes
+- The remaining upstream gap is image hosts, nearly all adult (out per maintainer decision) or general-purpose (giphy, tenor, prnt.sc, imgflip) where auto-clicking would cause false positives.
+
 ## 1.14.2 — 2026-11-25
 
 ### Added

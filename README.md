@@ -114,7 +114,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `turkdown` | Follows the get-link href (`link.turkdown.com`) |
 | `tutwuri` | Clicks the btn-1/2/3 sequence (`tutwuri.id`) |
 | `exeo-app` | Clicks the three-stage buttons (`exe-links.com`, `exeo.app`, `exeygo.com`) |
-| `exe-urls` | Clicks `#submit-button` across stages (`exe-urls.com`, `exego.app`, `exnion.com`) |
+| `exe-urls` | Clicks `#submit-button` across stages (`exe.io`, `exe-urls.com`, `exego.app`, `exnion.com`) |
 | `lnk2` | Strips overlays, clicks `#getLink` on `/go/` (`lnk2.cc`) |
 | `spaste` | Submits the contact form on `/site/` (`www.spaste.com`) |
 | `f95zone` | Clicks `.host_link` on `/masked/` (`f95zone.to`) |
