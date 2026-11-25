@@ -703,7 +703,7 @@ test('srnky/clksz click a primary/secondary button', async () => {
 
 test('exe-urls family clicks #submit-button in stages', async () => {
   const sel = '#submit-button:not([disabled])';
-  for (const host of ['exe-urls.com', 'exego.app', 'exnion.com']) {
+  for (const host of ['exe.io', 'exe-urls.com', 'exego.app', 'exnion.com']) {
     const h = load({ href: `https://${host}/x`, querySelector: qsMap({ [sel]: clickable() }) });
     assert.strictEqual(await h.api.handleExeUrls(), true);
   }
@@ -724,7 +724,7 @@ test('safefileku clicks the submit control', async () => {
 });
 
 test('new pahe-family hosts open the gate', () => {
-  for (const host of ['srnky.com', 'clksz.com', 'cutlink.net', 'exe-urls.com', 'textfrog.com', 'simpcity.cr', 'ashnk.com', 'shrink-service.it']) {
+  for (const host of ['srnky.com', 'clksz.com', 'cutlink.net', 'exe.io', 'exe-urls.com', 'textfrog.com', 'simpcity.cr', 'ashnk.com', 'shrink-service.it']) {
     const h = load({ href: `https://${host}/x`, querySelector: () => null });
     assert.strictEqual(h.api.knownShortener(), true, host + ' must open the shortener gate');
   }
