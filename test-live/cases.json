@@ -627,5 +627,78 @@
     "family": "wpsafelink",
     "note": "JSON variant: the base64 payload is decoded locally",
     "timeout": 35
+  },
+  {
+    "id": "srnky-1",
+    "host": "srnky.com",
+    "path": "/r/abc",
+    "html": "<button class=\"btn-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('.btn-primary').addEventListener('click',()=>{document.title='CLICKED-srnky-1';});</script>",
+    "expect": "CLICKED-srnky-1",
+    "family": "ports",
+    "note": "live: srnky-1"
+  },
+  {
+    "id": "clksz-1",
+    "host": "clksz.com",
+    "path": "/r/abc",
+    "html": "<button class=\"btn-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('.btn-primary').addEventListener('click',()=>{document.title='CLICKED-clksz-1';});</script>",
+    "expect": "CLICKED-clksz-1",
+    "family": "ports",
+    "note": "live: clksz-1"
+  },
+  {
+    "id": "exe-io-1",
+    "host": "exe.io",
+    "path": "/abc",
+    "html": "<button id=\"submit-button\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('#submit-button').addEventListener('click',()=>{document.title='CLICKED-exe-io-1';});</script>",
+    "expect": "CLICKED-exe-io-1",
+    "family": "ports",
+    "note": "live: exe-io-1"
+  },
+  {
+    "id": "cutlink-1",
+    "host": "cutlink.net",
+    "path": "/abc",
+    "html": "<button id=\"submit-button\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('#submit-button').addEventListener('click',()=>{document.title='CLICKED-cutlink-1';});</script>",
+    "expect": "CLICKED-cutlink-1",
+    "family": "ports",
+    "note": "live: cutlink-1"
+  },
+  {
+    "id": "sl-primary-1",
+    "host": "textfrog.com",
+    "path": "/abc",
+    "html": "<button id=\"sl-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('#sl-primary').addEventListener('click',()=>{document.title='CLICKED-sl-primary-1';});</script>",
+    "expect": "CLICKED-sl-primary-1",
+    "family": "ports",
+    "note": "live: sl-primary-1"
+  },
+  {
+    "id": "safefileku-1",
+    "host": "safefileku.com",
+    "path": "/abc",
+    "html": "<button type=\"submit\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('button[type=\"submit\"]').addEventListener('click',()=>{document.title='CLICKED-safefileku-1';});</script>",
+    "expect": "CLICKED-safefileku-1",
+    "family": "ports",
+    "note": "live: safefileku-1"
+  },
+  {
+    "id": "simpcity-1",
+    "host": "simpcity.cr",
+    "path": "/redirect",
+    "search": "?to=aHR0cHM6Ly9leGFtcGxlLmNvbS9zaW1wY2l0eS1wb3N0",
+    "html": "<p>Redirecting...</p>",
+    "expect": "https://example.com/simpcity-post",
+    "family": "ports",
+    "note": "live: simpcity base64 ?to="
+  },
+  {
+    "id": "ashnk-1",
+    "host": "ashnk.com",
+    "path": "/abc",
+    "html": "<button class=\"ui right labeled icon button primary huge fluid\">Continue</button><a id=\"final_redirect\" href=\"https://example.com/ashnk-dest\">Final</a><p>Please wait a moment...</p>",
+    "expect": "https://example.com/ashnk-dest",
+    "family": "ports",
+    "note": "live: ashnk variant"
   }
 ]

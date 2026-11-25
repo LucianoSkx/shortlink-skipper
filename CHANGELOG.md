@@ -1,3 +1,12 @@
+## 1.14.4 — 2026-11-25
+
+### Fixed
+- **`simpcity.cr` gets a dedicated rule.** Relying on `url-destination` was not enough: that rule only runs when the page looks like a shortlink, so a bare `/redirect?to=` page could be skipped. The new rule decodes the base64 `?to=` directly.
+
+### Tests
+- Live harness now covers the 1.14.2/1.14.3 hosts (srnky, clksz, exe.io, cutlink, sl-primary, safefileku, simpcity, ashnk): **77/77 cases pass** in a real browser.
+- `package-lock.json` synced to the current version.
+
 ## 1.14.3 — 2026-11-25
 
 ### Added
