@@ -631,7 +631,7 @@
   {
     "id": "srnky-1",
     "host": "srnky.com",
-    "path": "/r/abc",
+    "path": "/r/abc/def",
     "html": "<button class=\"btn-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('.btn-primary').addEventListener('click',()=>{document.title='CLICKED-srnky-1';});</script>",
     "expect": "CLICKED-srnky-1",
     "family": "ports",
@@ -640,7 +640,7 @@
   {
     "id": "clksz-1",
     "host": "clksz.com",
-    "path": "/r/abc",
+    "path": "/r/abc/def",
     "html": "<button class=\"btn-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('.btn-primary').addEventListener('click',()=>{document.title='CLICKED-clksz-1';});</script>",
     "expect": "CLICKED-clksz-1",
     "family": "ports",
@@ -654,15 +654,6 @@
     "expect": "CLICKED-exe-io-1",
     "family": "ports",
     "note": "live: exe-io-1"
-  },
-  {
-    "id": "cutlink-1",
-    "host": "cutlink.net",
-    "path": "/abc",
-    "html": "<button id=\"submit-button\">Continue</button><p>Please wait a moment...</p><script>document.querySelector('#submit-button').addEventListener('click',()=>{document.title='CLICKED-cutlink-1';});</script>",
-    "expect": "CLICKED-cutlink-1",
-    "family": "ports",
-    "note": "live: cutlink-1"
   },
   {
     "id": "sl-primary-1",

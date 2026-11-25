@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.14.4
+// @version      1.14.5
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -116,7 +116,7 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|a2zapk\.dev|adshnk\.com|ashnk\.com|shrink-service\.it|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|cuty\.io|cutlink\.net|cutnet\.net|cuttlinks\.com|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|exe\.io|exe-urls\.com|exego\.app|exnion\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.(co|com)|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|simpcity\.cr|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|srnky\.com|clksz\.com|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|usfinf\.net|xervoo\.net|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|textfrog\.com|eduify\.app|gamescrate\.app|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|coinclix\.co|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
+    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|a2zapk\.dev|adshnk\.com|ashnk\.com|shrink-service\.it|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|cuty\.io|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|exe\.io|exe-urls\.com|exego\.app|exnion\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.(co|com)|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|simpcity\.cr|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|usfinf\.net|xervoo\.net|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|textfrog\.com|eduify\.app|gamescrate\.app|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|coinclix\.co|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|2i\.(cz|sk)|pixsera\.net|3xpla\.net|3xplanet\.(net|xyz)|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -1434,12 +1434,14 @@
   }
 
   async function handleCuttty() {
-    if (!/(^|\.)(cuttty\.com|cuty\.io|cety\.app|cutlink\.net|cutnet\.net|cuttlinks\.com)$/.test(location.host)) return false;
+    if (!/(^|\.)(cuttty\.com|cuty\.io|cety\.app)$/.test(location.host)) return false;
     return clickSelectorWhen('#submit-button', 9000);
   }
 
   async function handleSrnky() {
     if (!SRNKY_HOST.test(location.host)) return false;
+    // Root is a general content site; only the /r/<slug>/... path is a shortlink.
+    if (!/^\/r\/[^/]+\/.+$/.test(location.pathname)) return false;
     return clickWhen(
       'button.btn-primary:not([disabled]):not(.disabled), button.btn-success:not([disabled]):not(.disabled), a.btn-primary[href]:not(.disabled), a.btn-success[href]:not(.disabled)',
       15000,
@@ -3025,7 +3027,7 @@
     { name: 'hen-tay', when: () => /(^|\.)hen-tay\.net$/.test(location.host), run: handleHenTay },
     { name: 'wpsafe-anchor', when: () => WPSAFE_ANCHOR_HOST.test(location.host), run: handleWpsafeAnchor },
     { name: 'tribuntekno', when: () => /(^|\.)tribuntekno\.com$/.test(location.host), run: handleTribuntekno },
-    { name: 'cuttty', when: () => /(^|\.)(cuttty\.com|cuty\.io|cety\.app|cutlink\.net|cutnet\.net|cuttlinks\.com)$/.test(location.host), run: handleCuttty },
+    { name: 'cuttty', when: () => /(^|\.)(cuttty\.com|cuty\.io|cety\.app)$/.test(location.host), run: handleCuttty },
     { name: 'fir3', when: () => /(^|\.)fir3\.net$/.test(location.host), run: handleFir3 },
     { name: 'gplinks', when: () => /(^|\.)gplinks\.(co|com)$/.test(location.host), run: handleGplinks },
     { name: 'sl-primary', when: () => SL_PRIMARY_HOST.test(location.host), run: handleSlPrimary },

@@ -107,7 +107,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `hen-tay` | Follows the download link on `/go/` (`hen-tay.net`) |
 | `wpsafe-anchor` | Follows `#wpsafe-link a` (`otomi-games.com`, `ryuugames.com`) |
 | `tribuntekno` | Clicks the verification buttons (`tribuntekno.com`) |
-| `cuttty` | Clicks `#submit-button` (`cuttty.com`, `cuty.io`, `cety.app`, `cutlink.net`, `cutnet.net`, `cuttlinks.com`) |
+| `cuttty` | Clicks `#submit-button` (`cuttty.com`, `cuty.io`, `cety.app`) |
 | `fir3` | Clicks the get-link button (`fir3.net`) |
 | `gplinks` | Clicks `.get-link` (`gplinks.co`, `gplinks.com`) |
 | `icutlink` | Follows the get-link href / clicks `.bsub` (`icutlink.com`, `zegtrends.com`) |
@@ -120,7 +120,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `f95zone` | Clicks `.host_link` on `/masked/` (`f95zone.to`) |
 | `rlu-preview` | Follows the long URL (`preview.rlu.ru`) |
 | `adshnk` | Clicks through to `#final_redirect` (`adshnk.com`, `ashnk.com`, `shrink-service.it`) |
-| `srnky` | Clicks the primary/secondary button (`srnky.com`, `clksz.com`) |
+| `srnky` | Clicks the primary/secondary button on `/r/<slug>/...` only (`srnky.com`, `clksz.com`) |
 | `sl-primary` | Clicks `#sl-primary` or `.get-link` (`textfrog.com`, `eduify.app`, `gamescrate.app`) |
 | `safefileku` | Clicks the submit control after the timer (`safefileku.com`) |
 | `similarsites` | Decodes the `/goto/` path (`similarsites.com`) |
