@@ -1,3 +1,15 @@
+## 1.14.7 — 2026-11-26
+
+### Added
+- **Unlocker hosts from the F.E.A.R. reference list:** `work-direct.ink` (work.ink alias), `link-unlock.com` and `lockr.to` now route through `external-service` (trw.lat API → bypass.tools). F.E.A.R. consumes the same trw.lat backend this script already uses; its task auto-completion was **not** ported because this project deliberately leaves engagement walls to the user.
+
+### Fixed
+- **Rule order:** `cloudfam` and `upfilesgo` now run before `file-host`. Both hosts are also in `FILE_HOSTS`, and `file-host` waits 20 s for a download control before yielding — the dedicated rule was delayed by that entire wait on every page.
+- `lockr.to` joins the `lockr.so`/`lockr.net` gate entries.
+
+### Tests
+- Live harness grew from 75 to **110 cases** (35 host-gated rules that had no browser coverage: aii.sh, apkadmin, avnsgames, bit.ly, blog.adlink.click, datanodes, filespayouts, filekeeper, fuckingfast, horrorpay, cloudfam, inshorturl, mahitimanch, shrinkme.click, toolkit.inshorturl, uiil.ink, vexfile, zdrive, aknewz, jobzhub, lnbz, nerventualken, safelinkearn, speedy-links, toolskitpro, xut, fc-lc, themezon, intercelestial, pahe.plus, devuploads, upfilesgo, file-upload.org, finance host, mrproblogger). **110/110 pass.**
+
 ## 1.14.6 — 2026-11-25
 
 ### Fixed

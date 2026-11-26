@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.14.6
+// @version      1.14.7
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -116,7 +116,7 @@
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|a2zapk\.io|a2zapk\.dev|adshnk\.com|ashnk\.com|shrink-service\.it|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|cuty\.io|exeo\.app|exeygo\.com|exe\.io|exe-urls\.com|exnion\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.(co|com)|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|simpcity\.cr|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|vplink\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|ppcnt\.net|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|textfrog\.com|eduify\.app|gamescrate\.app|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
+    /(^|\.)(1ink\.cc|a2zapk\.io|a2zapk\.dev|adshnk\.com|ashnk\.com|shrink-service\.it|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|cuty\.io|exeo\.app|exeygo\.com|exe\.io|exe-urls\.com|exnion\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.(co|com)|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|simpcity\.cr|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|vplink\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|v\.gd|paster\.gg|rinku\.pro|lockr\.(?:so|net|to)|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|ppcnt\.net|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|textfrog\.com|eduify\.app|gamescrate\.app|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|2i\.(cz|sk)|pixsera\.net|3xpla\.net|3xplanet\.(net|xyz)|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
@@ -125,7 +125,7 @@
     /(^|\.)(ssdhostting\.com|rvpaste\.com|shrinkbixby\.com)$/;
   const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
-    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|paster\.gg|gplinks\.in)\/.+)/;
+    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|work-direct\.ink|workink\.(?:net|one|me)|link-unlock\.com|lockr\.(?:so|net|to)|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|paster\.gg|gplinks\.in)\/.+)/;
   // Matches whole host labels, never substrings: "x.com" must not catch
   // netflix.com/dropbox.com/box.com, which a bare substring alternation did.
   const INFRA_HOST =
@@ -2953,6 +2953,10 @@
     { name: 'image-host', when: () => IMAGE_HOSTS.test(location.host), run: handleImageHost },
     { name: 'safefileku', when: () => SAFEFILEKU_HOST.test(location.host), run: handleSafefileku },
     { name: 'katfile', when: () => KATFILE_HOST.test(location.host), run: handleKatfile },
+    // These two hosts are also in FILE_HOSTS; file-host waits 20s for a
+    // download control before yielding, so their dedicated rules go first.
+    { name: 'cloudfam', when: () => CLOUdfAM_HOST.test(location.host), run: handleCloudfam },
+    { name: 'upfilesgo', when: () => UPFILESGO_HOST.test(location.host), run: handleUpfilesgo },
     { name: 'file-host', when: () => FILE_HOSTS.test(location.host), run: handleFileHost },
     { name: 'ouo', when: () => OUO_HOST.test(location.host), run: handleOuo },
     { name: 'adfoc', when: () => ADFOC_FAMILY.test(location.host), run: handleAdFoc },
@@ -3014,7 +3018,6 @@
     { name: 'fucking-fast', when: () => FUCKINGFAST_HOST.test(location.host), run: handleFuckingFast },
     { name: 'horrorpay', when: () => HORRORPAY_HOST.test(location.host), run: handleHorrorpay },
     { name: 'cloud-unblockedgames', when: () => CLOUD_UNBLOCKED_GAMES_HOST.test(location.host), run: handleCloudUnblockedGames },
-    { name: 'cloudfam', when: () => CLOUdfAM_HOST.test(location.host), run: handleCloudfam },
     { name: 'filespayouts', when: () => FILESPAYOUTS_HOST.test(location.host), run: handleFilespayouts },
     { name: 'inshorturl-in', when: () => INSHORTURL_IN_HOST.test(location.host), run: handleInshorturlIn },
     { name: 'mahitimanch', when: () => MAHITIMANCH_HOST.test(location.host), run: handleMahitimanch },
@@ -3042,7 +3045,6 @@
     { name: 'up-4ever', when: () => UP4EVER_HOST.test(location.host), run: handleUp4Ever },
     { name: 'geekgrove', when: () => GEEKGROVE_HOST.test(location.host), run: handleGeekgrove },
     { name: 'file-upload-org', when: () => FILE_UPLOAD_ORG_HOST.test(location.host), run: handleFileUploadOrg },
-    { name: 'upfilesgo', when: () => UPFILESGO_HOST.test(location.host), run: handleUpfilesgo },
     { name: 'forumdinheiro', when: () => FORUMDINHEIRO_HOST.test(location.host), run: handleForumdinheiro },
     { name: 'token-link', when: () => TOKEN_HOST.test(location.host), run: handleTokenLink },
     { name: 'wp-content-lock', when: () => WP_CONTENT_LOCK_HOST.test(location.host), run: handleWpContentLock },
