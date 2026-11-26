@@ -2,7 +2,7 @@
   "name": "shortlink-skipper",
   "version": "1.14.7",
   "private": true,
-  "description": "Userscript that skips link shorteners; smoke tests with no external dependencies.",
+  "description": "Userscript that skips link shorteners; unit suite (node:test) plus a live Chrome fixture harness.",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "test:live": "node test-live/run-all.js"
