@@ -24,6 +24,13 @@ jobs:
         run: |
           TITLE="Upstream gap: adsbypasser coverage not yet ported"
           NUM=$(gh issue list --search "$TITLE in:title" --state open --json number -q '.[0].number')
+          # image roots stay out by maintainer decision; only a link/file gap
+          # is worth a new issue, otherwise the monthly run recreates noise.
+          if ! grep -qE '^## (link|file) \(' gap.md; then
+            echo "No link/file gap -- image hosts remain out of scope."
+            if [ -n "$NUM" ]; then gh issue edit "$NUM" --body-file gap.md; fi
+            exit 0
+          fi
           if [ -z "$NUM" ]; then
             gh issue create --title "$TITLE" --body-file gap.md
           else
