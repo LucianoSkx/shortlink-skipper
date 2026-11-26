@@ -1,6 +1,8 @@
 # Function-by-function audit — prioritized changes
 
-Scope: `shortlink-skipper.user.js` (~85 functions, v1.10.5). Order = impact ÷ effort.
+Scope: `shortlink-skipper.user.js` (~85 functions, **v1.10.5 snapshot**). Order = impact ÷ effort.
+The line numbers below are from 1.10.5 and no longer resolve; treat this as a record of
+what was decided and why, not as a current map.
 Branch flow: `main` is protected (PR + Validate). Prefer short PRs into `main`;
 use `dev` only for long-running work and fast-forward it after each merge
 (`git push origin main:dev`). Installed users poll raw `main`.

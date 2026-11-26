@@ -2,6 +2,14 @@ name: Live harness
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'shortlink-skipper.user.js'
+      - 'test-live/**'
+
+concurrency:
+  group: live-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
