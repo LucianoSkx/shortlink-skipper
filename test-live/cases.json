@@ -1278,5 +1278,15 @@
       }
     },
     "note": "live: bstlar XHR hook completes the task (mocked)"
+  },
+  {
+    "id": "cuturl-1",
+    "host": "cuturl.cc",
+    "path": "/goto.php",
+    "search": "?goto=https%3A%2F%2Fexample.com%2Fcuturl-next",
+    "html": "<p>Redirecting...</p>",
+    "expect": "https://example.com/cuturl-next",
+    "family": "ports",
+    "note": "live: cuturl.cc ?goto= next stage"
   }
 ]

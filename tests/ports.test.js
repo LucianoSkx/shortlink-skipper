@@ -834,3 +834,12 @@ test('handleSetcForm decodes the #landing go field', async () => {
   assert.strictEqual(await h.api.handleSetcForm(), true);
   assert.ok(h.navs.includes(dest));
 });
+
+test('cuturl.cc follows the ?goto= next-stage URL', async () => {
+  const dest = 'https://1ink.cc/go.php?id=n9u';
+  const h = load({ href: `https://cuturl.cc/goto.php?goto=${encodeURIComponent(dest)}` });
+  assert.strictEqual(await h.api.handleCuturl(), true);
+  assert.ok(h.navs.includes(dest));
+  const bare = load({ href: 'https://cuturl.cc/' });
+  assert.strictEqual(await bare.api.handleCuturl(), false);
+});
