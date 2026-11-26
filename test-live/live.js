@@ -136,10 +136,20 @@ async function main() {
     if (frameUrl) {
       final = frameUrl;
     } else {
+      let gone = false;
       try {
         const r = await S('Runtime.evaluate', { expression: 'window.__SL_FINAL_HREF || location.href', returnByValue: true });
-        final = r.result && r.result.result ? r.result.result.value : '';
-      } catch (_) {}
+        if (r.error) gone = true;
+        else final = r.result && r.result.result ? r.result.result.value : '';
+      } catch (_) {
+        gone = true;
+      }
+      // A rule that closes the tab (close-interstitial) leaves nothing to
+      // evaluate; report it instead of polling until the hard timeout.
+      if (gone) {
+        const info = await send('Target.getTargetInfo', { targetId });
+        if (info.error || !info.result) { final = 'PAGE_CLOSED'; break; }
+      }
     }
     try {
       const r = await S('Runtime.evaluate', { expression: 'document.title', returnByValue: true });

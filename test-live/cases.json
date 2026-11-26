@@ -1118,5 +1118,87 @@
       }
     },
     "note": "live: adlinkfly /links/go (mocked)"
+  },
+  {
+    "id": "loot-reward-1",
+    "host": "loot-reward.com",
+    "path": "/x",
+    "search": "?cc=eyJsaW5rIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9sb290LXJld2FyZC1kZXN0In0%3D",
+    "html": "<p>Reward</p>",
+    "expect": "https://example.com/loot-reward-dest",
+    "family": "ports",
+    "note": "live: loot-reward base64cc"
+  },
+  {
+    "id": "token-link-1",
+    "host": "tpi.li",
+    "path": "/abc",
+    "html": "<input name=\"token\" value=\"aHR0cHM6Ly9leGFtcGxlLmNvbS90b2tlbi1kZXN0\"><p>Generating your link...</p>",
+    "expect": "https://example.com/token-dest",
+    "family": "ports",
+    "note": "live: token-link input value"
+  },
+  {
+    "id": "skip-button-dest-1",
+    "host": "hurirk.net",
+    "path": "/ad/locked",
+    "search": "?h=abc&url=https%3A%2F%2Fexample.com%2Fskip-dest",
+    "html": "<p>locked</p>",
+    "expect": "hurirk.net/-abc/",
+    "family": "ports",
+    "note": "live: skip-button dest construction"
+  },
+  {
+    "id": "cloud-unblockedgames-1",
+    "host": "cloud.unblockedgames.world",
+    "path": "/abc",
+    "html": "<button>Start Verification</button><button id=\"verify_button2\">2</button><button id=\"verify_button\">1</button><a id=\"two_steps_btn\" href=\"https://example.com/cug-dest\">Go</a><p>Please wait a moment...</p><script>document.querySelector(\"button\").addEventListener('click',()=>{document.title='CLICKED-cloud-unblockedgames-1';});</script>",
+    "expect": "CLICKED-cloud-unblockedgames-1",
+    "family": "ports",
+    "note": "live: cloud-unblockedgames stages"
+  },
+  {
+    "id": "ouo-1",
+    "host": "ouo.io",
+    "path": "/abc",
+    "html": "<form id=\"form-captcha\"><button type=\"submit\">Continue</button></form><p>Please wait a moment...</p><script>document.getElementById(\"form-captcha\").addEventListener(\"submit\",(e)=>{e.preventDefault();document.title=\"CLICKED-ouo-1\";e.target.remove();});</script>",
+    "expect": "CLICKED-ouo-1",
+    "family": "ports",
+    "note": "live: ouo form submit loop"
+  },
+  {
+    "id": "aylink-1",
+    "host": "aylink.co",
+    "path": "/abc/def",
+    "html": "<script>window.app={csrf:\"csrf\"};window._a=\"a\";window._t=\"t\";window._d=\"d\";</script><p>Generating your link...</p>",
+    "expect": "https://example.com/aylink-dest",
+    "family": "ports",
+    "mock": {
+      "/get/tk": {
+        "th": "tk1"
+      },
+      "/links/go2": {
+        "url": "https://example.com/aylink-dest"
+      }
+    },
+    "note": "live: aylink postForm chain (mocked)"
+  },
+  {
+    "id": "close-interstitial-1",
+    "host": "ppcnt.net",
+    "path": "/x",
+    "html": "<p>interstitial</p>",
+    "expect": "PAGE_CLOSED",
+    "family": "ports",
+    "note": "live: close-interstitial closes the tab"
+  },
+  {
+    "id": "adlinkfly-captcha-host-1",
+    "host": "shortly.xyz",
+    "path": "/abc",
+    "html": "<button id=\"invisibleCaptchaShortlink\">Continue</button><p>Generating your link...</p><script>document.querySelector(\"#invisibleCaptchaShortlink\").addEventListener(\"click\",()=>{document.title=\"CLICKED-adlinkfly-captcha-host-1\";});</script>",
+    "expect": "CLICKED-adlinkfly-captcha-host-1",
+    "family": "ports",
+    "note": "live: adlinkfly invisible captcha on a gated host"
   }
 ]
