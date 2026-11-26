@@ -3349,6 +3349,8 @@
       handleFileHost,
       handleKatfile,
       KATFILE_HOST,
+      FILE_HOSTS,
+      GENERIC_RULES,
       SRNKY_HOST,
       EXE_URLS_HOST,
       SL_PRIMARY_HOST,
