@@ -1,4 +1,4 @@
-## Unreleased
+## 1.14.8 — 2026-11-26
 
 ### Fixed
 - `@exclude` header now matches the in-script `EXCLUDE_HOSTS` list: added `google.*` (all TLDs), `googlemail`, `youtube`, `youtube-nocookie`, `recaptcha`, `hcaptcha` and `cloudflare`. The script already refused them at runtime, but userscript managers were still injecting (and evaluating) it on those pages.
