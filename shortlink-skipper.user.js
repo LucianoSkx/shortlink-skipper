@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shortlink Skipper
 // @namespace    https://github.com/luciano
-// @version      1.14.5
+// @version      1.14.6
 // @description  Automatically skips link shorteners: speeds up countdowns, clicks final buttons, extracts the destination from the URL, blocks popups and anti-adblock warnings.
 // @author       Luciano
 // @license      MIT
@@ -100,8 +100,8 @@
   const AYLINK_HOST =
     /(^|\.)(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
   const BCVC_HOST = /(^|\.)(bcvc\.(live|xyz|go)|bcvcgo\.xyz)$/;
-  const SKIP_BUTTON_HOST = /(^|\.)(hurirk\.net|usfinf\.net|xervoo\.net)$/;
-  const CLOSE_INTERSTITIAL_HOST = /(^|\.)(doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com)$/;
+  const SKIP_BUTTON_HOST = /(^|\.)hurirk\.net$/;
+  const CLOSE_INTERSTITIAL_HOST = /(^|\.)ppcnt\.net$/;
   const REKONISE_HOST = /(^|\.)rekonise\.com$/;
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
@@ -110,22 +110,22 @@
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.(com|net)$/;
   const ADLINKFLY_HOSTS =
-    /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.(mobi|co)|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|earnmm\.com|cutwin\.co|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com|shrinkbixby\.com)$/;
+    /(^|\.)(shortly\.xyz|shortmoz\.link|wadooo\.com|lnk\.news|uiz\.io|uiz\.app|tik\.lat|tlkm\.id|sfile\.(mobi|co)|skiplink\.io|link-to\.net|gplinks\.in|paster\.so|pixls\.co|socialwolvez\.com|xslinks\.com|apkpsp\.com|shrinkbixby\.com)$/;
   const TOKEN_HOST = /(^|\.)(tpi\.li|oii\.la|tei\.ai|tii\.ai|iir\.ai|oko\.sh)$/;
   const ZAFREE_HOST = /(^|\.)za\.(gl|uy)$/;
   // Curated from adsbypasser's src/sites (BSD-2-Clause) -- families our generic
   // rules already handle once the gate lets them through.
   const EXTRA_SHORTENER_HOSTS =
-    /(^|\.)(1ink\.cc|1link\.club|a2zapk\.io|a2zapk\.dev|adshnk\.com|ashnk\.com|shrink-service\.it|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|cuty\.io|download\.yasir252\.com|exeo\.app|exe-links\.com|exeygo\.com|exe\.io|exe-urls\.com|exego\.app|exnion\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.(co|com)|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|simpcity\.cr|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|rocklinks\.in|vplink\.in|jrlinks\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|booo\.st|cety\.app|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|doaipomer\.com|ppcnt\.net|lnkparts\.com|zunsoach\.com|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|usfinf\.net|xervoo\.net|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|textfrog\.com|eduify\.app|gamescrate\.app|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|coinclix\.co|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
+    /(^|\.)(1ink\.cc|a2zapk\.io|a2zapk\.dev|adshnk\.com|ashnk\.com|shrink-service\.it|anchoreth\.com|bcvc\.ink|binbox\.io|blogmado\.com|cpmlink\.net|cuttty\.com|cuty\.io|exeo\.app|exeygo\.com|exe\.io|exe-urls\.com|exnion\.com|fir3\.net|f95zone\.to|get-click2\.blogspot\.com|go\.linkify\.ru|goo\.st|gplinks\.(co|com)|gplinks\.in|hen-tay\.net|icutlink\.com|imagetwist\.netlify\.app|javlibrary\.com|kimochi\.info|kingofshrink\.com|linegee\.net|linkpoi\.me|linkshrink\.net|lnk2\.cc|lolinez\.com|mangalist\.org|network-loop\.com|nmac\.to|otomi-games\.com|preview\.rlu\.ru|ryuugames\.com|similarsites\.com|simpcity\.cr|stfly\.me|stly\.link|supercheats\.com|swzz\.xyz|thinfi\.com|tribuntekno\.com|tutwuri\.id|urlcash\.com|urlgalleries\.net|zegtrends\.com|link\.turkdown\.com|softurl\.in|shrinkme\.io|droplink\.co|lksfy\.in|vplink\.in|4hi\.in|linkshortify\.in|shrinkforearn\.in|indianshortner\.com|dekhe\.click|clk\.wiki|clk\.kim|clk\.sh|bst\.gg|v\.gd|paster\.gg|rinku\.pro|lockr\.so|lockr\.net|subfinal\.com|forumdinheiro\.com|guis2\.com|tarviral\.com|umconto\.com|ppcnt\.net|aii\.sh|apkadmin\.com|avnsgames\.com|bit\.ly|blog\.adlink\.click|datanodes\.to|en\.mrproblogger\.com|filekeeper\.net|fuckingfast\.co|horrorpay\.online|hurirk\.net|loot-reward\.com|cloud\.unblockedgames\.world|cloudfam\.io|filespayouts\.com|inshorturl\.in|mahitimanch\.in|shrinkme\.click|toolkit\.inshorturl\.com|uiil\.ink|vexfile\.com|zdrive\.to|aknewz\.xyz|aradmag\.online|financeehelp\.com|cloudhostt\.com|financeguidz\.com|techbixby\.com|loanbixby\.com|jobzhub\.store|lnbz\.la|nerventualken\.com|safelinkearn\.com|speedy-links\.com|toolskitpro\.net|xut\.io|textfrog\.com|eduify\.app|gamescrate\.app|fc-lc\.xyz|oii\.io|themezon\.net|intercelestial\.com|pahe\.plus|djxmaza\.in|smartfeecalculator\.com|gujjukhabar\.in|pdfhindibook\.com|invest\.datapendidikan\.com|crm\.urlwebsite\.com|go\.fakta\.id|www\.up-4ever\.net|geekgrove\.net|www\.file-upload\.org|upfilesgo\.com)$/;
   const IMAGE_HOSTS =
     /(^|\.)(bayimg\.com|beeimg\.com|casimages\.com|cloudgallery\.net|croea\.com|cubeupload\.com|depic\.me|directupload\.eu|dpic\.me|fastpic\.org|fikfok\.net|fotosik\.pl|goonbox\.cr|hostpic\.org|ibb\.co|im\.ge|imagebam\.com|imageban\.ru|imagehaha\.com|imagenetz\.de|imagenpic\.com|imageshack\.com|imageshimage\.com|imagetwist\.com|imageup\.ru|imagevenue\.com|imagexport\.com|imgair\.net|imgbase\.ru|imgbb\.com|imgblaze\.net|imgbox\.com|imgfira\.cc|imgfrost\.net|imgouhmde\.sbs|imgouskel\.sbs|imghit\.com|imgo\.info|imgpv\.com|imgpulse\.top|imgtraffic\.com|imgxxt\.in|imx\.to|keptarolo\.hu|lookmyimg\.com|noelshack\.com|orangepix\.is|picforall\.eu|pic-upload\.de|2i\.(cz|sk)|pixsera\.net|3xpla\.net|3xplanet\.(net|xyz)|picstate\.com|pilot007\.org|pimpandhost\.com|pixfy\.cfd|pixhost\.cc|pixhost\.to|pixho\.st|pixxxels\.cc|postimages\.org|postimg\.cc|rintor\.space|shotcan\.com|trafficimage\.club|turboimagehost\.com|vipr\.im|3xplanet\.com)$/;
   const FILE_HOSTS =
-    /(^|\.)(ak\.sv|safefileku\.com|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.(vip|co|com)|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com|mega4upload\.net|uploady\.io|upfilesgo\.com|upfiles\.app|modsfire\.com|dailyuploads\.net|jioupload\.link|jioupload\.com|jioupload\.icu|cloudfam\.io|frdl\.io|freedl\.ink|fredl\.ru|frdl\.is|rapidgator\.net)$/;
+    /(^|\.)(safefileku\.com|apunkasoftware\.net|thefileslocker\.net|gofile\.download|katfile\.(vip|co|com)|keeplinks\.org|mirrored\.to|multiup\.io|uploadhaven\.com|uploadrar\.com|usersdrive\.com|mega4upload\.net|uploady\.io|upfilesgo\.com|upfiles\.app|modsfire\.com|dailyuploads\.net|jioupload\.link|jioupload\.com|cloudfam\.io|frdl\.io|freedl\.ink|fredl\.ru|frdl\.is|rapidgator\.net)$/;
   const WP_CONTENT_LOCK_HOST =
     /(^|\.)(ssdhostting\.com|rvpaste\.com|shrinkbixby\.com)$/;
   const SETC_FORM = 'form#setc';
   const BYPASS_SERVICE_URL =
-    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|r\.work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|paster\.gg|gplinks\.in)\/.+)/;
+    /^https?:\/\/(?:(?:loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com)\/s[\/?].+|linkvertise\.(?:com|net)\/.+|links\.lootlabs\.gg\/.+|(?:work\.ink|workink\.(?:net|one|me)|lockr\.so|lockr\.net|mboost\.me|sub2get\.com|ytsubme\.com|esohasl\.net|rbscripts\.net|link\.rbscripts\.net|cuty\.io|unlocknow\.net|sub2unlock\.(?:com|io|net|online|top)|sub4unlock\.(?:com|io|pro)|social-unlock\.com|key-access\.co|discordlink\.cc|link-target\.(?:net|org)|vip-linknetwork\.com|link-to\.net|paster\.so|paster\.gg|gplinks\.in)\/.+)/;
   // Matches whole host labels, never substrings: "x.com" must not catch
   // netflix.com/dropbox.com/box.com, which a bare substring alternation did.
   const INFRA_HOST =
@@ -1344,11 +1344,6 @@
     return clickSelectorWhen('.btn-xs', 5000);
   }
 
-  async function handleYasir252() {
-    if (!/^download\.yasir252\.com$/.test(location.host)) return false;
-    return openSelectorHref('a[id="downloadBtn"]');
-  }
-
   async function handleImagetwistNetlify() {
     if (!/^imagetwist\.netlify\.app$/.test(location.host)) return false;
     return openSelectorHref('center h2 p a, .btn-dark');
@@ -1434,7 +1429,7 @@
   }
 
   async function handleCuttty() {
-    if (!/(^|\.)(cuttty\.com|cuty\.io|cety\.app)$/.test(location.host)) return false;
+    if (!/(^|\.)(cuttty\.com|cuty\.io)$/.test(location.host)) return false;
     return clickSelectorWhen('#submit-button', 9000);
   }
 
@@ -1505,7 +1500,7 @@
     return true;
   }
 
-  const EXEO_HOST = /(^|\.)(exe-links\.com|exeo\.app|exeygo\.com)$/;
+  const EXEO_HOST = /(^|\.)(exeo\.app|exeygo\.com)$/;
   async function handleExeoApp() {
     if (!EXEO_HOST.test(location.host)) return false;
     const first = await waitFor('.link-button.button', 8000);
@@ -1657,7 +1652,6 @@
   const HORRORPAY_HOST = /(^|\.)horrorpay\.online$/;
   const FILE_UPLOAD_ORG_HOST = /(^|\.)www\.file-upload\.org$/;
   const UPFILESGO_HOST = /(^|\.)upfilesgo\.com$/;
-  const COINCLIX_HOST = /(^|\.)coinclix\.co$/;
   const GEEKGROVE_HOST = /(^|\.)geekgrove\.net$/;
   const DEVUPLOADS_HOST = /(^|\.)((djxmaza\.in)|(smartfeecalculator\.com)|(gujjukhabar\.in)|(pdfhindibook\.com))$/;
   const PNDK_HOST = /(^|\.)((invest\.datapendidikan\.com)|(crm\.urlwebsite\.com)|(go\.fakta\.id))$/;
@@ -1689,7 +1683,7 @@
   // Pahe-family flow observed on andradeatdev/auto-continue-shortlinks
   // (GPL-3.0, behavior reference only - no code copied).
   const SRNKY_HOST = /(^|\.)(srnky\.com|clksz\.com)$/;
-  const EXE_URLS_HOST = /(^|\.)(exe\.io|exe-urls\.com|exego\.app|exnion\.com)$/;
+  const EXE_URLS_HOST = /(^|\.)(exe\.io|exe-urls\.com|exnion\.com)$/;
   const SL_PRIMARY_HOST = /(^|\.)(textfrog\.com|eduify\.app|gamescrate\.app)$/;
   const SAFEFILEKU_HOST = /(^|\.)safefileku\.com$/;
   async function handleForumdinheiro() {
@@ -2028,45 +2022,6 @@
     if (await clickSelectorWhen('#dl2btn', 9000)) acted = true;
     return acted;
   }
-  async function handleCoinclix() {
-    if (!COINCLIX_HOST.test(location.host)) return false;
-    let acted = false;
-    const btnVerif = document.querySelector ? document.querySelector('#link-card #btnVerification') : null;
-    if (btnVerif) { try { fireClick(btnVerif); acted = true; } catch {} }
-    const linkBtn = document.querySelector ? document.querySelector('#link-card .btn-primary[href]') : null;
-    if (linkBtn?.href) { try { goto(linkBtn.href); acted = true; } catch {} }
-    const instructions = document.querySelector ? document.querySelector('#link-instructions-body') : null;
-    const kbds = instructions ? instructions.querySelectorAll('kbd') : null;
-    if (kbds && kbds.length) {
-      const key = kbds[kbds.length - 1].textContent.trim();
-      const url = `https://geekgrove.net/?key=${key}`;
-      try {
-        const openUrl = 'https://www.google.com/url?sa=t&source=web&rct=j&url=' + encodeURIComponent(url) + '&ved=2ahUKEwjS8I_fjaDdAhXqKsAKHQLeD3cQFjAAegQIABAB';
-        if (typeof GM_openInTab === 'function') GM_openInTab(openUrl, { active: true, insert: true });
-        else if (typeof PAGE.open === 'function') PAGE.open(openUrl);
-        acted = true;
-      } catch {}
-    }
-    if (!PAGE.__coinclixReturnPoll) {
-      PAGE.__coinclixReturnPoll = true;
-      let last = GM_getValue('sl_geekgrove_return_key', null);
-      const iv = setInterval(() => {
-        try {
-          const now = GM_getValue('sl_geekgrove_return_key', null);
-          if (now && now !== last) {
-            last = now;
-            const input = document.querySelector('#link-card input#verificationCode');
-            if (input) input.value = now;
-            const submit = document.querySelector('#link-card button#btnVerification');
-            if (submit) fireClick(submit);
-            clearInterval(iv);
-          }
-        } catch {}
-      }, 1000);
-    }
-    return acted;
-  }
-
   async function handleGeekgrove() {
     if (!GEEKGROVE_HOST.test(location.host)) return false;
     let acted = false;
@@ -3021,13 +2976,12 @@
     { name: 'blogmado', when: () => /(^|\.)blogmado\.com$/.test(location.host), run: handleBlogmado },
     { name: 'mangalist', when: () => /(^|\.)mangalist\.org$/.test(location.host), run: handleMangalist },
     { name: 'linegee', when: () => /(^|\.)linegee\.net$/.test(location.host), run: handleLinegee },
-    { name: 'yasir252', when: () => /^download\.yasir252\.com$/.test(location.host), run: handleYasir252 },
     { name: 'imagetwist-netlify', when: () => /^imagetwist\.netlify\.app$/.test(location.host), run: handleImagetwistNetlify },
     { name: 'urlgalleries', when: () => /(^|\.)urlgalleries\.net$/.test(location.host), run: handleUrlgalleries },
     { name: 'hen-tay', when: () => /(^|\.)hen-tay\.net$/.test(location.host), run: handleHenTay },
     { name: 'wpsafe-anchor', when: () => WPSAFE_ANCHOR_HOST.test(location.host), run: handleWpsafeAnchor },
     { name: 'tribuntekno', when: () => /(^|\.)tribuntekno\.com$/.test(location.host), run: handleTribuntekno },
-    { name: 'cuttty', when: () => /(^|\.)(cuttty\.com|cuty\.io|cety\.app)$/.test(location.host), run: handleCuttty },
+    { name: 'cuttty', when: () => /(^|\.)(cuttty\.com|cuty\.io)$/.test(location.host), run: handleCuttty },
     { name: 'fir3', when: () => /(^|\.)fir3\.net$/.test(location.host), run: handleFir3 },
     { name: 'gplinks', when: () => /(^|\.)gplinks\.(co|com)$/.test(location.host), run: handleGplinks },
     { name: 'sl-primary', when: () => SL_PRIMARY_HOST.test(location.host), run: handleSlPrimary },
@@ -3086,7 +3040,6 @@
     { name: 'devuploads', when: () => DEVUPLOADS_HOST.test(location.host), run: handleDevuploads },
     { name: 'pndk', when: () => PNDK_HOST.test(location.host), run: handlePndk },
     { name: 'up-4ever', when: () => UP4EVER_HOST.test(location.host), run: handleUp4Ever },
-    { name: 'coinclix', when: () => COINCLIX_HOST.test(location.host), run: handleCoinclix },
     { name: 'geekgrove', when: () => GEEKGROVE_HOST.test(location.host), run: handleGeekgrove },
     { name: 'file-upload-org', when: () => FILE_UPLOAD_ORG_HOST.test(location.host), run: handleFileUploadOrg },
     { name: 'upfilesgo', when: () => UPFILESGO_HOST.test(location.host), run: handleUpfilesgo },
@@ -3426,7 +3379,6 @@
       handleBlogmado,
       handleMangalist,
       handleLinegee,
-      handleYasir252,
       handleImagetwistNetlify,
       handleUrlgalleries,
       handleHenTay,
@@ -3468,7 +3420,6 @@
       handleHorrorpay,
       handleFileUploadOrg,
       handleUpfilesgo,
-      handleCoinclix,
       handleGeekgrove,
       handleDevuploads,
       handlePndk,

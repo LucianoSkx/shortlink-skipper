@@ -253,16 +253,6 @@
     "note": "live: a2zapk-1"
   },
   {
-    "id": "yasir-1",
-    "host": "download.yasir252.com",
-    "path": "/abc",
-    "search": "",
-    "html": "<a id=\"downloadBtn\" href=\"https://example.com/yas-target\">x</a>",
-    "expect": "example.com/",
-    "family": "ports",
-    "note": "live: yasir-1"
-  },
-  {
     "id": "itw-1",
     "host": "imagetwist.netlify.app",
     "path": "/abc",
