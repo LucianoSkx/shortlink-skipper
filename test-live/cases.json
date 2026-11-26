@@ -1200,5 +1200,83 @@
     "expect": "CLICKED-adlinkfly-captcha-host-1",
     "family": "ports",
     "note": "live: adlinkfly invisible captcha on a gated host"
+  },
+  {
+    "id": "zafree-1",
+    "host": "za.gl",
+    "path": "/abc",
+    "html": "<form id=\"link-view\"><input id=\"x\"><input id=\"y\"><input name=\"givenX\"><input name=\"givenY\"><button type=\"submit\">Continue</button></form><a href=\"https://example.com/zafree-dest\">Download</a><p>Please wait a moment...</p><script>document.getElementById(\"link-view\").addEventListener(\"submit\",(e)=>{e.preventDefault();e.target.remove();});</script>",
+    "expect": "https://example.com/zafree-dest",
+    "family": "ports",
+    "note": "live: za.gl coordinate form + destination link"
+  },
+  {
+    "id": "geekgrove-1",
+    "host": "geekgrove.net",
+    "path": "/x",
+    "html": "<button id=\"btnLinkStart\">Start</button><button id=\"btnLinkContinue\">Continue</button><button id=\"btnLpcont\">Go</button><div id=\"linkResHeader\"><kbd>KEY-123</kbd></div><p>Please wait a moment...</p>",
+    "expect": "PAGE_CLOSED",
+    "family": "ports",
+    "note": "live: geekgrove key chain closes the tab"
+  },
+  {
+    "id": "bcvc-1",
+    "host": "bcvc.live",
+    "path": "/abc",
+    "html": "<script>window.tZ=\"1\";window.cW=2;window.cH=3;window.tkn=\"k\";window.sW=4;window.sH=5;window.xyz=\"x\";</script><button id=\"getLink\">Get Link</button><p>Please wait a moment...</p>",
+    "expect": "https://example.com/bcvc-dest",
+    "family": "ports",
+    "mock": {
+      "/ln.php?wds=x": {
+        "message": {
+          "url": "https://example.com/bcvc-dest"
+        }
+      }
+    },
+    "note": "live: bc.vc globals + ln.php (mocked)"
+  },
+  {
+    "id": "forumdinheiro-1",
+    "host": "forumdinheiro.com",
+    "path": "/abc",
+    "html": "<p>Generating your link...</p>",
+    "expect": "https://example.com/forum-dest",
+    "family": "ports",
+    "mock": {
+      "/api/session-info": {
+        "hasSession": true,
+        "totalStage": 2,
+        "stageNumber": 1,
+        "sessionToken": "tok",
+        "stageId": "st"
+      },
+      "/api/trpc/linkSession.nextStage?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22token%22%3A%22tok%22%2C%22progress%22%3A2%2C%22stageId%22%3A%22st%22%7D%7D%7D": {
+        "destinationLink": "https://example.com/forum-dest"
+      }
+    },
+    "note": "live: forumdinheiro tRPC stage chain (mocked)"
+  },
+  {
+    "id": "acortalink-1",
+    "host": "acortalink.me",
+    "path": "/abc",
+    "html": "<button id=\"contador\">Continue</button><p>Please wait a moment...</p><script>document.getElementById(\"contador\").addEventListener(\"click\",()=>{document.title=\"CLICKED-acortalink-1\";});</script>",
+    "expect": "CLICKED-acortalink-1",
+    "family": "ports",
+    "note": "live: acortalink contador click"
+  },
+  {
+    "id": "bstlar-1",
+    "host": "bstlar.com",
+    "path": "/abc",
+    "html": "<p>Please wait a moment...</p><script>\nfunction FakeXHR(){this._l={};}\nFakeXHR.prototype.addEventListener=function(t,f){(this._l[t]=this._l[t]||[]).push(f);};\nFakeXHR.prototype.open=function(){};\nFakeXHR.prototype.send=function(){this.responseText=String.raw`{\"link\":{\"id\":7},\"tasks\":[]}`;(this._l.load||[]).forEach(function(f){f.call(this);}.bind(this));};\nwindow.XMLHttpRequest=FakeXHR;\nsetTimeout(function(){var x=new XMLHttpRequest();x.open(\"GET\",\"/api/tasks\");x.send();},400);\n</script>",
+    "expect": "https://example.com/bstlar-dest",
+    "family": "ports",
+    "mock": {
+      "/api/link-completed": {
+        "__text": "https://example.com/bstlar-dest"
+      }
+    },
+    "note": "live: bstlar XHR hook completes the task (mocked)"
   }
 ]

@@ -37,7 +37,11 @@ var fetch = function (url, opts) {
   var target = String(url);
   for (var suffix in __sl_mock_routes) {
     if (target.endsWith(suffix)) {
-      return Promise.resolve(new Response(JSON.stringify(__sl_mock_routes[suffix]), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      var v = __sl_mock_routes[suffix];
+      // { __text: "..." } serves a raw body: some handlers expect plain text
+      // (e.g. a bare destination URL) instead of JSON.
+      var raw = v && typeof v === 'object' && typeof v.__text === 'string';
+      return Promise.resolve(new Response(raw ? v.__text : JSON.stringify(v), { status: 200, headers: { 'Content-Type': raw ? 'text/plain' : 'application/json' } }));
     }
   }
   return __sl_real_fetch ? __sl_real_fetch(url, opts) : Promise.reject(new Error('fetch unavailable'));
