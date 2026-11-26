@@ -194,7 +194,6 @@ for (const [fn, href, sel] of [
   ['handleA2zapk', 'https://a2zapk.io/a', '#dlbtn li a'],
   ['handleRlu', 'https://preview.rlu.ru/a', '#content > .long_url > a'],
   ['handleHenTay', 'https://hen-tay.net/go/a', '#download_url div a'],
-  ['handleYasir252', 'https://download.yasir252.com/a', 'a[id="downloadBtn"]'],
   ['handleImagetwistNetlify', 'https://imagetwist.netlify.app/a', 'center h2 p a, .btn-dark'],
   ['handleWpsafeAnchor', 'https://otomi-games.com/go/a', '#wpsafe-link a'],
   ['handleKimochi', 'https://kimochi.info/inter', 'a#next'],
@@ -209,7 +208,7 @@ for (const [fn, href, sel] of [
 for (const fn of [
   'handleGooSt', 'handle1ink', 'handleCpmlink', 'handleThinfi', 'handleKimochi',
   'handleA2zapk', 'handleBlogmado', 'handleMangalist', 'handleLinegee',
-  'handleYasir252', 'handleImagetwistNetlify', 'handleUrlgalleries', 'handleHenTay',
+  'handleImagetwistNetlify', 'handleUrlgalleries', 'handleHenTay',
   'handleWpsafeAnchor', 'handleTribuntekno', 'handleCuttty', 'handleFir3',
   'handleGplinks', 'handleIcutlink', 'handleTurkdown', 'handleTutwuri', 'handleExeoApp', 'handleLnk2',
   'handleSpaste', 'handleF95zone', 'handleRlu', 'handleAdshnk', 'handleSimilarsites',
@@ -611,9 +610,8 @@ for (const fn of ['handleDevuploads', 'handlePndk', 'handleUp4Ever']) {
   });
 }
 
-// --- P1: pahe batch 7 (coinclix / geekgrove) ---
+// --- P1: pahe batch 7 (geekgrove) ---
 for (const [fn, href] of [
-  ['handleCoinclix', 'https://coinclix.co/x'],
   ['handleGeekgrove', 'https://geekgrove.net/x'],
 ]) {
   test(`${fn} ignores other hosts`, async () => {
@@ -685,16 +683,8 @@ for (const [fn, href, sel] of [
   });
 }
 
-// --- Pahe-family hosts observed on andradeatdev/auto-continue-shortlinks ---
-for (const host of ['cety.app']) {
-  test(`cuttty family clicks #submit-button on ${host}`, async () => {
-    const h = load({ href: `https://${host}/x`, querySelector: qsMap({ '#submit-button': clickable() }) });
-    assert.strictEqual(await h.api.handleCuttty(), true);
-  });
-}
-
 test('cuttty ignores the parked/retired cut-link hosts', async () => {
-  for (const host of ['cutlink.net', 'cutnet.net', 'cuttlinks.com']) {
+  for (const host of ['cutlink.net', 'cutnet.net', 'cuttlinks.com', 'cety.app']) {
     const h = load({ href: `https://${host}/x`, querySelector: qsMap({ '#submit-button': clickable() }) });
     assert.strictEqual(await h.api.handleCuttty(), false, host + ' must not act');
   }
@@ -712,7 +702,7 @@ test('srnky/clksz click a primary/secondary button on /r/ only', async () => {
 
 test('exe-urls family clicks #submit-button in stages', async () => {
   const sel = '#submit-button:not([disabled])';
-  for (const host of ['exe.io', 'exe-urls.com', 'exego.app', 'exnion.com']) {
+  for (const host of ['exe.io', 'exe-urls.com', 'exnion.com']) {
     const h = load({ href: `https://${host}/x`, querySelector: qsMap({ [sel]: clickable() }) });
     assert.strictEqual(await h.api.handleExeUrls(), true);
   }

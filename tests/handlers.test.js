@@ -754,7 +754,7 @@ test('host regex matches subdomains for 4 fixed families in knownShortener', () 
 test('skip-button hosts open the gate through knownShortener', () => {
   // Regression: the rule used to run only when the heuristic happened to score
   // 2, so its hosts were effectively dead (AGENTS.md "só no handler = regra morta").
-  for (const href of ['https://hurirk.net/x', 'https://sub.usfinf.net/x', 'https://xervoo.net/x']) {
+  for (const href of ['https://hurirk.net/x']) {
     const h = load({ href, querySelector: () => null });
     assert.strictEqual(h.api.knownShortener(), true, href + ' must open the gate');
   }

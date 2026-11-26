@@ -33,10 +33,7 @@ test('media gate includes every host the image handlers claim', () => {
 
 test('interstitial-only hosts open the gate so the tab can be closed', () => {
   for (const href of [
-    'https://doaipomer.com/x',
     'https://ppcnt.net/x',
-    'https://lnkparts.com/x',
-    'https://zunsoach.com/x',
   ]) {
     assert.strictEqual(load({ href }).api.knownShortener(), true, `${href} must open the shortener gate`);
   }
@@ -45,8 +42,8 @@ test('interstitial-only hosts open the gate so the tab can be closed', () => {
 test('host regexes require a label boundary instead of a bare suffix', async () => {
   assert.strictEqual(load({ href: 'https://notbcvcgo.xyz/x' }).api.knownShortener(), false);
   assert.strictEqual(load({ href: 'https://bcvcgo.xyz/x' }).api.knownShortener(), true);
-  assert.strictEqual(load({ href: 'https://notdoaipomer.com/x' }).api.knownShortener(), false);
-  assert.strictEqual(await load({ href: 'https://notdoaipomer.com/x' }).api.handleCloseInterstitial(), false);
+  assert.strictEqual(load({ href: 'https://notppcnt.net/x' }).api.knownShortener(), false);
+  assert.strictEqual(await load({ href: 'https://notppcnt.net/x' }).api.handleCloseInterstitial(), false);
 });
 
 test('gallery homes are not treated as image hosts', async () => {
@@ -60,7 +57,7 @@ test('gallery homes are not treated as image hosts', async () => {
 // --- close-interstitial ---
 
 test('close-interstitial closes the tab on interstitial hosts', async () => {
-  const h = load({ href: 'https://doaipomer.com/x' });
+  const h = load({ href: 'https://ppcnt.net/x' });
   let closed = false;
   h.sandbox.close = () => { closed = true; };
   const ok = await h.api.handleCloseInterstitial();
@@ -469,9 +466,7 @@ test('indian shortener hosts open the gate', () => {
     'https://shrinkme.io/abc',
     'https://droplink.co/abc',
     'https://lksfy.in/abc',
-    'https://rocklinks.in/abc',
     'https://vplink.in/abc',
-    'https://jrlinks.in/abc',
     'https://4hi.in/abc',
     'https://linkshortify.in/abc',
     'https://shrinkforearn.in/abc',
@@ -499,7 +494,6 @@ test('new file hosters open the gate', () => {
     'https://dailyuploads.net/abc',
     'https://jioupload.link/abc',
     'https://jioupload.com/abc',
-    'https://jioupload.icu/abc',
     'https://cloudfam.io/abc',
     'https://frdl.io/abc',
     'https://freedl.ink/abc',
@@ -576,8 +570,6 @@ test('new loot mirrors open the shortener gate', () => {
 test('new shorteners open the shortener gate', () => {
   const hosts = [
     'https://bst.gg/x',
-    'https://booo.st/x',
-    'https://cety.app/x',
     'https://v.gd/x',
     'https://paster.gg/x',
     'https://rinku.pro/x',

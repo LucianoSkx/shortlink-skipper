@@ -1,3 +1,14 @@
+## 1.14.6 — 2026-11-25
+
+### Fixed
+- **DNS sweep of every host in the lists.** 18 entries no longer resolve on Cloudflare, Google or Quad9, so they can never be visited — but they stay in the gate and would auto-click a stranger's page if the domain is re-registered. Removed:
+  - Gate: `1link.club` (repurposed into the NXBrew blog — no shortener paths), `download.yasir252.com`, `cety.app`, `coinclix.co`, `doaipomer.com`, `lnkparts.com`, `zunsoach.com`, `usfinf.net`, `xervoo.net`, `jrlinks.in`, `rocklinks.in`, `booo.st`, `exe-links.com`, `exego.app`.
+  - Rules/other lists: `ak.sv` and `jioupload.icu` (file hosts), `earnmm.com` and `cutwin.co` (adlinkfly family), `r.work.ink` (bypass-service URL).
+- `coinclix` and `yasir252` rules deleted with their hosts; `skip-button-dest` now matches only `hurirk.net`, `close-interstitial` only `ppcnt.net`.
+
+### Tests
+- 361 unit tests pass; live cases trimmed to the hosts that still exist (75 cases).
+
 ## 1.14.5 — 2026-11-25
 
 ### Fixed

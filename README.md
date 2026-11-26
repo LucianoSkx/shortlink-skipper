@@ -56,7 +56,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `katfile` | Clicks `.btn.btn-default` before file-host (`katfile.vip`, `.co`, `.com`) |
 | `ouo` | Submits `#form-captcha` / `#form-go` in a loop until each stage advances (`ouo.today` uses the `nextUrl` global) |
 | `adfoc` | Follows `click_url` / hidden `#y` input (`adfoc.us`, `adf.ly`, `clk.sh`, `shrink.pe`) |
-| `close-interstitial` | Closes interstitial-only tabs (doaipomer, ppcnt, lnkparts, zunsoach) |
+| `close-interstitial` | Closes interstitial-only tabs (ppcnt) |
 | `rekonise` | Calls the social-unlock API directly |
 | `mboost` | Pulls escaped `"targeturl"` from page source |
 | `loot-reward` | Decodes the `?cc=` base64url JSON (`{link}`) into the destination, no network |
@@ -101,20 +101,19 @@ unlockers) are detected and left alone — they validate server-side.
 | `blogmado` | Clicks `.btn` (`blogmado.com`) |
 | `mangalist` | Clicks the URL button (`mangalist.org`) |
 | `linegee` | Clicks `.btn-xs` (`linegee.net`) |
-| `yasir252` | Follows `#downloadBtn` (`download.yasir252.com`) |
 | `imagetwist-netlify` | Follows the download button (`imagetwist.netlify.app`) |
 | `urlgalleries` | Clicks the overlay button (`urlgalleries.net`) |
 | `hen-tay` | Follows the download link on `/go/` (`hen-tay.net`) |
 | `wpsafe-anchor` | Follows `#wpsafe-link a` (`otomi-games.com`, `ryuugames.com`) |
 | `tribuntekno` | Clicks the verification buttons (`tribuntekno.com`) |
-| `cuttty` | Clicks `#submit-button` (`cuttty.com`, `cuty.io`, `cety.app`) |
+| `cuttty` | Clicks `#submit-button` (`cuttty.com`, `cuty.io`) |
 | `fir3` | Clicks the get-link button (`fir3.net`) |
 | `gplinks` | Clicks `.get-link` (`gplinks.co`, `gplinks.com`) |
 | `icutlink` | Follows the get-link href / clicks `.bsub` (`icutlink.com`, `zegtrends.com`) |
 | `turkdown` | Follows the get-link href (`link.turkdown.com`) |
 | `tutwuri` | Clicks the btn-1/2/3 sequence (`tutwuri.id`) |
-| `exeo-app` | Clicks the three-stage buttons (`exe-links.com`, `exeo.app`, `exeygo.com`) |
-| `exe-urls` | Clicks `#submit-button` across stages (`exe.io`, `exe-urls.com`, `exego.app`, `exnion.com`) |
+| `exeo-app` | Clicks the three-stage buttons (`exeo.app`, `exeygo.com`) |
+| `exe-urls` | Clicks `#submit-button` across stages (`exe.io`, `exe-urls.com`, `exnion.com`) |
 | `lnk2` | Strips overlays, clicks `#getLink` on `/go/` (`lnk2.cc`) |
 | `spaste` | Submits the contact form on `/site/` (`www.spaste.com`) |
 | `f95zone` | Clicks `.host_link` on `/masked/` (`f95zone.to`) |
@@ -135,7 +134,7 @@ unlockers) are detected and left alone — they validate server-side.
 ### Pahe-ported families
 
 Dedicated rules were added for pahe.ink and related hosts (see changelog 1.13.13+):
-aii.sh, apkadmin.com, avnsgames.com, bit.ly, blog.adlink.click, datanodes.to, en.mrproblogger.com, filekeeper.net, fuckingfast.co, horrorpay.online, cloud.unblockedgames.world, cloudfam.io, filespayouts.com, inshorturl.in, mahitimanch.in, shrinkme.click, toolkit.inshorturl.com, uiil.ink, vexfile.com, zdrive.to, aknewz.xyz, aradmag.online, finance host family, jobzhub.store, lnbz.la, nerventualken.com, safelinkearn.com, speedy-links.com, toolskitpro.net, xut.io, fc-lc.xyz/oii.io, themezon.net, intercelestial.com, pahe.plus, devuploads family, pndk family, www.up-4ever.net, coinclix.co, geekgrove.net, www.file-upload.org, upfilesgo.com.
+aii.sh, apkadmin.com, avnsgames.com, bit.ly, blog.adlink.click, datanodes.to, en.mrproblogger.com, filekeeper.net, fuckingfast.co, horrorpay.online, cloud.unblockedgames.world, cloudfam.io, filespayouts.com, inshorturl.in, mahitimanch.in, shrinkme.click, toolkit.inshorturl.com, uiil.ink, vexfile.com, zdrive.to, aknewz.xyz, aradmag.online, finance host family, jobzhub.store, lnbz.la, nerventualken.com, safelinkearn.com, speedy-links.com, toolskitpro.net, xut.io, fc-lc.xyz/oii.io, themezon.net, intercelestial.com, pahe.plus, devuploads family, pndk family, www.up-4ever.net, geekgrove.net, www.file-upload.org, upfilesgo.com.
 
 </details>
 
