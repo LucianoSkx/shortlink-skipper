@@ -27,3 +27,4 @@ jobs:
         run: |
           node --check test-live/run-all.js
           node --check test-live/live.js
+          node --check test-live/upstream-gap.js
