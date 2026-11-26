@@ -996,5 +996,127 @@
     "expect": "https://example.com/cloudfam-dest",
     "family": "ports",
     "note": "live: cloudfam-1"
+  },
+  {
+    "id": "mboost-1",
+    "host": "mboost.me",
+    "path": "/abc",
+    "html": "<script>var cfg = \"{\\\"targeturl\\\":\\\"https://example.com/mboost-dest\\\"}\";</script><p>Please wait a moment...</p>",
+    "expect": "https://example.com/mboost-dest",
+    "family": "ports",
+    "note": "live: mboost targeturl regex"
+  },
+  {
+    "id": "adfoc-1",
+    "host": "adfoc.us",
+    "path": "/abc",
+    "html": "<input id=\"y\" value=\"https://example.com/adfoc-dest\"><p>Please wait a moment...</p>",
+    "expect": "https://example.com/adfoc-dest",
+    "family": "ports",
+    "note": "live: adfoc hidden #y"
+  },
+  {
+    "id": "rekonise-1",
+    "host": "rekonise.com",
+    "path": "/abc",
+    "html": "<p>Unlock to continue</p>",
+    "expect": "https://example.com/rekonise-dest",
+    "family": "ports",
+    "mock": {
+      "/unlock": {
+        "link": "https://example.com/rekonise-dest"
+      }
+    },
+    "note": "live: rekonise unlock API (mocked)"
+  },
+  {
+    "id": "katfile-1",
+    "host": "katfile.com",
+    "path": "/abc",
+    "html": "<button class=\"btn btn-default\">Free Download</button><p>Please wait a moment...</p><script>document.querySelector(\".btn.btn-default\").addEventListener('click',()=>{document.title='CLICKED-katfile-1';});</script>",
+    "expect": "CLICKED-katfile-1",
+    "family": "ports",
+    "note": "live: katfile bootstrap button"
+  },
+  {
+    "id": "linkvertise-easy-1",
+    "host": "linkvertise.com",
+    "path": "/abc",
+    "search": "?r=aHR0cHM6Ly9leGFtcGxlLmNvbS9sdi1kZXN0",
+    "html": "<p>Linkvertise</p>",
+    "expect": "https://example.com/lv-dest",
+    "family": "ports",
+    "note": "live: linkvertise ?r= base64"
+  },
+  {
+    "id": "pndk-1",
+    "host": "go.fakta.id",
+    "path": "/abc",
+    "html": "<button id=\"continue\">Continue</button><div id=\"btget\"><button>Get</button></div><div id=\"next-btn\"><button>Next</button></div><p>Please wait a moment...</p><script>document.querySelector(\"#continue\").addEventListener('click',()=>{document.title='CLICKED-pndk-1';});</script>",
+    "expect": "CLICKED-pndk-1",
+    "family": "ports",
+    "note": "live: pndk stage buttons"
+  },
+  {
+    "id": "up-4ever-1",
+    "host": "www.up-4ever.net",
+    "path": "/abc",
+    "html": "<button name=\"method_free\">Free Download</button><button id=\"downloadbtn\">Download</button><button type=\"submit\">Submit</button><button id=\"dl2btn\">Dl2</button><p>Please wait a moment...</p><script>document.querySelector(\"button[name=\\\"method_free\\\"]\").addEventListener('click',()=>{document.title='CLICKED-up-4ever-1';});</script>",
+    "expect": "CLICKED-up-4ever-1",
+    "family": "ports",
+    "note": "live: up-4ever staged buttons"
+  },
+  {
+    "id": "aradmag-1",
+    "host": "aradmag.online",
+    "path": "/abc",
+    "html": "<div id=\"ow_step1\"><button>Step</button></div><button id=\"offerContinueBtn\">Continue</button><button id=\"continueBtn\">Go</button><p>Please wait a moment...</p><script>document.querySelector(\"#offerContinueBtn\").addEventListener('click',()=>{document.title='CLICKED-aradmag-1';});</script>",
+    "expect": "CLICKED-aradmag-1",
+    "family": "ports",
+    "note": "live: aradmag offer chain"
+  },
+  {
+    "id": "external-service-1",
+    "host": "work.ink",
+    "path": "/abc",
+    "html": "<p>work.ink unlocker</p>",
+    "expect": "bypass.tools/bypass?url=",
+    "family": "ports",
+    "note": "live: work.ink falls back to bypass.tools"
+  },
+  {
+    "id": "service-last-resort-1",
+    "host": "bypass.tools",
+    "path": "/bypass",
+    "search": "?url=https%3A%2F%2Fexample.com%2Fx",
+    "html": "<p>bypass</p>",
+    "expect": "adbypass.org",
+    "family": "ports",
+    "timeout": 20,
+    "note": "live: delegated landing forwards to adbypass.org"
+  },
+  {
+    "id": "url-destination-1",
+    "host": "goo.st",
+    "path": "/abc",
+    "search": "?url=https%3A%2F%2Fexample.com%2Furl-dest",
+    "html": "<form id=\"go-link\"><input name=\"url\" value=\"https://example.com/form-ignored\"></form><p>Generating your link, please wait...</p>",
+    "expect": "https://example.com/url-dest",
+    "family": "ports",
+    "note": "live: url-destination reads ?url="
+  },
+  {
+    "id": "adlinkfly-host-1",
+    "host": "shortly.xyz",
+    "path": "/abc",
+    "html": "<p>Generating your link...</p><form><input type=\"hidden\" name=\"ad_form_data\" value=\"abc\"><input type=\"hidden\" name=\"_token\" value=\"t\"></form>",
+    "expect": "https://example.com/adl-dest",
+    "family": "ports",
+    "mock": {
+      "/links/go": {
+        "url": "https://example.com/adl-dest"
+      }
+    },
+    "note": "live: adlinkfly /links/go (mocked)"
   }
 ]

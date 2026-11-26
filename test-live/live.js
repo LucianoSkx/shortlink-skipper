@@ -125,13 +125,17 @@ async function main() {
   const pollCount = Math.ceil(timeoutMs / 500);
   for (let i = 0; i < pollCount; i++) {
     await new Promise((r) => setTimeout(r, 500));
-    // Check for navigation in collected events
+    // A real navigation wins; otherwise re-read the mock href every tick --
+    // it changes in place, and freezing the first value hid late gotos.
+    let frameUrl = '';
     for (const e of events) {
       if (e.method === 'Page.frameNavigated' && e.params.frame?.url) {
-        final = e.params.frame.url;
+        frameUrl = e.params.frame.url;
       }
     }
-    if (!final) {
+    if (frameUrl) {
+      final = frameUrl;
+    } else {
       try {
         const r = await S('Runtime.evaluate', { expression: 'window.__SL_FINAL_HREF || location.href', returnByValue: true });
         final = r.result && r.result.result ? r.result.result.value : '';
