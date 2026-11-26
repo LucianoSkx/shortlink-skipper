@@ -9,6 +9,10 @@
 - 12 more live cases for rules that only ran in unit tests: `mboost`, `adfoc`, `rekonise` (mocked unlock API), `katfile`, `linkvertise-easy`, `pndk`, `up-4ever`, `aradmag`, `external-service` (work.ink → bypass.tools), `service-last-resort` (→ adbypass.org), `url-destination` (`?url=`) and `adlinkfly` (`/links/go`, mocked). **122/122 pass.**
 - `tests/meta.test.js` guards version drift (`@version` vs `package.json` vs `package-lock.json`), install URLs, rule-name uniqueness and `file-host` shadowing.
 - `tests/upstream-gap.test.js` covers the host-token parser, including the `(?:...)` regression above.
+- 8 more live cases for the rules that were still unit-only: `loot-reward` (`?cc=` base64), `token-link` (input value), `skip-button-dest` (`/ad/locked` rewrite), `adlinkfly-captcha` on a gated host, `cloud-unblockedgames` stages, `ouo` form-submit loop, `aylink` (mocked `/get/tk` + `/links/go2`) and `close-interstitial`. **130/130 pass.**
+
+### Harness
+- `live.js` now reports `PAGE_CLOSED` when a rule closes the tab, instead of polling until the hard timeout.
 
 ### CI
 - `Live harness` now also runs on PRs touching the userscript or `test-live/**`.

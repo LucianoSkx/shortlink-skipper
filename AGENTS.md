@@ -61,7 +61,7 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
 ```bash
 node --check shortlink-skipper.user.js   # sintaxe
 npm test                                 # suite node:test + harness vm (365)
-npm run test:live                        # 122 fixtures no Chrome real (CDP :9222)
+npm run test:live                        # 130 fixtures no Chrome real (CDP :9222)
 ```
 
 `test:live` precisa de um Chrome com `--remote-debugging-port=9222` (ou
