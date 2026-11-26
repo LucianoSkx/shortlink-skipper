@@ -74,7 +74,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `boost-ink` | Fetches own source, decodes payload behind internal marker key |
 | `linkvertise-easy` | Extracts destination from Linkvertise `?r=` / `#r=` (base64) |
 | `adlinkfly-hosts` | Host-gated AdLinkFly family: serializes hidden fields, POSTs `/links/go` |
-| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven): queries the free trw.lat API for an instant destination, then [bypass.tools](https://bypass.tools) |
+| `external-service` | Hardened links (Linkvertise hard case, loot-links, admaven, work.ink/`work-direct.ink`, `link-unlock.com`, `lockr.so`/`.net`/`.to`): queries the free trw.lat API for an instant destination, then [bypass.tools](https://bypass.tools) |
 | `network-capture` | Hooks fetch/XHR; follows destination-shaped JSON responses |
 | `url-destination` | Base64/hex destinations in query params *and* path segments (`/goto/<b64>`) |
 | `adlinkfly` | Serializes hidden fields, POSTs `/links/go` with adaptive retries |
@@ -266,6 +266,7 @@ Techniques are reimplemented in this codebase's rule format.
 | [bypass-all-shortlinks-debloated](https://codeberg.org/Amm0ni4/bypass-all-shortlinks-debloated) by Amm0ni4 | mixed | acortalink, bstlar, linkvertise-easy, external-service concepts (AdGuard/FastForward lineage) |
 | [nOneCode4u/bypass-shortlinks](https://github.com/nOneCode4u/bypass-shortlinks) | Unlicense | network capture technique |
 | [BypassTools v5](https://bypass.tools) by BypassTools, EAS, Woozie & jiggey | MIT | bypass.tools as second-level resolver and `service-last-resort` cascade; `cur_url` observation technique (reimplemented) |
+| [F.E.A.R. V3.5](https://cdn.trw.lat/rgc/cdn/F.E.A.R.user.js) by A.J Yates | MIT | same trw.lat backend already used here; host hints for `lockr.to`, `link-unlock.com` and `work-direct.ink` (no code ported — its task-wall auto-complete conflicts with the manual-step policy) |
 | Universal Shortlink Auto-Bypasser v4.0 | none | confidence-scoring idea, extra destination sources (reimplemented) |
 | Smart Auto Redirect Scroll v1.3 | none | path-segment decoding, WPSafeLink JSON variant ideas (reimplemented) |
 | [adsbypasser](https://github.com/adsbypasser/adsbypasser) | BSD-2-Clause | host lists for small shorteners, image hosters and file hosters (absorbed into generic rules, no code ported); `forumdinheiro` port (tRPC stage chain, `cur_url` body observation) |

@@ -681,5 +681,320 @@
     "expect": "https://example.com/ashnk-dest",
     "family": "ports",
     "note": "live: ashnk variant"
+  },
+  {
+    "id": "aii-sh-1",
+    "host": "aii.sh",
+    "path": "/abc",
+    "html": "<button id=\"continue\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#continue\").addEventListener('click',()=>{document.title='CLICKED-aii-sh-1';});</script>",
+    "expect": "CLICKED-aii-sh-1",
+    "family": "ports",
+    "note": "live: aii-sh-1"
+  },
+  {
+    "id": "apkadmin-1",
+    "host": "apkadmin.com",
+    "path": "/abc",
+    "html": "<button id=\"downloadbtn\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#downloadbtn\").addEventListener('click',()=>{document.title='CLICKED-apkadmin-1';});</script>",
+    "expect": "CLICKED-apkadmin-1",
+    "family": "ports",
+    "note": "live: apkadmin-1"
+  },
+  {
+    "id": "avnsgames-1",
+    "host": "avnsgames.com",
+    "path": "/abc",
+    "html": "<button id=\"getnewlink\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#getnewlink\").addEventListener('click',()=>{document.title='CLICKED-avnsgames-1';});</script>",
+    "expect": "CLICKED-avnsgames-1",
+    "family": "ports",
+    "note": "live: avnsgames-1"
+  },
+  {
+    "id": "bitly-1",
+    "host": "bit.ly",
+    "path": "/abc",
+    "html": "<button id=\"action:continue\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"[id=\\\"action:continue\\\"]\").addEventListener('click',()=>{document.title='CLICKED-bitly-1';});</script>",
+    "expect": "CLICKED-bitly-1",
+    "family": "ports",
+    "note": "live: bitly-1"
+  },
+  {
+    "id": "blog-adlink-1",
+    "host": "blog.adlink.click",
+    "path": "/abc",
+    "html": "<button class=\"btn get-link\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".btn.get-link\").addEventListener('click',()=>{document.title='CLICKED-blog-adlink-1';});</script>",
+    "expect": "CLICKED-blog-adlink-1",
+    "family": "ports",
+    "note": "live: blog-adlink-1"
+  },
+  {
+    "id": "mrproblogger-1",
+    "host": "en.mrproblogger.com",
+    "path": "/abc",
+    "html": "<button class=\"get-link\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".get-link\").addEventListener('click',()=>{document.title='CLICKED-mrproblogger-1';});</script>",
+    "expect": "CLICKED-mrproblogger-1",
+    "family": "ports",
+    "note": "live: mrproblogger-1"
+  },
+  {
+    "id": "filekeeper-1",
+    "host": "filekeeper.net",
+    "path": "/abc",
+    "html": "<button id=\"download-button\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#download-button\").addEventListener('click',()=>{document.title='CLICKED-filekeeper-1';});</script>",
+    "expect": "CLICKED-filekeeper-1",
+    "family": "ports",
+    "note": "live: filekeeper-1"
+  },
+  {
+    "id": "fuckingfast-1",
+    "host": "fuckingfast.co",
+    "path": "/abc",
+    "html": "<button class=\"link-button\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".link-button\").addEventListener('click',()=>{document.title='CLICKED-fuckingfast-1';});</script>",
+    "expect": "CLICKED-fuckingfast-1",
+    "family": "ports",
+    "note": "live: fuckingfast-1"
+  },
+  {
+    "id": "horrorpay-1",
+    "host": "horrorpay.online",
+    "path": "/abc",
+    "html": "<button class=\"get-link\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".get-link\").addEventListener('click',()=>{document.title='CLICKED-horrorpay-1';});</script>",
+    "expect": "CLICKED-horrorpay-1",
+    "family": "ports",
+    "note": "live: horrorpay-1"
+  },
+  {
+    "id": "filespayouts-1",
+    "host": "filespayouts.com",
+    "path": "/abc",
+    "html": "<button id=\"method_free\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#method_free\").addEventListener('click',()=>{document.title='CLICKED-filespayouts-1';});</script>",
+    "expect": "CLICKED-filespayouts-1",
+    "family": "ports",
+    "note": "live: filespayouts-1"
+  },
+  {
+    "id": "inshorturl-1",
+    "host": "inshorturl.in",
+    "path": "/abc",
+    "html": "<a id=\"ts-get-link\" href=\"https://example.com/inshorturl-dest\">Get Link</a><p>Please wait a moment...</p>",
+    "expect": "https://example.com/inshorturl-dest",
+    "family": "ports",
+    "note": "live: inshorturl-1"
+  },
+  {
+    "id": "toolkit-inshorturl-1",
+    "host": "toolkit.inshorturl.com",
+    "path": "/abc",
+    "html": "<div id=\"lkActions\"><a href=\"https://example.com/toolkit-dest\">Get Link</a></div><p>Please wait a moment...</p>",
+    "expect": "https://example.com/toolkit-dest",
+    "family": "ports",
+    "note": "live: toolkit-inshorturl-1"
+  },
+  {
+    "id": "mahitimanch-1",
+    "host": "mahitimanch.in",
+    "path": "/abc",
+    "html": "<button id=\"link\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#link\").addEventListener('click',()=>{document.title='CLICKED-mahitimanch-1';});</script>",
+    "expect": "CLICKED-mahitimanch-1",
+    "family": "ports",
+    "note": "live: mahitimanch-1"
+  },
+  {
+    "id": "shrinkme-click-1",
+    "host": "shrinkme.click",
+    "path": "/abc",
+    "html": "<button class=\"btn-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".btn-primary\").addEventListener('click',()=>{document.title='CLICKED-shrinkme-click-1';});</script>",
+    "expect": "CLICKED-shrinkme-click-1",
+    "family": "ports",
+    "note": "live: shrinkme-click-1"
+  },
+  {
+    "id": "uiil-ink-1",
+    "host": "uiil.ink",
+    "path": "/abc",
+    "html": "<form id=\"form-continue\" onsubmit=\"return false\"><button type=\"submit\">Continue</button></form><button id=\"multiLinkBtn\">Multi</button><p>Please wait a moment...</p><script>document.querySelector(\"#form-continue [type=submit]\").addEventListener(\"click\",()=>{document.title=\"CLICKED-uiil-ink-1\";});document.querySelector(\"#multiLinkBtn\").addEventListener(\"click\",()=>{document.title=\"CLICKED-uiil-ink-1\";});</script>",
+    "expect": "CLICKED-uiil-ink-1",
+    "family": "ports",
+    "note": "live: uiil-ink-1"
+  },
+  {
+    "id": "vexfile-1",
+    "host": "vexfile.com",
+    "path": "/abc",
+    "html": "<button class=\"generate-link\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".generate-link\").addEventListener('click',()=>{document.title='CLICKED-vexfile-1';});</script>",
+    "expect": "CLICKED-vexfile-1",
+    "family": "ports",
+    "note": "live: vexfile-1"
+  },
+  {
+    "id": "zdrive-1",
+    "host": "zdrive.to",
+    "path": "/abc",
+    "html": "<button id=\"freeBtn\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#freeBtn\").addEventListener('click',()=>{document.title='CLICKED-zdrive-1';});</script>",
+    "expect": "CLICKED-zdrive-1",
+    "family": "ports",
+    "note": "live: zdrive-1"
+  },
+  {
+    "id": "aknewz-1",
+    "host": "aknewz.xyz",
+    "path": "/abc",
+    "html": "<button id=\"next\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#next\").addEventListener('click',()=>{document.title='CLICKED-aknewz-1';});</script>",
+    "expect": "CLICKED-aknewz-1",
+    "family": "ports",
+    "note": "live: aknewz-1"
+  },
+  {
+    "id": "jobzhub-1",
+    "host": "jobzhub.store",
+    "path": "/abc",
+    "html": "<button id=\"next\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#next\").addEventListener('click',()=>{document.title='CLICKED-jobzhub-1';});</script>",
+    "expect": "CLICKED-jobzhub-1",
+    "family": "ports",
+    "note": "live: jobzhub-1"
+  },
+  {
+    "id": "lnbz-1",
+    "host": "lnbz.la",
+    "path": "/abc",
+    "html": "<button id=\"continue\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"[id=\\\"continue\\\"]\").addEventListener('click',()=>{document.title='CLICKED-lnbz-1';});</script>",
+    "expect": "CLICKED-lnbz-1",
+    "family": "ports",
+    "note": "live: lnbz-1"
+  },
+  {
+    "id": "nerventualken-1",
+    "host": "nerventualken.com",
+    "path": "/abc",
+    "html": "<button id=\"go\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"[id=\\\"go\\\"]\").addEventListener('click',()=>{document.title='CLICKED-nerventualken-1';});</script>",
+    "expect": "CLICKED-nerventualken-1",
+    "family": "ports",
+    "note": "live: nerventualken-1"
+  },
+  {
+    "id": "safelinkearn-1",
+    "host": "safelinkearn.com",
+    "path": "/abc",
+    "html": "<button class=\"open-btn\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".open-btn\").addEventListener('click',()=>{document.title='CLICKED-safelinkearn-1';});</script>",
+    "expect": "CLICKED-safelinkearn-1",
+    "family": "ports",
+    "note": "live: safelinkearn-1"
+  },
+  {
+    "id": "speedy-links-1",
+    "host": "speedy-links.com",
+    "path": "/abc",
+    "html": "<button data-task=\"1\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"[data-task]\").addEventListener('click',()=>{document.title='CLICKED-speedy-links-1';});</script>",
+    "expect": "CLICKED-speedy-links-1",
+    "family": "ports",
+    "note": "live: speedy-links-1"
+  },
+  {
+    "id": "toolskitpro-1",
+    "host": "toolskitpro.net",
+    "path": "/abc",
+    "html": "<div class=\"show\"><button id=\"afterBtn\">Continue</button></div><p>Please wait a moment...</p><script>document.querySelector('#afterBtn').addEventListener('click',()=>{document.title='CLICKED-toolskitpro-1';});</script>",
+    "expect": "CLICKED-toolskitpro-1",
+    "family": "ports",
+    "note": "live: toolskitpro-1"
+  },
+  {
+    "id": "xut-1",
+    "host": "xut.io",
+    "path": "/abc",
+    "html": "<button id=\"sl-primary\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#sl-primary\").addEventListener('click',()=>{document.title='CLICKED-xut-1';});</script>",
+    "expect": "CLICKED-xut-1",
+    "family": "ports",
+    "note": "live: xut-1"
+  },
+  {
+    "id": "fclc-1",
+    "host": "fc-lc.xyz",
+    "path": "/abc",
+    "html": "<button id=\"hCaptchaShortlink\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#hCaptchaShortlink\").addEventListener('click',()=>{document.title='CLICKED-fclc-1';});</script>",
+    "expect": "CLICKED-fclc-1",
+    "family": "ports",
+    "note": "live: fclc-1"
+  },
+  {
+    "id": "themezon-1",
+    "host": "themezon.net",
+    "path": "/abc",
+    "html": "<button id=\"smg-arm\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#smg-arm\").addEventListener('click',()=>{document.title='CLICKED-themezon-1';});</script>",
+    "expect": "CLICKED-themezon-1",
+    "family": "ports",
+    "note": "live: themezon-1"
+  },
+  {
+    "id": "intercelestial-1",
+    "host": "intercelestial.com",
+    "path": "/abc",
+    "html": "<button class=\"myButton\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\".myButton\").addEventListener('click',()=>{document.title='CLICKED-intercelestial-1';});</script>",
+    "expect": "CLICKED-intercelestial-1",
+    "family": "ports",
+    "note": "live: intercelestial-1"
+  },
+  {
+    "id": "pahe-plus-1",
+    "host": "pahe.plus",
+    "path": "/abc",
+    "html": "<button id=\"invisibleCaptchaShortlink\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#invisibleCaptchaShortlink\").addEventListener('click',()=>{document.title='CLICKED-pahe-plus-1';});</script>",
+    "expect": "CLICKED-pahe-plus-1",
+    "family": "ports",
+    "note": "live: pahe-plus-1"
+  },
+  {
+    "id": "devuploads-1",
+    "host": "djxmaza.in",
+    "path": "/abc",
+    "html": "<button id=\"gdl\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#gdl\").addEventListener('click',()=>{document.title='CLICKED-devuploads-1';});</script>",
+    "expect": "CLICKED-devuploads-1",
+    "family": "ports",
+    "note": "live: devuploads-1"
+  },
+  {
+    "id": "upfilesgo-1",
+    "host": "upfilesgo.com",
+    "path": "/abc",
+    "html": "<button id=\"link-button-free\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#link-button-free\").addEventListener('click',()=>{document.title='CLICKED-upfilesgo-1';});</script>",
+    "expect": "CLICKED-upfilesgo-1",
+    "family": "ports",
+    "note": "live: upfilesgo-1"
+  },
+  {
+    "id": "file-upload-org-1",
+    "host": "www.file-upload.org",
+    "path": "/abc",
+    "html": "<button name=\"method_free\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"button[name=\\\"method_free\\\"]\").addEventListener('click',()=>{document.title='CLICKED-file-upload-org-1';});</script>",
+    "expect": "CLICKED-file-upload-org-1",
+    "family": "ports",
+    "note": "live: file-upload-org-1"
+  },
+  {
+    "id": "datanodes-1",
+    "host": "datanodes.to",
+    "path": "/abc",
+    "html": "<button id=\"method_free\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#method_free\").addEventListener('click',()=>{document.title='CLICKED-datanodes-1';});</script>",
+    "expect": "CLICKED-datanodes-1",
+    "family": "ports",
+    "note": "live: datanodes-1"
+  },
+  {
+    "id": "finance-host-1",
+    "host": "financeehelp.com",
+    "path": "/abc",
+    "html": "<button id=\"startButton\">Continue</button><p>Please wait a moment...</p><script>document.querySelector(\"#startButton\").addEventListener('click',()=>{document.title='CLICKED-finance-host-1';});</script>",
+    "expect": "CLICKED-finance-host-1",
+    "family": "ports",
+    "note": "live: finance-host-1"
+  },
+  {
+    "id": "cloudfam-1",
+    "host": "cloudfam.io",
+    "path": "/abc",
+    "html": "<a id=\"btn-clean-continue\" href=\"https://example.com/cloudfam-dest\">1</a><a id=\"cf-btn-free\" href=\"https://example.com/cloudfam-dest\">2</a><a id=\"free-btn\" href=\"https://example.com/cloudfam-dest\">3</a><a id=\"cf-dl-btn\" href=\"https://example.com/cloudfam-dest\">4</a><p>Please wait a moment...</p>",
+    "expect": "https://example.com/cloudfam-dest",
+    "family": "ports",
+    "note": "live: cloudfam-1"
   }
 ]
