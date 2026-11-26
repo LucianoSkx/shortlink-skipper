@@ -6,9 +6,16 @@
 // @author       Luciano
 // @license      MIT
 // @match        *://*/*
+// @exclude      *://*.google.*/*
 // @exclude      *://*.google.com/*
 // @exclude      *://mail.google.com/*
 // @exclude      *://*.gmail.com/*
+// @exclude      *://*.googlemail.com/*
+// @exclude      *://*.youtube.com/*
+// @exclude      *://*.youtube-nocookie.com/*
+// @exclude      *://*.recaptcha.net/*
+// @exclude      *://*.hcaptcha.com/*
+// @exclude      *://*.cloudflare.com/*
 // @exclude      *://*.microsoft.com/*
 // @exclude      *://*.outlook.com/*
 // @exclude      *://*.live.com/*
