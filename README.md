@@ -94,6 +94,7 @@ unlockers) are detected and left alone — they validate server-side.
 | `single-external-link` | Redirects when exactly one plausible external exit exists |
 | `goo-st` | Clicks `.btn-primary` (`goo.st`, `swzz.xyz`) |
 | `1ink` | Follows `#countingbtn` (`1ink.cc`) |
+| `cuturl` | Follows the `?goto=` next stage on the `1ink.cc` redirect intermediary (`cuturl.cc`) |
 | `cpmlink` | Follows `#btn-main` (`cpmlink.net`) |
 | `thinfi` | Follows the content link (`thinfi.com`) |
 | `kimochi` | Follows `a#next` on `/inter` (`kimochi.info`) |
