@@ -3,6 +3,11 @@
 ### Tests
 - **Live harness bug:** the runner froze the first observed URL, so a `goto()` that happened after the first poll (e.g. a rule that sleeps before navigating) never matched. It now re-reads the mock href every tick and only lets a real frame navigation win.
 - 12 more live cases for rules that only ran in unit tests: `mboost`, `adfoc`, `rekonise` (mocked unlock API), `katfile`, `linkvertise-easy`, `pndk`, `up-4ever`, `aradmag`, `external-service` (work.ink → bypass.tools), `service-last-resort` (→ adbypass.org), `url-destination` (`?url=`) and `adlinkfly` (`/links/go`, mocked). **122/122 pass.**
+- `tests/meta.test.js` guards version drift (`@version` vs `package.json` vs `package-lock.json`), install URLs, rule-name uniqueness and `file-host` shadowing.
+
+### CI
+- `Live harness` now also runs on PRs touching the userscript or `test-live/**`.
+- Monthly upstream job only opens an issue when the `link`/`file` gap is non-zero.
 
 ## 1.14.7 — 2026-11-26
 

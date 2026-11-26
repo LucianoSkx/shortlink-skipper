@@ -1,6 +1,6 @@
 # Shortlink Skipper — instruções do projeto
 
-Userscript em **arquivo único** (`shortlink-skipper.user.js`, ~2900 linhas).
+Userscript em **arquivo único** (`shortlink-skipper.user.js`, ~3500 linhas).
 Nunca reintroduzir estrutura multi-arquivo, build ou `dist/` — houve uma
 migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
 
@@ -8,7 +8,10 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
 
 - Engine de regras em `GENERIC_RULES`: a primeira regra cujo `run()` retorna
   truthy vence e encerra o loop. Regras específicas de host vêm antes das
-  genéricas (`network-capture` em diante).
+  genéricas (`network-capture` em diante). Regra dedicada cujo host também
+  está em `FILE_HOSTS` precisa vir **antes** de `file-host`, que espera 20s
+  por um controle de download — `tests/meta.test.js` falha se a ordem
+  regredir.
 - O loop só roda se a página parecer shortener (`looksLikeShortlink()`),
   for host conhecido (`knownShortener()` / `knownMediaHost()`), host de
   paste (`PASTE_HOSTS`, regra dedicada `paste-extract`) ou bypass.tools.
@@ -57,12 +60,18 @@ migração para a arquitetura do adsbypasser e ela foi revertida de propósito.
 
 ```bash
 node --check shortlink-skipper.user.js   # sintaxe
-npm test                                 # suite node:test + harness vm
+npm test                                 # suite node:test + harness vm (365)
+npm run test:live                        # 122 fixtures no Chrome real (CDP :9222)
 ```
+
+`test:live` precisa de um Chrome com `--remote-debugging-port=9222` (ou
+`CDP_URL=http://host:porta`) e do pacote `ws` instalado. É opcional localmente,
+mas roda no CI em PRs que mexem em `shortlink-skipper.user.js` ou `test-live/**`.
 
 ## Fluxo
 
 Branch a partir de `main` → PR → merge squash. `main` é protegida e exige
-o check `syntax` do workflow `Validate`. Bump de versão = `@version` no
-header + `package.json` + CHANGELOG. Instalação é via raw do `main`
-(`@downloadURL`/`@updateURL`), sem releases.
+`Validate` (sintaxe + testes) e, quando o PR toca o userscript ou `test-live/`,
+também `Live harness`. Bump de versão = `@version` no header + `package.json`
++ `package-lock.json` + CHANGELOG (o teste de meta falha se divergirem).
+Instalação é via raw do `main` (`@downloadURL`/`@updateURL`), sem releases.
