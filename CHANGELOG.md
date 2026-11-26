@@ -2,8 +2,6 @@
 
 ### Fixed
 - `@exclude` header now matches the in-script `EXCLUDE_HOSTS` list: added `google.*` (all TLDs), `googlemail`, `youtube`, `youtube-nocookie`, `recaptcha`, `hcaptcha` and `cloudflare`. The script already refused them at runtime, but userscript managers were still injecting (and evaluating) it on those pages.
-
-### Fixed
 - **Upstream gap report under-reported our coverage.** A `(?:...)` group inside the gate regex made the tokenizer split at the `?`, drop the closing paren and discard the whole host alternation — 5 covered hosts (`anchoreth`, `javlibrary`, `kingofshrink`, `nmac.to`, `supercheats`) were reported as missing. Both the tokenizer and the group expander handle non-capturing groups now, and the gap is back to 60 image-only roots.
 - `yasir252.com` is recorded as reviewed/out-of-scope: upstream targets a `download.*` subdomain that no longer resolves, and the root is a blog.
 
