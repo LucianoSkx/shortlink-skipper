@@ -28,7 +28,9 @@ function expandGroups(s) {
   const m = s.match(/\(([^()]+)\)/);
   if (!m) return [s];
   const out = [];
-  for (const alt of m[1].split('|')) {
+  // Strip a non-capturing marker: without this, "(?:a|b)" never expands and
+  // the caller then discards the whole alternation it was embedded in.
+  for (const alt of m[1].replace(/^\?:/, '').split('|')) {
     if (!/^[a-z0-9.\-]+$/i.test(alt)) continue;
     out.push(...expandGroups(s.slice(0, m.index) + alt + s.slice(m.index + m[0].length)));
   }
@@ -50,12 +52,29 @@ function cleanHostToken(tok) {
   return out;
 }
 
+// `?:` must stay inside a token: splitting at the `?` used to cut the closing
+// paren off and discard the whole host alternation around it.
+function collectOurRoots(src) {
+  const ours = new Set();
+  const candidates = src.match(/[a-z0-9_\\.\-()|?:]*\\[\.][a-z0-9_\\.\-()|?:]*/gi) || [];
+  for (const tok of candidates) {
+    for (const h of cleanHostToken(tok)) ours.add(root(h));
+  }
+  return ours;
+}
+
 function root(d) {
   const p = d.split('.');
   return p.length >= 2 ? p.slice(-2).join('.') : d;
 }
 
 const ADULT_HINT = /(hentai|jav|porn|xxx|fap|covid|pig69|av\.|cosplay|ecchi|eroge|javstore|javtenshi)/i;
+
+// Reviewed upstream roots that stay uncovered on purpose. Listed so the
+// monthly report does not reopen an issue for them.
+//   yasir252.com: upstream targets download.yasir252.com, which no longer
+//   resolves; the root itself is a tips/tutorial blog (false-positive risk).
+const ACCEPTED = new Set(['yasir252.com']);
 
 function main() {
   const abDir = ensureCheckout();
@@ -82,14 +101,10 @@ function main() {
 
   // Ours: every host-like token in the userscript, reduced to roots.
   const oursSrc = fs.readFileSync(path.join(__dirname, '..', 'shortlink-skipper.user.js'), 'utf8');
-  const ours = new Set();
-  const candidates = oursSrc.match(/[a-z0-9_\\.\-()|]*\\[\.][a-z0-9_\\.\-()|]*/gi) || [];
-  for (const tok of candidates) {
-    for (const h of cleanHostToken(tok)) ours.add(root(h));
-  }
+  const ours = collectOurRoots(oursSrc);
 
   const gap = [...upstream.entries()]
-    .filter(([r]) => !ours.has(r))
+    .filter(([r]) => !ours.has(r) && !ACCEPTED.has(r))
     .sort((a, b) => a[0].localeCompare(b[0]));
 
   const rev = [...ours].filter((r) => ![...upstream.keys()].includes(r)).length;
@@ -101,6 +116,7 @@ function main() {
   console.log('');
   console.log('Ports land as native rules (bounded `waitFor`, navigation only via `goto()`).');
   console.log('Adult hosts are flagged — P3 stays out by maintainer decision.');
+  if (ACCEPTED.size) console.log(`Excluded after review: ${[...ACCEPTED].join(', ')}.`);
   console.log('');
   for (const cat of ['link', 'file', 'image']) {
     const items = gap.filter(([, v]) => v.category === cat);
@@ -115,4 +131,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = { cleanHostToken, expandGroups, root, collectOurRoots };

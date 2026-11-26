@@ -1,9 +1,14 @@
 ## Unreleased
 
+### Fixed
+- **Upstream gap report under-reported our coverage.** A `(?:...)` group inside the gate regex made the tokenizer split at the `?`, drop the closing paren and discard the whole host alternation — 5 covered hosts (`anchoreth`, `javlibrary`, `kingofshrink`, `nmac.to`, `supercheats`) were reported as missing. Both the tokenizer and the group expander handle non-capturing groups now, and the gap is back to 60 image-only roots.
+- `yasir252.com` is recorded as reviewed/out-of-scope: upstream targets a `download.*` subdomain that no longer resolves, and the root is a blog.
+
 ### Tests
 - **Live harness bug:** the runner froze the first observed URL, so a `goto()` that happened after the first poll (e.g. a rule that sleeps before navigating) never matched. It now re-reads the mock href every tick and only lets a real frame navigation win.
 - 12 more live cases for rules that only ran in unit tests: `mboost`, `adfoc`, `rekonise` (mocked unlock API), `katfile`, `linkvertise-easy`, `pndk`, `up-4ever`, `aradmag`, `external-service` (work.ink → bypass.tools), `service-last-resort` (→ adbypass.org), `url-destination` (`?url=`) and `adlinkfly` (`/links/go`, mocked). **122/122 pass.**
 - `tests/meta.test.js` guards version drift (`@version` vs `package.json` vs `package-lock.json`), install URLs, rule-name uniqueness and `file-host` shadowing.
+- `tests/upstream-gap.test.js` covers the host-token parser, including the `(?:...)` regression above.
 
 ### CI
 - `Live harness` now also runs on PRs touching the userscript or `test-live/**`.
