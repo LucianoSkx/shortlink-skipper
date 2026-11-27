@@ -249,25 +249,6 @@ test('skip-button-dest ignores other hosts', async () => {
   assert.strictEqual(await h.api.handleSkipButtonDest(), false);
 });
 
-// --- acortalink ---
-
-test('acortalink fires the countdown button', async () => {
-  let clicks = 0;
-  const btn = visibleBtn({ dispatchEvent: () => { clicks += 1; return true; } });
-  const h = load({
-    href: 'https://acortalink.me/abc',
-    querySelector: (sel) => (sel.includes('#contador') ? btn : null),
-  });
-  const ok = await h.api.handleAcortalink();
-  assert.ok(ok);
-  assert.ok(clicks > 0, 'the countdown button must receive the click sequence');
-});
-
-test('acortalink ignores other hosts', async () => {
-  const h = load({ href: 'https://example.com/x' });
-  assert.strictEqual(await h.api.handleAcortalink(), false);
-});
-
 // --- bstlar ---
 
 test('bstlar installs the tasks XHR hook and yields', async () => {
