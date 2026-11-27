@@ -1,8 +1,10 @@
-## 1.14.8 — 2026-11-26
+## 1.14.9 — 2026-11-27
 
 ### Fixed
 - **Parked domains dropped** after a full host sweep: `4hi.in` (domain-owner notice), `acortalink.me` and `findi.pro` (both now show "This domain is for sale"). Their rules and gate entries are gone, along with the `acortalink` handler and test file.
 - **`cuturl.cc` ate the destination of `1ink.cc` links.** The real flow is `1ink.cc/<slug>` → `cuturl.cc/goto.php?goto=<next stage>` → `1ink.cc/go.php` → destination, but `cuturl.cc` was not in the gate and no rule read its `?goto=` param. The script stood by and the browser stalled on the anti-bot interstitial. New dedicated rule jumps straight to `?goto=` (validated by `goto()`). **Confirmed on a real shortlink generated during this pass** (`1ink.cc/n9u` → `example.com/real-browser`).
+
+## 1.14.8 — 2026-11-26
 
 ### Fixed
 - `@exclude` header now matches the in-script `EXCLUDE_HOSTS` list: added `google.*` (all TLDs), `googlemail`, `youtube`, `youtube-nocookie`, `recaptcha`, `hcaptcha` and `cloudflare`. The script already refused them at runtime, but userscript managers were still injecting (and evaluating) it on those pages.
