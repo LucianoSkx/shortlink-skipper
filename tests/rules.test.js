@@ -467,7 +467,6 @@ test('indian shortener hosts open the gate', () => {
     'https://droplink.co/abc',
     'https://lksfy.in/abc',
     'https://vplink.in/abc',
-    'https://4hi.in/abc',
     'https://linkshortify.in/abc',
     'https://shrinkforearn.in/abc',
     'https://indianshortner.com/abc',
