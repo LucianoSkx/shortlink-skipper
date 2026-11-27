@@ -65,7 +65,6 @@ unlockers) are detected and left alone — they validate server-side.
 | `aylink-family` | Exchanges `_a/_t/_d` for a token at `/get/tk`, finishes at `/links/go2` |
 | `bcvc` | Clicks `#getLink` after countdown, POSTs `/ln.php` with page globals |
 | `skip-button-dest` | Reads `dest=` from `#skip_bu2tton`; resolves `/ad/locked` hops |
-| `acortalink` | Spoofs `postMessage("__done__")` to defeat the counter, clicks through |
 | `bstlar` | Intercepts the tasks XHR, marks steps complete on their API |
 | `token-link` | Decodes base64 `input[name=token]` (or its tail) into the destination |
 | `wp-content-lock` | WordPress content-lock: waits out the timer, follows the external get-link |

@@ -105,7 +105,7 @@
   const ADFOC_FAMILY =
     /(^|\.)(adfoc\.us|adf\.ly|clk\.sh|shrink\.pe)$/;
   const AYLINK_HOST =
-    /(^|\.)(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|findi\.pro|gitlink\.pro)$/;
+    /(^|\.)(aylink\.co|yindex\.xyz|gitizle\.vip|uzunversiyon\.xyz|shtms\.co|gitlink\.pro)$/;
   const BCVC_HOST = /(^|\.)(bcvc\.(live|xyz|go)|bcvcgo\.xyz)$/;
   const SKIP_BUTTON_HOST = /(^|\.)hurirk\.net$/;
   const CLOSE_INTERSTITIAL_HOST = /(^|\.)ppcnt\.net$/;
@@ -113,7 +113,6 @@
   const MBOOST_HOST = /(^|\.)mboost\.me$/;
   const LOOTLABS_HOST = /(^|\.)links\.lootlabs\.gg$/;
   const LOOTLINK_HOST = /(^|\.)(loot-link\.com|loot-links\.com|lootlink\.org|lootlinks\.co|lootlinks\.com|loot-labs\.com|lootlabs\.com|lootlabs\.gg|lootboost\.net|fast-links\.org|link-hub\.net|ultra-links\.net|megalnk\.com|drlinker\.com|lootdest\.(?:info|org|com)|links-loot\.com|linksloot\.net|(?:bleleadersto|tonordersitye|daughablelea|mdlinkshub|eofmukindwo|realiukzemydre|kmendation)\.com|links\.lootlabs\.gg)$/;
-  const ACORTALINK_HOST = /(^|\.)acortalink\.me$/;
   const BSTLAR_HOST = /(^|\.)bstlar\.com$/;
   const LINKVERTISE_HOST = /(^|\.)linkvertise\.(com|net)$/;
   const ADLINKFLY_HOSTS =
@@ -443,7 +442,6 @@
       LOOTLINK_HOST.test(location.host) ||
       LOOTLABS_HOST.test(location.host) ||
       BSTLAR_HOST.test(location.host) ||
-      ACORTALINK_HOST.test(location.host) ||
       OUO_HOST.test(location.host) ||
       ADFOC_FAMILY.test(location.host) ||
       /(^|\.)boost\.ink$/.test(location.host) ||
@@ -2210,41 +2208,6 @@
     return /^https?:\/\//.test(dest) ? goto(dest) : false;
   }
 
-  async function handleAcortalink() {
-    if (!ACORTALINK_HOST.test(location.host)) return false;
-    log('acortalink.me detected');
-    const originalOpen = PAGE.open;
-    // Funnel through goto() so the spoofed open honors validation + anti-loop.
-    // Return null on refusal so call sites that check for popup-block behavior
-    // see the same shape as the real blocked window.open().
-    PAGE.open = (url) => {
-      return goto(url) ? PAGE : null;
-    };
-    const onDone = (event) => {
-      if (event.origin !== location.origin) return;
-      if (typeof event.data === 'string' && event.data.includes('__done__') && event.data.length < 9) {
-        Object.defineProperty(event, 'source', { value: '' });
-      }
-    };
-    PAGE.addEventListener('message', onDone, true);
-    const observer = new MutationObserver(() => {
-      if (document.querySelector('a.button#contador')) {
-        observer.disconnect();
-        setTimeout(() => PAGE.postMessage('__done__', PAGE.location.origin), 100);
-      }
-    });
-    observer.observe(document, { childList: true, subtree: true });
-    const btn = await waitFor('#contador', 30000, 300);
-    if (btn && visible(btn)) fireClick(btn);
-    // Restore original open and listeners after the rule completes
-    setTimeout(() => {
-      PAGE.open = originalOpen;
-      PAGE.removeEventListener('message', onDone, true);
-      observer.disconnect();
-    }, 5000);
-    return Boolean(btn);
-  }
-
   function installBstlarXhrHook() {
     if (PAGE.__slBstlarHooked) return;
     PAGE.__slBstlarHooked = true;
@@ -2983,7 +2946,6 @@
     { name: 'aylink-family', when: () => AYLINK_HOST.test(location.host), run: handleAylink },
     { name: 'bcvc', when: () => BCVC_HOST.test(location.host), run: handleBcVc },
     { name: 'skip-button-dest', when: () => SKIP_BUTTON_HOST.test(location.host), run: handleSkipButtonDest },
-    { name: 'acortalink', when: () => ACORTALINK_HOST.test(location.host), run: handleAcortalink },
     { name: 'bstlar', when: () => BSTLAR_HOST.test(location.host), run: handleBstlar },
     { name: 'goo-st', when: () => GOO_ST_HOST.test(location.host), run: handleGooSt },
     { name: '1ink', when: () => /(^|\.)1ink\.cc$/.test(location.host), run: handle1ink },
@@ -3386,7 +3348,6 @@
       handleAylink,
       handleBcVc,
       handleSkipButtonDest,
-      handleAcortalink,
       handleBstlar,
       handleTokenLink,
       handleGooSt,
