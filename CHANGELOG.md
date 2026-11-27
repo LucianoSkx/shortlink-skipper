@@ -1,6 +1,7 @@
 ## 1.14.8 — 2026-11-26
 
 ### Fixed
+- **`4hi.in` dropped**: during real-site validation it served only a domain-owner notice ("This domain is owned by 4Hi.Co"), no shortener.
 - **`cuturl.cc` ate the destination of `1ink.cc` links.** The real flow is `1ink.cc/<slug>` → `cuturl.cc/goto.php?goto=<next stage>` → `1ink.cc/go.php` → destination, but `cuturl.cc` was not in the gate and no rule read its `?goto=` param. The script stood by and the browser stalled on the anti-bot interstitial. New dedicated rule jumps straight to `?goto=` (validated by `goto()`). **Confirmed on a real shortlink generated during this pass** (`1ink.cc/n9u` → `example.com/real-browser`).
 
 ### Fixed
